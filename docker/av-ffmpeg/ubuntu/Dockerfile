@@ -63,5 +63,5 @@ FROM ubuntu:18.04
 WORKDIR /usr/local/bin/
 COPY --from=builder /usr/local/bin/ffmpeg .
 RUN ls -l /usr/local/bin/
-ENTRYPOINT ["ldd ffmpeg"]
+ENTRYPOINT ["/bin/ldd /usr/local/bin/ffmpeg"]
 CMD ["-version"]
