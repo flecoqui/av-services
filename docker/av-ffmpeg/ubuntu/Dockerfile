@@ -60,7 +60,8 @@ RUN mkdir -p ~/ffmpeg_sources ~/bin && cd ~/ffmpeg_sources && \
 RUN mv ~/bin/ffmpeg /usr/local/bin && mv ~/bin/ffprobe /usr/local/bin && mv ~/bin/ffplay /usr/local/bin
 
 FROM ubuntu:18.04 
-WORKDIR /root/usr/local/bin/
+WORKDIR /usr/local/bin/
 COPY --from=builder /usr/local/bin/ffmpeg .
+RUN ls -l /usr/local/bin/
 ENTRYPOINT ["ffmpeg"]
 CMD ["-version"]
