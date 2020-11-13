@@ -64,5 +64,5 @@ WORKDIR /usr/local/bin/
 COPY --from=builder /usr/local/bin/ffmpeg .
 RUN ls -l /bin/
 RUN ls -l /usr/local/bin/
-ENTRYPOINT ["/bin/ldd /usr/local/bin/ffmpeg"]
-CMD ["-version"]
+#ENTRYPOINT ["/bin/ldd /usr/local/bin/ffmpeg"]
+CMD ["@"]
