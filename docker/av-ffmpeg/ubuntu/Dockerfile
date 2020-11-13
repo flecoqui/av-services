@@ -61,6 +61,7 @@ RUN mv ~/bin/ffmpeg /usr/local/bin && mv ~/bin/ffprobe /usr/local/bin && mv ~/bi
 
 FROM ubuntu:18.04 
 WORKDIR /usr/local/bin/
+COPY --from=builder /lib/x86_64-linux-gnu/libxcb.so.1 /lib/x86_64-linux-gnu/
 COPY --from=builder /usr/local/bin/ffmpeg .
 RUN ls -l /usr/local/bin/
 ENTRYPOINT ["ffmpeg"]
