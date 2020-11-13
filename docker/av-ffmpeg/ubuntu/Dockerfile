@@ -62,6 +62,7 @@ RUN mv ~/bin/ffmpeg /usr/local/bin && mv ~/bin/ffprobe /usr/local/bin && mv ~/bi
 FROM ubuntu:18.04 
 WORKDIR /usr/local/bin/
 COPY --from=builder /usr/local/bin/ffmpeg .
+RUN ls -l /bin/
 RUN ls -l /usr/local/bin/
 ENTRYPOINT ["/bin/ldd /usr/local/bin/ffmpeg"]
 CMD ["-version"]
