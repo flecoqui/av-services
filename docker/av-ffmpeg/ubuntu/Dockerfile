@@ -58,7 +58,7 @@ RUN mkdir -p ~/ffmpeg_sources ~/bin && cd ~/ffmpeg_sources && \
     make install -j8 && \
     hash -r
 RUN mv ~/bin/ffmpeg /usr/local/bin && mv ~/bin/ffprobe /usr/local/bin && mv ~/bin/ffplay /usr/local/bin
-RUN ls -l /usr/lib/x86_64-linux-gnu/libbsd*
+RUN find / -name libbsd*
 RUN ls -l lib/x86_64-linux-gnu/libbsd*
 RUN ls -l /usr/lib/libbsd*
 
