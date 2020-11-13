@@ -58,6 +58,7 @@ RUN mkdir -p ~/ffmpeg_sources ~/bin && cd ~/ffmpeg_sources && \
     make install -j8 && \
     hash -r
 RUN mv ~/bin/ffmpeg /usr/local/bin && mv ~/bin/ffprobe /usr/local/bin && mv ~/bin/ffplay /usr/local/bin
+RUN find /lib -name libxcb.so.1
 RUN ls -l /lib/x86_64-linux-gnu/lib*
 
 FROM ubuntu:18.04 
