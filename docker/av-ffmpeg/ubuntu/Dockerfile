@@ -63,10 +63,10 @@ RUN ls -l /lib/x86_64-linux-gnu/lib*
 
 FROM ubuntu:18.04 
 WORKDIR /usr/local/bin/
-COPY --from=builder /lib/x86_64-linux-gnu/libxcb.so.1 /lib/
-COPY --from=builder /lib/x86_64-linux-gnu/libxcb-shm.so.0 /lib/
-COPY --from=builder /lib/x86_64-linux-gnu/libxcb-shape.so.0 /lib/
-COPY --from=builder /lib/x86_64-linux-gnu/libxcb-xfixes.so.0 /lib/x86_64-linux-gnu/
+#COPY --from=builder /lib/x86_64-linux-gnu/libxcb.so.1 /lib/x86_64-linux-gnu/
+#COPY --from=builder /lib/x86_64-linux-gnu/libxcb-shm.so.0 /lib/x86_64-linux-gnu/
+#COPY --from=builder /lib/x86_64-linux-gnu/libxcb-shape.so.0 /lib/x86_64-linux-gnu/
+#COPY --from=builder /lib/x86_64-linux-gnu/libxcb-xfixes.so.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libasound.so.2 /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libSDL2-2.0.so.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /lib/x86_64-linux-gnu/libsndio.so.6.1 /lib/x86_64-linux-gnu/
