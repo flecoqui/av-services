@@ -114,7 +114,7 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libdrm.so.2 /usr/lib/x86_64-linux-
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libXfixes.so.3 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libdrm.so.2 /usr/lib/x86_64-linux-gnu/
 
-COPY --from=builder /lib/x86_64-linux-gnu/libpulsecommon-11.1.so /lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/pulseaudio/libpulsecommon-11.1.so /usr/lib/x86_64-linux-gnu/pulseaudio/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libdbus-1.so.3 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libXrender.so.1 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libXrender.so.1 /usr/lib/x86_64-linux-gnu/
