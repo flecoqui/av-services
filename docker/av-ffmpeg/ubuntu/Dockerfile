@@ -58,9 +58,9 @@ RUN mkdir -p ~/ffmpeg_sources ~/bin && cd ~/ffmpeg_sources && \
     make install -j8 && \
     hash -r
 RUN mv ~/bin/ffmpeg /usr/local/bin && mv ~/bin/ffprobe /usr/local/bin && mv ~/bin/ffplay /usr/local/bin
-RUN find / -name libbsd*
-RUN ls -l lib/x86_64-linux-gnu/libbsd*
-RUN ls -l /usr/lib/libbsd*
+#RUN find / -name libbsd*
+#RUN ls -l /lib/x86_64-linux-gnu/libbsd*
+#RUN ls -l /usr/lib/libbsd*
 
 FROM ubuntu:18.04 
 WORKDIR /usr/local/bin/
@@ -103,7 +103,7 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libwayland-egl.so.1 /usr/lib/x86_6
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libwayland-client.so.0 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libwayland-cursor.so.0 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libxkbcommon.so.0 /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libbsd.so.0 /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /lib/x86_64-linux-gnu/libbsd.so.0 /lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libfribidi.so.0 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libfontconfig.so.1 /usr/lib/x86_64-linux-gnu/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libharfbuzz.so.0 /usr/lib/x86_64-linux-gnu/
