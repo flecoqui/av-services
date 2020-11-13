@@ -58,9 +58,6 @@ RUN mkdir -p ~/ffmpeg_sources ~/bin && cd ~/ffmpeg_sources && \
     make install -j8 && \
     hash -r
 RUN mv ~/bin/ffmpeg /usr/local/bin && mv ~/bin/ffprobe /usr/local/bin && mv ~/bin/ffplay /usr/local/bin
-RUN find / -name libwrap.so.0
-#RUN ls -l /lib/x86_64-linux-gnu/libbsd*
-#RUN ls -l /usr/lib/libbsd*
 
 FROM ubuntu:18.04 
 WORKDIR /usr/local/bin/
@@ -128,5 +125,5 @@ COPY --from=builder /usr/lib/x86_64-linux-gnu/libasyncns.so.0 /usr/lib/x86_64-li
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libFLAC.so.8 /usr/lib/x86_64-linux-gnu/
 
 COPY --from=builder /usr/local/bin/ffmpeg .
-#ENTRYPOINT ["/bin/ldd /usr/local/bin/ffmpeg"]
+#ENTRYPOINT ["/usr/local/bin/ffmpeg"]
 CMD ["@"]
