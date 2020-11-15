@@ -90,12 +90,7 @@ RUN apk add --update \
 RUN  mkdir /testav \
 && mkdir /testav/log \ 
 && chmod 0777 /testav/log \
-&& mkdir /testav/config \ 
-&& mkdir -p /etc/nginx \
-&& mkdir -p /etc/nginx/sbin \ 
-&& mkdir -p /etc/nginx/conf \ 
-&& mkdir -p /etc/nginx/logs \  
-&& mkdir -p /etc/nginx/html 
+&& mkdir /testav/config 
 
 # Copy binairies
 COPY --from=build-nginx /usr/local/nginx /usr/local/nginx

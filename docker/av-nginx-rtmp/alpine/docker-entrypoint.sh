@@ -94,8 +94,8 @@ rtmp {
         }
     }
 }" > /etc/nginx/nginx.conf
-#exec /usr/local/nginx/sbin/nginx  
-exec /bin/sh
+exec /usr/local/nginx/sbin/nginx  
+#exec /bin/sh
 
 
 
