@@ -22,7 +22,7 @@ echo '<!DOCTYPE html>
  <p>PORT_HLS: '$PORT_HLS'</p>
  <p>PORT_HTML: '$PORT_HTML'</p>
  <p>PORT_RTMP: '$PORT_RTMP'</p>
- </html>' > /usr/local/nginx/html/player.html
+ </html>' > /etc/nginx/html/player.html
 
 echo "worker_processes  1;
 error_log  /testav/log/nginxerror.log debug;
