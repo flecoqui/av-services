@@ -65,7 +65,7 @@ ENV PORT_HTTP 80
 ENV PORT_SSL 443
 ENV PORT_RTMP 1935
 
-EXPOSE $PORT_RTMP/tcp $PORT_HLS/tcp $PORT_HTTP/tcp $PORT_SSL/tcp
+
 
 RUN apk add --update \
   ca-certificates \
@@ -99,6 +99,10 @@ COPY --from=build-nginx /etc/nginx /etc/nginx
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"
 
+
 COPY docker-entrypoint.sh /
 RUN chmod 0755 /docker-entrypoint.sh 
+
+EXPOSE $PORT_RTMP/tcp $PORT_HLS/tcp $PORT_HTTP/tcp $PORT_SSL/tcp
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
