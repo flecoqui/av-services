@@ -93,6 +93,6 @@ rtmp {
             hls_playlist_length 60;
         }
     }
-}" > /usr/local/nginx/conf/nginx.conf
-exec /usr/local/nginx/sbin/nginx -g "daemon off;" 
+}" > /etc/nginx/conf/nginx.conf
+exec /etc/nginx/nginx -g "daemon off;" 
 
