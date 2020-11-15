@@ -95,5 +95,7 @@ rtmp {
     }
 }" > /etc/nginx/conf/nginx.conf
 #exec /usr/local/nginx/sbin/nginx -g "daemon off;" 
-exec /bin/sh" 
+exec /bin/sh
+
+
 
