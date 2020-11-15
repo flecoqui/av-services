@@ -85,16 +85,24 @@ RUN apk add --update \
   x264-dev \
   x265-dev
 
+
+# Create directories.
+RUN  mkdir /testav \
+&& mkdir /testav/log \ 
+&& chmod 0777 /testav/log \
+&& mkdir /testav/config \ 
+&& mkdir -p /usr/local/nginx \
+&& mkdir -p /usr/local/nginx/sbin \ 
+&& mkdir -p /usr/local/nginx/conf \ 
+&& mkdir -p /usr/local/nginx/logs \  
+&& mkdir -p /usr/local/nginx/html 
+
+# Copy binairies
 COPY --from=build-nginx /usr/local/nginx /usr/local/nginx
 COPY --from=build-nginx /etc/nginx /etc/nginx
 
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"
-
-RUN  mkdir /testav \
-&& mkdir /testav/log \ 
-&& chmod 0777 /testav/log \
-&& mkdir /testav/config 
 
 RUN echo '<!DOCTYPE html>\n\
 <html lang="en">\n\
@@ -117,7 +125,7 @@ RUN echo '<!DOCTYPE html>\n\
  <p>PORT_HLS: '$PORT_HLS'</p>\n\
  <p>PORT_HTML: '$PORT_HTML'</p>\n\
  <p>PORT_RTMP: '$PORT_RTMP'</p>\n\
- </html>\n' > /etc/nginx/html/player.html
+ </html>\n' > /usr/local/nginx/html/player.html
 
 RUN echo "worker_processes  1;\n\
 error_log  /testav/log/nginxerror.log debug;\n\
@@ -188,7 +196,7 @@ rtmp {\n\
             hls_playlist_length 60;\n\
         }\n\
     }\n\
-}\n" > /etc/nginx/nginx.conf
+}\n" > /usr/local/nginx/conf/nginx.conf
 
 
 CMD nginx
