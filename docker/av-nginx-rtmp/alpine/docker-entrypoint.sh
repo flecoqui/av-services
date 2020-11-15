@@ -94,5 +94,5 @@ rtmp {
         }
     }
 }" > /etc/nginx/conf/nginx.conf
-exec /etc/nginx/nginx -g "daemon off;" 
+exec /usr/local/nginx/sbin/nginx -g "daemon off;" 
 
