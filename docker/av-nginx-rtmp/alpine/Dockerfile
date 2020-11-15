@@ -199,4 +199,6 @@ rtmp {\n\
 }\n" > /usr/local/nginx/conf/nginx.conf
 
 
-CMD nginx
+COPY docker-entrypoint.sh /
+RUN chmod 0755 /docker-entrypoint.sh 
+ENTRYPOINT ["/docker-entrypoint.sh"]
