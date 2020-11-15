@@ -123,9 +123,9 @@ RUN echo '<!DOCTYPE html>\n\
  </body>\n\
  <p>HOSTNAME: '$HOSTNAME'</p>\n\
  <p>PORT_HLS: '$PORT_HLS'</p>\n\
- <p>PORT_HTML: '$PORT_HTML'</p>\n\
+ <p>PORT_HTML: '$PORT_HTTP'</p>\n\
  <p>PORT_RTMP: '$PORT_RTMP'</p>\n\
- </html>\n' > /etc/nginx/html/player.html
+ </html>\n' > /usr/local/nginx/html/player.html
 
 RUN echo "worker_processes  1;\n\
 error_log  /testav/log/nginxerror.log debug;\n\
@@ -140,7 +140,7 @@ http {\n\
     directio 512;\n\
     server {\n\
         sendfile        on;\n\
-        listen       "$PORT_HTML";\n\
+        listen       "$PORT_HTTP";\n\
         server_name  localhost;\n\
         location /stat {\n\
             rtmp_stat all;\n\
