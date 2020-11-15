@@ -1,7 +1,12 @@
 version: '3.8'
 services:
-  ffmpeg:
+  nginx-rtmp:
     build: 
       context: .
       dockerfile: Dockerfile
-    command: "-help"
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "443:443"
+      - "1935:1935"
+      
