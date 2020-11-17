@@ -2,7 +2,7 @@
 docker build -t flecoqui/av-nginx-rtmp-alpine .
 # run image
 docker run -it  flecoqui/av-nginx-rtmp-alpine 
-docker run -it -p 80:80/tcp  -p 8080:8080/tcp -p 443:443/tcp    -p 1935:1935/tcp flecoqui/av-nginx-rtmp-alpine 
+docker run -it -p 80:80/tcp  -p 8080:8080/tcp -p 443:443/tcp    -p 1935:1935/tcp -p 443:443/tcp flecoqui/av-nginx-rtmp-alpine 
 docker-compose up -d
 docker-compose down
 docker push  flecoqui/av-nginx-rtmp-alpine 
