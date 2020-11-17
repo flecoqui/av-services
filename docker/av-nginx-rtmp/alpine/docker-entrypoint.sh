@@ -42,7 +42,7 @@ http {
         listen       "$PORT_HTTP" default_server;
         listen [::]:$PORT_HTTP default_server;
         server_name  $HOSTNAME;
-        listen "$PORT_SSL";
+        listen "$PORT_SSL" ssl default_server;
         listen [::]:$PORT_SSL ssl http2 default_server;
         ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
