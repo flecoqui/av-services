@@ -41,12 +41,13 @@ http {
         sendfile        on;
         listen       "$PORT_HTTP" default_server;
         listen [::]:$PORT_HTTP default_server;
-        server_name  localhost;
+        server_name  $HOSTNAME;
         listen "$PORT_SSL";
         listen [::]:$PORT_SSL ssl http2 default_server;
         ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
-
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2, TLSv1.3;
+        
         location /stat {
             rtmp_stat all;
             rtmp_stat_stylesheet stat.xsl;
