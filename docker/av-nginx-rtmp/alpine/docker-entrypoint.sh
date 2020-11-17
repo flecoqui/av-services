@@ -46,8 +46,8 @@ http {
         listen [::]:$PORT_SSL ssl http2 default_server;
         ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
-        ssl_protocols TLSv1 TLSv1.1 TLSv1.2, TLSv1.3;
-        
+        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+
         location /stat {
             rtmp_stat all;
             rtmp_stat_stylesheet stat.xsl;
