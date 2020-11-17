@@ -1,6 +1,7 @@
 #!/bin/sh
 set -e
 
+openssl req -x509 -nodes -days 365 -subj "/C=CA/ST=QC/O=$COMPANYNAME, Inc./CN=$HOSTNAME" -addext "subjectAltName=DNS:$HOSTNAME" -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt;
 echo '<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,7 +21,8 @@ echo '<!DOCTYPE html>
  </body>
  <p>HOSTNAME: '$HOSTNAME'</p>
  <p>PORT_HLS: '$PORT_HLS'</p>
- <p>PORT_HTML: '$PORT_HTTP'</p>
+ <p>PORT_HTTP: '$PORT_HTTP'</p> 
+ <p>PORT_SSL: '$PORT_SSL'</p>
  <p>PORT_RTMP: '$PORT_RTMP'</p>
  </html>' > /usr/local/nginx/html/player.html
 
@@ -37,8 +39,14 @@ http {
     directio 512;
     server {
         sendfile        on;
-        listen       "$PORT_HTTP";
+        listen       "$PORT_HTTP" default_server;
+        listen [::]:$PORT_HTTP default_server;
         server_name  localhost;
+        listen "$PORT_SSL";
+        listen [::]:$PORT_SSL ssl http2 default_server;
+        ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;
+        ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
         location /stat {
             rtmp_stat all;
             rtmp_stat_stylesheet stat.xsl;

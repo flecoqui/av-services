@@ -59,7 +59,8 @@ RUN rm -rf /var/cache/* /tmp/*
 # Build the release image.
 FROM alpine:3.12
 
-ENV HOSTNAME 127.0.0.1
+ENV COMPANYNAME Company
+ENV HOSTNAME localhost
 ENV PORT_HLS 8080
 ENV PORT_HTTP 80
 ENV PORT_SSL 443
@@ -96,9 +97,11 @@ RUN  mkdir /testav \
 COPY --from=build-nginx /usr/local/nginx /usr/local/nginx
 COPY --from=build-nginx /etc/nginx /etc/nginx
 
+# install openssl used to create ssl certificates
+RUN apk add openssl;
+
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"
-
 
 COPY docker-entrypoint.sh /
 RUN chmod 0755 /docker-entrypoint.sh 
