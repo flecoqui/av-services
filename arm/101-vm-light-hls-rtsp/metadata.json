@@ -1,0 +1,7 @@
+{
+  "itemDisplayName": "Deploy a Virtual Machine to capture a Live RTMP stream and copy the video chunks in Azure Storage",
+  "description": "This template allows you to deploy a Virtual Machine to capture a Live RTMP stream and copy the video chunks in Azure Storage",
+  "summary": "This template takes a minimum amount of parameters and deploys a Virtual Machine to capture a Live RTMP stream and copy the video chunks in Azure Storage.",
+  "githubUsername": "flecoqui",
+  "dateUpdated": "2020-01-30"
+}
