@@ -105,7 +105,7 @@ rtmp {
 }" > /etc/nginx/nginx.conf
 
 # Start the nginx process
-/usr/local/nginx/sbin/nginx -g "daemon off;"  -D
+/usr/local/nginx/sbin/nginx -g "daemon off;" & 
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start nginx: $status"
@@ -113,7 +113,7 @@ if [ $status -ne 0 ]; then
 fi
 
 # Start the rtsp process
-/rtsp-simple-server -D
+/rtsp-simple-server &
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start rtsp: $status"
@@ -121,7 +121,8 @@ if [ $status -ne 0 ]; then
 fi
 
 # Start the ffmpeg process
-ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -framerate 25 -video_size 640x480  -pix_fmt yuv420p -bsf:v h264_mp4toannexb -profile:v baseline -level:v 3.2 -c:v libx264 -x264-params keyint=120:scenecut=0 -c:a aac -b:a 128k -ar 44100 -f rtsp -muxdelay 0.1 rtsp://127.0.0.1:8554/test -D
+#ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -framerate 25 -video_size 640x480  -pix_fmt yuv420p -bsf:v h264_mp4toannexb -profile:v baseline -level:v 3.2 -c:v libx264 -x264-params keyint=120:scenecut=0 -c:a aac -b:a 128k -ar 44100 -f rtsp -muxdelay 0.1 rtsp://127.0.0.1:8554/test 
+ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -f rtsp  rtsp://127.0.0.1:8554/test &
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start rtsp: $status"
