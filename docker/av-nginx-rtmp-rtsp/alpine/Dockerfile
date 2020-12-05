@@ -4,6 +4,8 @@ ARG NGINX_RTMP_VERSION=1.2.1
 
 ##############################
 # Build the NGINX-build image.
+
+FROM aler9/rtsp-simple-server AS server
 FROM alpine:3.12 as build-nginx
 ARG NGINX_VERSION
 ARG NGINX_RTMP_VERSION
@@ -101,6 +103,10 @@ COPY --from=build-nginx /etc/nginx /etc/nginx
 
 # install openssl used to create ssl certificates
 RUN apk add openssl;
+# install ffmpeg
+RUN apk add ffmpeg 
+# install rtsp-simple-server
+COPY --from=server /rtsp-simple-server /rtsp-simple-server
 
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"

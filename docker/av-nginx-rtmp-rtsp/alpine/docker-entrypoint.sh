@@ -103,8 +103,52 @@ rtmp {
         }
     }
 }" > /etc/nginx/nginx.conf
-/usr/local/nginx/sbin/nginx -g "daemon off;" 
+
+# Start the nginx process
+/usr/local/nginx/sbin/nginx -g "daemon off;"  -D
+status=$?
+if [ $status -ne 0 ]; then
+  echo "Failed to start nginx: $status"
+  exit $status
+fi
+
+# Start the rtsp process
+/rtsp-simple-server -D
+status=$?
+if [ $status -ne 0 ]; then
+  echo "Failed to start rtsp: $status"
+  exit $status
+fi
+
+# Start the ffmpeg process
+ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -framerate 25 -video_size 640x480  -pix_fmt yuv420p -bsf:v h264_mp4toannexb -profile:v baseline -level:v 3.2 -c:v libx264 -x264-params keyint=120:scenecut=0 -c:a aac -b:a 128k -ar 44100 -f rtsp -muxdelay 0.1 rtsp://127.0.0.1:8554/test -D
+status=$?
+if [ $status -ne 0 ]; then
+  echo "Failed to start rtsp: $status"
+  exit $status
+fi
 
 
+
+# Naive check runs checks once a minute to see if either of the processes exited.
+# This illustrates part of the heavy lifting you need to do if you want to run
+# more than one service in a container. The container exits with an error
+# if it detects that either of the processes has exited.
+# Otherwise it loops forever, waking up every 60 seconds
+
+while sleep 60; do
+  ps aux |grep nginx |grep -q -v grep
+  PROCESS_1_STATUS=$?
+  ps aux |grep rtsp-simple-server |grep -q -v grep
+  PROCESS_2_STATUS=$?
+  ps aux |grep ffmpeg |grep -q -v grep
+  PROCESS_3_STATUS=$?
+  # If the greps above find anything, they exit with 0 status
+  # If they are not both 0, then something is wrong
+  if [ $PROCESS_1_STATUS -ne 0 -o $PROCESS_2_STATUS -ne 0 -o $PROCESS_3_STATUS -ne 0 ]; then
+    echo "One of the processes has already exited."
+    exit 1
+  fi
+done
 
 

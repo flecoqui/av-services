@@ -14,3 +14,5 @@ ffmpeg.exe -v verbose -f dshow -i video="Integrated Webcam":audio="Microphone (R
 
 curl https://mymachine.mydomain.com/player.html --verbose -vk
 
+# stream a mkv file to rtmp server to emulate live feed
+ffmpeg.exe -v verbose   -stream_loop -1 -i camera-300s.mkv  -strict -2 -c:a aac -b:a 192k -ar 44100 -r 30 -g 60 -keyint_min 60 -b:v 2000000 -c:v libx264 -preset veryfast  -profile main -level 3.0 -pix_fmt yuv420p -bufsize 1800k -maxrate 400k    -f flv rtmp://127.0.0.1:1935/live/stream

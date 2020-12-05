@@ -109,4 +109,4 @@ RUN chmod 0755 /docker-entrypoint.sh
 
 EXPOSE $PORT_RTMP/tcp $PORT_HLS/tcp $PORT_HTTP/tcp $PORT_SSL/tcp
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ./docker-entrypoint.sh
