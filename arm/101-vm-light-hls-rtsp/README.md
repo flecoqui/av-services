@@ -77,9 +77,14 @@ When the resources associated with the current ARM template are deployed, the ff
             rtmp://vmName.region.cloudapp.azure.com:1935/rtmpPath
 
 
-For instance :
+For instance using a webcam:
 
      ffmpeg.exe -v verbose -f dshow -i video="Integrated Webcam":audio="Microphone (Realtek(R) Audio)"  -video_size 1280x720 -strict -2 -c:a aac -b:a 192k -ar 44100 -r 30 -g 60 -keyint_min 60 -b:v 2000000 -c:v libx264 -preset veryfast  -profile main -level 3.0 -pix_fmt yuv420p -bufsize 1800k -maxrate 400k    -f flv rtmp://RTMPIngesterIPAddress:1935/live/stream
+
+For instance using a MKV file:
+
+     ffmpeg.exe -v verbose  -re -stream_loop -1 -i camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://RTMPIngesterIPAddress:1935/live/stream
+
 
 </p>
 
