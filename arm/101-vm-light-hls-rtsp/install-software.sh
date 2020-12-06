@@ -107,6 +107,8 @@ apt-get -y install build-essential curl g++
 # Download source code
 cd /git
 apt-get -y update
+apt-get -y install gcc
+apt-get -y install make
 apt-get -y install libpcre3 libpcre3-dev
 apt-get -y install libssl-dev
 apt-get -y install zlib1g-dev
@@ -369,7 +371,6 @@ After=network.target
 
 [Service]
 Type=simple
-User=testrtmpuser
 ExecStart=/bin/sh /testrtmp/nginxrtmploop.sh
 Restart=on-abort
 
@@ -452,6 +453,7 @@ echo mkdir /chunks/\$folder >> /testrtmp/log/ffmpeg.log
 sleep 5
 done
 EOF
+chmod +x   /testrtmp/ffmpegloop.sh
 adduser  testrtmpuser -s /sbin/nologin
 usermod -aG sudo testrtmpuser
 
