@@ -327,6 +327,8 @@ EOF
 
 chmod +x   /testrtmp/ffmpegloop.sh
 adduser testrtmpuser --disabled-login
+usermod -aG sudo testrtmpuser
+
 
 cat <<EOF > /etc/systemd/system/ffmpegloop.service
 [Unit]
@@ -351,13 +353,14 @@ while [ : ]
 do
 folder=\$(date  +"%F-%X.%S")
 echo Starting nginx rtmp loop \$folder >> /testrtmp/log/nginxrtmp.log
-/usr/local/nginx/sbin/nginx
+/usr/local/nginx/sbin/nginx -g "daemon off;"
 sleep 5
 done
 EOF
 
 chmod +x   /testrtmp/nginxrtmploop.sh
 adduser testrtmpuser --disabled-login
+usermod -aG sudo testrtmpuser
 
 cat <<EOF > /etc/systemd/system/nginxrtmploop.service
 [Unit]
@@ -389,6 +392,7 @@ EOF
 
 chmod +x   /testrtmp/rtsploop.sh
 adduser testrtmpuser --disabled-login
+usermod -aG sudo testrtmpuser
 
 cat <<EOF > /etc/systemd/system/rtsploop.service
 [Unit]
@@ -419,6 +423,7 @@ EOF
 
 chmod +x   /testrtmp/ffmpegrtsploop.sh
 adduser testrtmpuser --disabled-login
+usermod -aG sudo testrtmpuser
 
 cat <<EOF > /etc/systemd/system/ffmpegrtsploop.service
 [Unit]
@@ -448,6 +453,7 @@ sleep 5
 done
 EOF
 adduser  testrtmpuser -s /sbin/nologin
+usermod -aG sudo testrtmpuser
 
 cat <<EOF > /etc/systemd/system/ffmpegloop.service
 [Unit]
@@ -533,6 +539,7 @@ EOF
 
 chmod +x   /testrtmp/azcliloop.sh
 adduser testrtmpuser --disabled-login
+usermod -aG sudo testrtmpuser
 
 cat <<EOF > /etc/systemd/system/azcliloop.service
 [Unit]
@@ -584,6 +591,7 @@ EOF
 
 chmod +x   /testrtmp/azcliloop.sh
 adduser  testrtmpuser -s /sbin/nologin
+usermod -aG sudo testrtmpuser
 
 cat <<EOF > /etc/systemd/system/azcliloop.service
 [Unit]
