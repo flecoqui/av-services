@@ -15,4 +15,4 @@ services:
       context: .
       dockerfile: Dockerfile-av-rtmp-sim
     environment: 
-    - RTMP_URL=rtmp://172.17.0.2:1935/live/stream
+    - RTMP_URL=rtmp://av-nginx-rtmp-rtsp-alpine:1935/live/stream
