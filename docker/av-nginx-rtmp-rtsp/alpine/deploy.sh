@@ -1,9 +1,8 @@
 # build image
 docker build -t flecoqui/av-nginx-rtmp-rtsp-alpine .
 # run image
-docker run -it  flecoqui/av-nginx-rtmp-alpine 
-docker run -it -p 80:80/tcp  -p 8080:8080/tcp -p 443:443/tcp    -p 1935:1935/tcp -p 5443:443/tcp flecoqui/av-nginx-rtmp-rtsp-alpine 
-docker run -it -p 80:80/tcp  -p 8080:8080/tcp    -p 1935:1935/tcp -p 443:443/tcp -p 8554:8554/tcp -e HOSTNAME=mymachine.mydomain.com -d flecoqui/av-nginx-rtmp-rtsp-alpine
+docker run -it  flecoqui/av-nginx-rtmp-rtsp-alpine 
+docker run -it  -p 80:80/tcp  -p 8080:8080/tcp    -p 1935:1935/tcp -p 443:443/tcp -p 8554:8554/tcp -e HOSTNAME=avnginxrtmprtsp -d flecoqui/av-nginx-rtmp-rtsp-alpine
 
 docker-compose up -d
 docker-compose down
