@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  av-nginx-rtmp-rtsp-alpine:
+    build: 
+      context: .
+      dockerfile: av-nginx-rtmp-rtsp/Dockerfile
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "443:443"
+      - "1935:1935"
+      - "8554:8554"      
+  av-rtmp-sim-alpine:
+    build: 
+      context: .
+      dockerfile: av-rtmp-sim/Dockerfile
+    environment: 
+    - RTMP_URL=rtmp://172.17.0.2:1935/live/stream
