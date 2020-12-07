@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  av-rtmp-sim-alpine:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    environment: 
+    - RTMP_URL=rtmp://172.17.0.2:1935/live/stream
+    
