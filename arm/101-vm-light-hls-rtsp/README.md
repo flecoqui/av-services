@@ -1,9 +1,9 @@
 # Deployment of a RTMP Ingester hosted on Azure Virtual Machine using NGINX RTMP, RTSP-SIMPLE-SERVER and FFMPEG with HLS, RTMP and RTSP Playback
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2FRTMPIngest%2Fmaster%2FAzure%2F101-vm-light-hls-rtsp%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2Fav-services%2Fmaster%2Farm%2F101-vm-light-hls-rtsp%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2FRTMPIngest%2Fmaster%2FAzure%2F101-vm-light-hls-rtsp%2Fazuredeploy.json" target="_blank">
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2Fav-services%2Fmaster%2Farm%2F101-vm-light-hls-rtsp%2Fazuredeploy.json" target="_blank">
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
@@ -15,7 +15,7 @@ This template allows you to deploy from Github a Live RTMP Ingester hosted on Az
 As this template doesn't build FFMPEG from the source code, the deployment should take around 20 minutes to build NGINX RTMP.
 
 
-![](https://raw.githubusercontent.com/flecoqui/av-services/master/arm/101-vm-light-hls-rtsp/Docs/1-architecture.png)
+![](./Docs/1-architecture.png)
 
 
 
@@ -89,11 +89,11 @@ For instance using a MKV file:
 </p>
 
 
-![](https://raw.githubusercontent.com/flecoqui/av-services/master/arm/101-vm-light-hls-rtsp/Docs/ffmpeg.png)
+![](./Docs/ffmpeg.png)
 
 After one minute of streaming, the audio/video chunks are copied in the Azure Storage Container. You can display the content of this container if you open the output parameter containerUrl with your favorite browser.
 
-![](https://raw.githubusercontent.com/flecoqui/av-services/master/arm/101-vm-light-hls-rtsp/Docs/container.png)
+![](./Docs/container.png)
 
 You can also playback the HLS stream, if you open with your browser the following urls:
             
@@ -103,7 +103,7 @@ You can also playback the HLS stream, if you open with your browser the followin
             http://vmName.region.cloudapp.azure.com:8080/hls/stream.m3u8
 
 
-![](https://raw.githubusercontent.com/flecoqui/av-services/master/arm/101-vm-light-hls-rtsp/Docs/player.png)
+![](./Docs/player.png)
 
 You can play with VLC the rtmp stream as well using the following url:
 
