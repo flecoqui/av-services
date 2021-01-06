@@ -10,5 +10,5 @@ The following audio/video adaptors will be supported:
 - RTMP ingress/RTMP egress 
 - RTMP ingress/HLS egress 
 - RTMP ingress/RTSP egress 
-- to be completed
+- MKV file/RTMP egress
 

@@ -24,6 +24,10 @@ echo '<!DOCTYPE html>
  <p>PORT_HTTP: '$PORT_HTTP'</p> 
  <p>PORT_SSL: '$PORT_SSL'</p>
  <p>PORT_RTMP: '$PORT_RTMP'</p>
+ <p>PORT_RTSP: '$PORT_RTSP'</p> 
+ <p>RTMP url: 'rtmp://$HOSTNAME:$PORT_RTMP/live/stream'</p> 
+ <p>RTSP url: 'rtsp://$HOSTNAME:$PORT_RTSP/rtsp/stream'</p>   
+ <p>HLS  url: 'http://$HOSTNAME:$PORT_HLS/hls/stream.m3u8'</p>
  </html>' > /usr/local/nginx/html/player.html
 
 echo "worker_processes  1;
@@ -113,6 +117,8 @@ if [ $status -ne 0 ]; then
 fi
 
 # Start the rtsp process
+export RTSP_PROTOCOLS=tcp 
+export RTSP_RTSPPORT=$PORT_RTSP
 /rtsp-simple-server &
 status=$?
 if [ $status -ne 0 ]; then
@@ -123,7 +129,7 @@ fi
 # Start the ffmpeg process
 #ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -framerate 25 -video_size 640x480  -pix_fmt yuv420p -bsf:v h264_mp4toannexb -profile:v baseline -level:v 3.2 -c:v libx264 -x264-params keyint=120:scenecut=0 -c:a aac -b:a 128k -ar 44100 -f rtsp -muxdelay 0.1 rtsp://127.0.0.1:8554/test 
 #ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -f rtsp  rtsp://127.0.0.1:8554/test &
-ffmpeg  -i rtmp://127.0.0.1:1935/live/stream   -codec copy -bsf:v h264_mp4toannexb -f rtsp  rtsp://127.0.0.1:8554/test &
+ffmpeg  -i rtmp://127.0.0.1:$PORT_RTMP/live/stream   -codec copy -bsf:v h264_mp4toannexb -f rtsp  rtsp://127.0.0.1:$PORT_RTSP/rtsp/stream &
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start rtsp: $status"

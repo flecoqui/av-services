@@ -29,7 +29,7 @@ For instance:
 
 For instance, the command line below set the HOSTNAME variable:
 
-            docker run -it -p 80:80/tcp  -p 8080:8080/tcp    -p 1935:1935/tcp -p 443:443/tcp -p 8554:8554/tcp -e HOSTNAME=mymachine.mydomain.com -d flecoqui/av-nginx-rtmp-rtsp-alpine
+            docker run -it -p 80:80/tcp  -p 8080:8080/tcp    -p 1935:1935/tcp -p 443:443/tcp -p 8554:8554/tcp -e HOSTNAME=mymachine.mydomain.com  -d flecoqui/av-nginx-rtmp-rtsp-alpine
 
 # Using docker-compose
 You can use docker-compose to start the container:
@@ -53,3 +53,16 @@ With ffmpeg stream the video associated with your webcam towards the RTMP server
 Open the url https://mymachine.mydomain.com/player.html to play the HLS stream:
 
         curl https://mymachine.mydomain.com/player.html --verbose -vk
+
+
+# Urls
+
+RTMP url:
+rtmp://$HOSTNAME:$PORT_RTMP/live/stream 
+
+RTSP url:
+rtsp://$HOSTNAME:$PORT_RTSP/rtsp/stream   
+
+HLS url:
+http://$HOSTNAME:$PORT_HLS/hls/stream.m3u8
+
