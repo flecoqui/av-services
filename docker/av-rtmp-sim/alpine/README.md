@@ -19,7 +19,7 @@ For instance:
 You can run the image using docker run command line.
 For instance:
 
-            docker run -it -e RTMP_URL=rtmp://192.168.0.1:1935/live/stream flecoqui/av-rtmp-sim-alpine 
+            docker run -it -e RTMP_URL=rtmp://172.17.0.2:1935/live/stream flecoqui/av-rtmp-sim-alpine 
 
 
 # Using docker-compose
