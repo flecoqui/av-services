@@ -24,7 +24,7 @@
     },
     "vmOS": {
       "type": "string",
-      "defaultValue": "debian",
+      "defaultValue": "ubuntu",
       "allowedValues": [
         "debian",
         "ubuntu",
