@@ -26,7 +26,7 @@ function usage() {
 }
 
 action=
-configuration_file=avtool.env
+configuration_file=.avtoolconfig
 while getopts "a:c:hq" opt; do
     case $opt in
     a) action=$OPTARG ;;
@@ -53,12 +53,27 @@ if [[ ! $action == install && ! $action == start && ! $action == stop && ! $acti
     usage
     exit 1
 fi
-
+# Check if configuration file exists
+if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
+    cat > "$repoRoot"/"$configuration_file" << EOF
+RESOURCE_GROUP=av-vm-rg
+RESOURCE_REGION=eastus2
+EOF
+fi
 # Read variables in configuration file
-export $(grep RESOURCE_GROUP $configuration_file)
+export $(grep RESOURCE_GROUP "$repoRoot"/"$configuration_file")
+export $(grep RESOURCE_REGION "$repoRoot"/"$configuration_file")
+
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
+    echo "Installing azure cli"
+    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    echo "Installing ffmpeg"
+    sudo apt-get -y update
+    sudo apt-get -y install ffmpeg
+    echo "Downloading content"
+    wget 
     exit 0
 fi
 
