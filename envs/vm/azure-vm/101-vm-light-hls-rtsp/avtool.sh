@@ -2,7 +2,7 @@
 ##########################################################################################################################################################################################
 #- Purpose: Script used to install pre-requisites, deploy/undeploy service, start/stop service, test service
 #- Parameters are:
-#- [-a] action - value: install, deploy, undeploy, start, stop, test
+#- [-a] action - value: login, install, deploy, undeploy, start, stop, test
 #- [-c] configuration file - by default avtool.env
 #
 # executable
@@ -48,8 +48,8 @@ if [[ $# -eq 0 || -z $action || -z $configuration_file ]]; then
     usage
     exit 1
 fi
-if [[ ! $action == install && ! $action == start && ! $action == stop && ! $action == deploy && ! $action == undeploy && ! $action == test ]]; then
-    echo "Required action is missing, values: install, deploy, undeploy, start, stop, test"
+if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == deploy && ! $action == undeploy && ! $action == test ]]; then
+    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, test"
     usage
     exit 1
 fi
@@ -102,13 +102,21 @@ if [[ "${action}" == "install" ]] ; then
     wget https://github.com/flecoqui/av-services/blob/main/content/camera-300s.mkv
     exit 0
 fi
+if [[ "${action}" == "login" ]] ; then
+    echo "Login..."
+    az login
+    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
+    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
+    echo "Login done"
+    exit 0
+fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     az group create -n ${RESOURCE_GROUP} -l ${RESOURCE_REGION}
-    az group deployment create -g ${RESOURCE_GROUP} -n ${RESOURCE_GROUP}dep --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
+    az deployment group create -g ${RESOURCE_GROUP} -n ${RESOURCE_GROUP}dep --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
     echo "Deployment done"
     exit 0
 fi
