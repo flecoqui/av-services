@@ -1,0 +1,9 @@
+FROM alpine:3.12 
+ENV RTMP_URL rtmp://localhost:1935/live/stream
+COPY camera-300s.mkv /
+COPY docker-entrypoint.sh /
+RUN chmod 0755 /docker-entrypoint.sh
+# build ffmpeg 4.2.2 from the source code 
+# ffmpeg container
+RUN apk add ffmpeg 
+CMD /docker-entrypoint.sh
