@@ -105,6 +105,8 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
+    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
+    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     az group create -n ${RESOURCE_GROUP} -l ${RESOURCE_REGION}
     az group deployment create -g ${RESOURCE_GROUP} -n ${RESOURCE_GROUP}dep --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${} vmAdminPassword=${} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
     echo "Deployment done"
@@ -113,6 +115,8 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
+    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
+    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     az group delete -n ${RESOURCE_GROUP} --yes
     echo "Undeployment done"
     exit 0
@@ -120,6 +124,8 @@ fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
+    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
+    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     az vm stop -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
     echo "Start done"
     exit 0
@@ -127,6 +133,8 @@ fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
+    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
+    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     az vm stop -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
     az vm deallocate -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
     echo "Stop done"
