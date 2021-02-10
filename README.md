@@ -1,12 +1,12 @@
-# av-services
-This repository contains samples of software components which could be used to create Audio/Video workflows. Most of those components are based on Open Source libraries or tools.  
-With those Audio/Video services, it's possible to support scenarios like:
+# Introduction
+This repository (av-services) contains samples of software components which could be used to create Audio/Video workflows. Most of those components are based on Open Source libraries or tools running in different environments like virtual machines, containers.  
+With those Audio/Video components, it's possible to provide services like:
 - RTMP to RTSP protcol adaptor 
 - RTMP Streamer from a Video file 
-- RTMP Receiver into MP4 files in Azure Storage 
+- RTMP Receiver into MP4 files on Azure Storage 
 
-
-Below some basic components which could be used to create an  Audio/Video workflow
+## Overview
+This chapter describes a list of components which could be used to create an Audio/Video workflow.
 
 ##  Audio/Video protocol adaptor client 
 The Audio/Video Protocol Adaptor Client will support :
@@ -93,10 +93,9 @@ The Audio/Video Receiver Client runs in a specific environment:
 - Operating System: Linux, Windows, MacOS
 - Docker Container 
 
-
-
 ![](./docs/img/workflow-receiver-client.png)
 
+# Samples of Audio/Video components 
 
 This repository contains samples of Audio/Video services based on Open Source libraries or tools. With those Audio/Video services, it's possible to support scenarios like:
 - Audio/Video Gateway: for instance RTMP to RTSP Gateway
@@ -122,4 +121,11 @@ The following audio/video services are supported:
 ![](./docs/img/RTMP-MP4-receiver-client.png) 
 
 
+# Next Steps
 
+Below a list of possible improvements 
+
+1. Define a common interface to deploy/undeploy, start/stop Audio/Video components
+2. Provide Samples of Audio/Video renderer components
+3. Provide Samples of Audio/Video splitter components supporting multicast
+ 
