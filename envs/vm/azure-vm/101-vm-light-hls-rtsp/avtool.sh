@@ -134,7 +134,7 @@ if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az vm stop -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+    az vm start -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
     echo "Start done"
     exit 0
 fi
