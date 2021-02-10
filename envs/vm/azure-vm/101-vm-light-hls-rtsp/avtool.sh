@@ -99,7 +99,7 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get -y update
     sudo apt-get -y install ffmpeg
     echo "Downloading content"
-    wget https://github.com/flecoqui/av-services/blob/main/content/camera-300s.mkv
+    wget https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
