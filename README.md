@@ -104,9 +104,9 @@ This repository contains samples of Audio/Video services based on Open Source li
 
 
 Those Audio/Video services are running in:
-- [Azure Virtual Machine](./arm/101-vm-light-hls-rtsp/README.md) 
-- [Docker Containers](./docker/README.md)
-- [Azure IoT Edge](./app-edge/README.md)
+- [Azure Virtual Machine](./envs/vm/azure-vm/README.md) 
+- [Docker Containers](./envs/container/docker/README.md)
+- [Azure IoT Edge](./envs/container/azure-iot-edge/README.md)
   
 The following audio/video services are supported:
 - Audio/Video Gateway: RTMP ingress/RTMP egress  
