@@ -121,7 +121,7 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get -y update
     sudo apt-get -y install ffmpeg
     echo "Downloading content"
-    wget https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
+    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
@@ -181,7 +181,6 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
     rm -f "${AV_TEMPDIR}"/testazure.xml   
     cmd="az storage blob delete-batch -s ${AV_CONTAINERNAME} --account-name ${AV_STORAGENAME} --pattern *.mp4 --sas-token \"${AV_SASTOKEN}\""
-    echo "$cmd"
     eval "$cmd"
     echo "Testing service..."
     echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
@@ -223,14 +222,13 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTSP successful"
 
     echo "Testing output on Azure Storage..."    
-    wget -O "${AV_TEMPDIR}"/testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
+    wget --quiet -O "${AV_TEMPDIR}"/testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
     blobs=($(grep -oP '(?<=Name>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
     bloblens=($(grep -oP '(?<=Content-Length>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
 
     teststorage=0
     for i in ${!blobs[*]}
     do
-        echo "$i" "${blobs[$i]}"
         echo "File: ${blobs[$i]} size: ${bloblens[$i]}"
         teststorage=1
     done
