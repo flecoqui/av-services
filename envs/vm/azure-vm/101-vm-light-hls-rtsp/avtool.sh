@@ -189,7 +189,10 @@ if [[ "${action}" == "test" ]] ; then
     echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
     ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} &
     #jobs
-    sleep 10
+    echo ""
+    echo " Wait 30 seconds before consuming the outputs..."
+    echo ""
+    sleep 30
 
     echo ""
     echo "Testing output RTMP..."
