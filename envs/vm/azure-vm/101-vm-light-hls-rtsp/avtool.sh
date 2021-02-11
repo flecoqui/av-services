@@ -90,6 +90,7 @@ AV_LOGIN=${AV_LOGIN}
 AV_PASSWORD=${AV_PASSWORD}
 AV_SASTOKEN=
 AV_STORAGENAME=
+AV_TEMPDIR=$(mktemp)
 EOF
 fi
 # Read variables in configuration file
@@ -105,6 +106,7 @@ export $(grep AV_STORAGENAME "$repoRoot"/"$configuration_file")
 export $(grep AV_SASTOKEN "$repoRoot"/"$configuration_file")
 export $(grep AV_LOGIN "$repoRoot"/"$configuration_file")
 export $(grep AV_PASSWORD "$repoRoot"/"$configuration_file")
+export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file")
 
 
 if [[ "${action}" == "install" ]] ; then
@@ -170,10 +172,10 @@ if [[ "${action}" == "stop" ]] ; then
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
-    rm -f testrtmp*.mp4
-    rm -f testhls*.mp4
-    rm -f testrtsp*.mp4
-    rm -f testazure.xml   
+    rm -f "${AV_TEMPDIR}"/testrtmp*.mp4
+    rm -f "${AV_TEMPDIR}"/testhls*.mp4
+    rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
+    rm -f "${AV_TEMPDIR}"/testazure.xml   
     az storage blob delete-batch -s ${AV_CONTAINERNAME} --account-name ${AV_STORAGENAME} --pattern "*.mp4" --sas-token ${AV_SASTOKEN}
     echo "Testing service..."
     echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
@@ -183,7 +185,7 @@ if [[ "${action}" == "test" ]] ; then
 
     echo "Testing output RTMP..."
     echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
-    ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testrtmp%d.mp4  || true
+    ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  || true
     test_output_files testrtmp || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTMP Test failed - check files testrtmpx.mp4"
@@ -194,7 +196,7 @@ if [[ "${action}" == "test" ]] ; then
     
     echo "Testing output HLS..."
     echo "Output HLS:  http://${AV_HOSTNAME}:8080/hls/stream.m3u8"
-    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testhls%d.mp4  || true
+    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
     test_output_files testhls || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "HLS Test failed - check files testhlsx.mp4"
@@ -205,7 +207,7 @@ if [[ "${action}" == "test" ]] ; then
 
     echo "Testing output RTSP..."
     echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
-    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 testrtsp%d.mp4 || true
+    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
     test_output_files testrtsp || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTSP Test failed - check files testrtsp.mp4"
@@ -215,9 +217,9 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTSP successful"
 
     echo "Testing output on Azure Storage..."    
-    wget -O testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}"
-    blobs=($(grep -oP '(?<=Name>)[^<]+' "./testazure.xml"))
-    bloblens=($(grep -oP '(?<=Content-Length>)[^<]+' "./testazure.xml"))
+    wget -O "${AV_TEMPDIR}"/testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}"
+    blobs=($(grep -oP '(?<=Name>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
+    bloblens=($(grep -oP '(?<=Content-Length>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
 
     teststorage=0
     for i in ${!blobs[*]}
