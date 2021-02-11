@@ -153,6 +153,8 @@ if [[ "${action}" == "undeploy" ]] ; then
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     az group delete -n ${RESOURCE_GROUP} --yes
+    sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=" >> "$repoRoot"/"$configuration_file"
     echo "Undeployment done"
     exit 0
 fi
