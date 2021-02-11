@@ -24,7 +24,16 @@ function usage() {
     echo -e "\tbash avtool.sh -a start -c avtool.env"
     
 }
-
+test_output_files () {
+    prefix="$1"
+    for i in 0 1 2 3
+    do
+        if [[ ! -f ${prefix}${i}.mp4 || $(wc -c ${prefix}${i}.mp4 | awk '{print $1}') < 10000 ]]; then 
+            return 0
+        fi
+    done 
+    return 1
+}
 action=
 configuration_file=.avtoolconfig
 while getopts "a:c:hq" opt; do
@@ -61,7 +70,7 @@ AV_PREFIXNAME=rtmprtsphls
 AV_VMNAME="$AV_PREFIXNAME"vm
 AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
-AV_LOGIN=vmadmn
+AV_LOGIN=vmadmin
 AV_PASSWORD=P@ssw0rd!
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
@@ -149,19 +158,44 @@ if [[ "${action}" == "stop" ]] ; then
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
+    rm -f testrtmp*.mp4
+    rm -f testhls*.mp4
+    rm -f testrtsp*.mp4    
     echo "Testing service..."
-    echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
-    echo "Output HLS:  http://${AV_HOSTNAME}:8080/hls/stream.m3u8"
-    echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
+    echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
     ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} &
     jobs
     sleep 10
-    ffmpeg -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testrtmp%d.mp4
-    ffmpeg -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testhls%d.mp4
-    ffmpeg -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 testrtsp%d.mp4
+    echo "Testing output RTMP..."
+    echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
+    ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testrtmp%d.mp4
+    if [[ test_output_files testrtmp == 0 ]]; then
+        echo "RTMP Test failed - check files testrtmpx.mp4"
+        kill %1
+        exit 0
+    fi
+    
+    echo "Testing output HLS..."
+    echo "Output HLS:  http://${AV_HOSTNAME}:8080/hls/stream.m3u8"
+    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testhls%d.mp4
+    if [[ test_output_files testhls == 0 ]]; then
+        echo "HLS Test failed - check files testhlsx.mp4"
+        kill %1
+        exit 0
+    fi
+
+    echo "Testing output RTSP..."
+    echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
+    ffmpeg -nostats -loglevel 0 -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 testrtsp%d.mp4
+    if [[ test_output_files testrtsp == 0 ]]; then
+        echo "RTSP Test failed - check files testrtsp.mp4"
+        kill %1
+        exit 0
+    fi
+
     jobs
     kill %1
 
-    echo "Test done"
+    echo "Tests successful"
     exit 0
 fi
