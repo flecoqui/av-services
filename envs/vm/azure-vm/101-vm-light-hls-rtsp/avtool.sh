@@ -142,8 +142,8 @@ if [[ "${action}" == "deploy" ]] ; then
     outputs=$(az deployment group show --name ${RESOURCE_GROUP}dep  -g ${RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
     AV_SASTOKEN=$(jq -r .storageSasToken.value <<< $outputs)
-    sed -i "s/AV_STORAGENAME=.*/AV_STORAGENAME=$AV_STORAGENAME/" "$repoRoot"/"$configuration_file"
-    sed -i "s/AV_SASTOKEN=.*/AV_SASTOKEN=$AV_SASTOKEN/" "$repoRoot"/"$configuration_file"    
+    sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=\"$AV_STORAGENAME\"" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=\"$AV_SASTOKEN\"" >> "$repoRoot"/"$configuration_file"
     echo "Deployment done"
     exit 0
 fi
