@@ -193,18 +193,15 @@ if [[ "${action}" == "test" ]] ; then
 
     echo "Testing output RTSP..."
     echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
-    ffmpeg -nostats -loglevel 0 -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 testrtsp%d.mp4 || true
+    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 testrtsp%d.mp4 || true
     test_output_files testrtsp || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTSP Test failed - check files testrtsp.mp4"
         kill %1
         exit 0
     fi
-    echo "Testing output RTSP successful"
-
     jobs
     kill %1
-
     echo "TESTS SUCCESSFUL"
     exit 0
 fi
