@@ -169,7 +169,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTMP..."
     echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
     ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testrtmp%d.mp4
-    if [[ test_output_files testrtmp == 0 ]] ; then
+    test_output_files testrtmp
+    if [[ $? == 0 ]] ; then
         echo "RTMP Test failed - check files testrtmpx.mp4"
         kill %1
         exit 0
@@ -178,7 +179,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output HLS..."
     echo "Output HLS:  http://${AV_HOSTNAME}:8080/hls/stream.m3u8"
     ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testhls%d.mp4
-    if [[ test_output_files testhls == 0 ]] ; then
+    test_output_files testhls
+    if [[ $? == 0 ]] ; then
         echo "HLS Test failed - check files testhlsx.mp4"
         kill %1
         exit 0
@@ -187,7 +189,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTSP..."
     echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
     ffmpeg -nostats -loglevel 0 -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 testrtsp%d.mp4
-    if [[ test_output_files testrtsp == 0 ]] ; then
+    test_output_files testrtsp
+    if [[ $? == 0 ]] ; then
         echo "RTSP Test failed - check files testrtsp.mp4"
         kill %1
         exit 0
