@@ -90,7 +90,7 @@ AV_LOGIN=${AV_LOGIN}
 AV_PASSWORD=${AV_PASSWORD}
 AV_SASTOKEN=
 AV_STORAGENAME=
-AV_TEMPDIR=$(mktemp)
+AV_TEMPDIR=$(mktemp -d)
 EOF
 fi
 # Read variables in configuration file
@@ -106,10 +106,10 @@ export $(grep AV_STORAGENAME "$repoRoot"/"$configuration_file")
 export $(grep AV_SASTOKEN "$repoRoot"/"$configuration_file")
 export $(grep AV_LOGIN "$repoRoot"/"$configuration_file"  )
 export $(grep AV_PASSWORD "$repoRoot"/"$configuration_file" )
-export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
+export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
-    AV_TEMPDIR=$(mktemp)
+    AV_TEMPDIR=$(mktemp -d)
     sed -i 's/AV_TEMPDIR=.*/AV_TEMPDIR=${AV_TEMPDIR}/' "$repoRoot"/"$configuration_file"
 fi
 
