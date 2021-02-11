@@ -516,6 +516,10 @@
   "outputs": {
     "storageAccount": {
       "type": "string",
+      "value": "[variables('storageAccountName')]"
+    },
+    "storageAccountUrl": {
+      "type": "string",
       "value": "[concat('https://',variables('storageAccountName'),'.blob.core.windows.net/', parameters('containerName'))]"
     },
     "storageKey": {
