@@ -28,6 +28,7 @@ test_output_files () {
     prefix="$1"
     for i in 0 1 2 3
     do
+        echo "check file: ${prefix}${i}.mp4 size: $(wc -c ${prefix}${i}.mp4 | awk '{print $1}')"
         if [[ ! -f ${prefix}${i}.mp4 || $(wc -c ${prefix}${i}.mp4 | awk '{print $1}') < 10000 ]]; then 
             return 0
         fi
