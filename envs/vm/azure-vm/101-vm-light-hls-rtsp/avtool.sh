@@ -222,7 +222,7 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTSP successful"
 
     echo "Testing output on Azure Storage..."    
-    wget -O "${AV_TEMPDIR}"/testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}"
+    wget -O "${AV_TEMPDIR}"/testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
     blobs=($(grep -oP '(?<=Name>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
     bloblens=($(grep -oP '(?<=Content-Length>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
 
@@ -234,7 +234,7 @@ if [[ "${action}" == "test" ]] ; then
         teststorage=1
     done
     if [[ "$teststorage" == "0" ]] ; then
-        echo "Azure Storage Test failed - check files https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}"
+        echo "Azure Storage Test failed - check files https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
         kill %1
         exit 0
     fi
