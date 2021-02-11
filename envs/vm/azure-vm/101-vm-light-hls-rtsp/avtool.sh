@@ -163,12 +163,23 @@ fi
 if [[ "${action}" == "test" ]] ; then
     rm -f testrtmp*.mp4
     rm -f testhls*.mp4
-    rm -f testrtsp*.mp4    
+    rm -f testrtsp*.mp4
+    rm -f testazure.xml    
     echo "Testing service..."
     echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
     ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} &
     #jobs
     sleep 10
+    echo "Testing chunks on Azure Storage..."
+    wget -O testazure.xml "https://rtmprtsp3ahnc4mybfacssa.blob.core.windows.net/avchunks?sv=2015-04-05&ss=b&srt=sco&sp=rwdlac&st=2020-01-01T00%3A00%3A01.0000000Z&se=2030-01-01T00%3A00%3A01.0000000Z&spr=https&sig=YhxotWahYYTKVfLxP93f8WWWQrZYDtrEj063Fui0Ot8%3D&comp=list&restype=container"
+    blobs=($(grep -oP '(?<name>)[^<]+' "./testazure.xml"))
+
+    for i in ${!blobs[*]}
+    do
+    echo "$i" "${blob[$i]}"
+    # instead of echo use the values to send emails, etc
+    done
+
     echo "Testing output RTMP..."
     echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
     ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testrtmp%d.mp4  || true
