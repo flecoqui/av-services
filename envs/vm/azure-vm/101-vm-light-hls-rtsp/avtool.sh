@@ -176,7 +176,7 @@ if [[ "${action}" == "test" ]] ; then
 
     for i in ${!blobs[*]}
     do
-    echo "$i" "${blob[$i]}"
+    echo "$i" "${blobs[$i]}"
     # instead of echo use the values to send emails, etc
     done
 
