@@ -25,15 +25,17 @@ function usage() {
     
 }
 test_output_files () {
+    test_output_files_result="1"
     prefix="$1"
     for i in 0 1 2 3
     do
         echo "check file: ${prefix}${i}.mp4 size: $(wc -c ${prefix}${i}.mp4 | awk '{print $1}')"
         if [[ ! -f ${prefix}${i}.mp4 || $(wc -c ${prefix}${i}.mp4 | awk '{print $1}') < 10000 ]]; then 
-            return 0
+            test_output_files_result="0"
+            return
         fi
     done 
-    return 1
+    return
 }
 action=
 configuration_file=.avtoolconfig
@@ -171,8 +173,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
     ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testrtmp%d.mp4
     test_output_files testrtmp || true
-    echo "result $?"
-    if [[ "$?" == "0" ]] ; then
+    echo "result $test_output_files_result"
+    if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTMP Test failed - check files testrtmpx.mp4"
         kill %1
         exit 0
@@ -182,8 +184,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output HLS..."
     echo "Output HLS:  http://${AV_HOSTNAME}:8080/hls/stream.m3u8"
     ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testhls%d.mp4
-    test_output_files testhls || true
-    if [[ $? == 0 ]] ; then
+    echo "result $test_output_files_result"
+    if [[ "$test_output_files_result" == "0" ]] ; then
         echo "HLS Test failed - check files testhlsx.mp4"
         kill %1
         exit 0
@@ -193,8 +195,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTSP..."
     echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
     ffmpeg -nostats -loglevel 0 -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 testrtsp%d.mp4
-    test_output_files testrtsp || true
-    if [[ $? == 0 ]] ; then
+    echo "result $test_output_files_result"
+    if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTSP Test failed - check files testrtsp.mp4"
         kill %1
         exit 0
