@@ -167,7 +167,7 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing service..."
     echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
     ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} &
-    jobs
+    #jobs
     sleep 10
     echo "Testing output RTMP..."
     echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
@@ -200,7 +200,7 @@ if [[ "${action}" == "test" ]] ; then
         kill %1
         exit 0
     fi
-    jobs
+    #jobs
     kill %1
     echo "TESTS SUCCESSFUL"
     exit 0
