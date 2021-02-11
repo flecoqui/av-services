@@ -175,6 +175,7 @@ if [[ "${action}" == "test" ]] ; then
         kill %1
         exit 0
     fi
+    echo "Testing output RTMP successful"
     
     echo "Testing output HLS..."
     echo "Output HLS:  http://${AV_HOSTNAME}:8080/hls/stream.m3u8"
@@ -185,6 +186,7 @@ if [[ "${action}" == "test" ]] ; then
         kill %1
         exit 0
     fi
+    echo "Testing output HLS successful"
 
     echo "Testing output RTSP..."
     echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
@@ -195,10 +197,11 @@ if [[ "${action}" == "test" ]] ; then
         kill %1
         exit 0
     fi
+    echo "Testing output RTSP successful"
 
     jobs
     kill %1
 
-    echo "Tests successful"
+    echo "TESTS SUCCESSFUL"
     exit 0
 fi
