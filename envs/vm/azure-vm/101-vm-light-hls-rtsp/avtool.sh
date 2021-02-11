@@ -29,8 +29,8 @@ test_output_files () {
     prefix="$1"
     for i in 0 1 2 3
     do
-        echo "checking file: ${prefix}${i}.mp4 size: $(wc -c ${prefix}${i}.mp4 | awk '{print $1}')"
-        if [[ ! -f ${prefix}${i}.mp4 || $(wc -c ${prefix}${i}.mp4 | awk '{print $1}') < 10000 ]]; then 
+        echo "checking file: ${AV_TEMPDIR}/${prefix}${i}.mp4 size: $(wc -c ${AV_TEMPDIR}/${prefix}${i}.mp4 | awk '{print $1}')"
+        if [[ ! -f "${AV_TEMPDIR}"/${prefix}${i}.mp4 || $(wc -c "${AV_TEMPDIR}"/${prefix}${i}.mp4 | awk '{print $1}') < 10000 ]]; then 
             test_output_files_result="0"
             return
         fi
