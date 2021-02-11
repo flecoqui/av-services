@@ -171,7 +171,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
     ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 testrtmp%d.mp4
     test_output_files testrtmp
-    if [[ $? == 0 ]] ; then
+    echo "result $?"
+    if [[ "$?" == "0" ]] ; then
         echo "RTMP Test failed - check files testrtmpx.mp4"
         kill %1
         exit 0
