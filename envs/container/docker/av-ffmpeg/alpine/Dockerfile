@@ -1,5 +1,5 @@
 FROM alpine:3.12 
-
+COPY camera-300s.mkv /
 # build ffmpeg 4.2.2 from the source code 
 # ffmpeg container
 RUN apk add ffmpeg 

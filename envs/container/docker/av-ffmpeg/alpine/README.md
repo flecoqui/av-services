@@ -7,14 +7,14 @@ This container will run the FFMPEG command with the docker run arguments.
 You can build the image using docker build command line.
 For instance:
 
-            docker build -t flecoqui/av-ffmpeg-alpine .
+            docker build -t av-services/av-ffmpeg-alpine .
 
 
 # Running the image
 You can run the image using docker run command line.
 For instance:
 
-            docker run  flecoqui/av-ffmpeg-alpine
+            docker run  av-services/av-ffmpeg-alpine
 
 
 For instance sample to convert incoming rtsp stream into rtmp:

@@ -65,47 +65,25 @@ if [[ ! $action == login && ! $action == install && ! $action == start && ! $act
     usage
     exit 1
 fi
-RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
-RESOURCE_REGION=eastus2
-AV_RTMP_PORT=1935
-AV_RTMP_PATH=live/stream
-AV_PREFIXNAME=rtmprtsphls
-AV_VMNAME="$AV_PREFIXNAME"vm
-AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
-AV_CONTAINERNAME=avchunks
-AV_LOGIN=vmadmin
-AV_PASSWORD=P@ssw0rd!
+AV_IMAGE_NAME=av-ffmpeg-alpine 
+AV_IMAGE_FOLDER=av-services
+AV_CONTAINER_NAME=av-ffmpeg-alpine-container
+AV_FFMPEG_COMMAND="-nostats -loglevel 0"
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
-RESOURCE_GROUP=${RESOURCE_GROUP}
-RESOURCE_REGION=${RESOURCE_REGION}
-AV_RTMP_PORT=${AV_RTMP_PORT}
-AV_RTMP_PATH=${AV_RTMP_PATH}
-AV_PREFIXNAME=${AV_PREFIXNAME}
-AV_VMNAME=${AV_VMNAME}
-AV_HOSTNAME=${AV_HOSTNAME}
-AV_CONTAINERNAME=${AV_CONTAINERNAME}
-AV_LOGIN=${AV_LOGIN}
-AV_PASSWORD=${AV_PASSWORD}
-AV_SASTOKEN=
-AV_STORAGENAME=
+AV_IMAGE_NAME=${AV_IMAGE_NAME}
+AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
+AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
+AV_FFMPEG_COMMAND=${AV_FFMPEG_COMMAND}
 AV_TEMPDIR=$(mktemp -d)
 EOF
 fi
 # Read variables in configuration file
-export $(grep RESOURCE_GROUP "$repoRoot"/"$configuration_file")
-export $(grep RESOURCE_REGION "$repoRoot"/"$configuration_file")
-export $(grep AV_RTMP_PORT "$repoRoot"/"$configuration_file")
-export $(grep AV_RTMP_PATH "$repoRoot"/"$configuration_file")
-export $(grep AV_PREFIXNAME "$repoRoot"/"$configuration_file")
-export $(grep AV_VMNAME "$repoRoot"/"$configuration_file")
-export $(grep AV_HOSTNAME "$repoRoot"/"$configuration_file")
-export $(grep AV_CONTAINERNAME "$repoRoot"/"$configuration_file")
-export $(grep AV_STORAGENAME "$repoRoot"/"$configuration_file")
-export $(grep AV_SASTOKEN "$repoRoot"/"$configuration_file")
-export $(grep AV_LOGIN "$repoRoot"/"$configuration_file"  )
-export $(grep AV_PASSWORD "$repoRoot"/"$configuration_file" )
+export $(grep AV_IMAGE_NAME "$repoRoot"/"$configuration_file")
+export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
+export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
+export $(grep AV_FFMPEG_COMMAND "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
@@ -140,58 +118,43 @@ if [[ "${action}" == "install" ]] ; then
         stable"
     sudo apt-get -y update
     sudo apt-get -y install docker-ce docker-ce-cli containerd.io    
+    sudo groupadd docker || true
+    sudo usermod -aG docker ${USER} || true
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
     echo "Login..."
-    az login
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
+    docker login
     echo "Login done"
     exit 0
 fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az group create -n ${RESOURCE_GROUP} -l ${RESOURCE_REGION}
-    az deployment group create -g ${RESOURCE_GROUP} -n ${RESOURCE_GROUP}dep --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
-    outputs=$(az deployment group show --name ${RESOURCE_GROUP}dep  -g ${RESOURCE_GROUP} --query properties.outputs)
-    AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
-    AV_SASTOKEN=$(jq -r .storageSasToken.value <<< $outputs)
-    sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=$AV_STORAGENAME" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=$AV_SASTOKEN" >> "$repoRoot"/"$configuration_file"
+    sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
+    sudo docker run  --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} ${AV_FFMPEG_COMMAND}
     echo "Deployment done"
     exit 0
 fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az group delete -n ${RESOURCE_GROUP} --yes
-    sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=" >> "$repoRoot"/"$configuration_file"
+    sudo docker container rm ${AV_CONTAINER_NAME}
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}
     echo "Undeployment done"
     exit 0
 fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az vm start -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+    sudo docker container start ${AV_CONTAINER_NAME}
     echo "Start done"
     exit 0
 fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az vm stop -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
-    az vm deallocate -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+    sudo docker container stop ${AV_CONTAINER_NAME}
     echo "Stop done"
     exit 0
 fi
