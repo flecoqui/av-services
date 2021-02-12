@@ -164,6 +164,11 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "FFMPEG encoding command: ${AV_FFMPEG_COMMAND}"
     echo ""
+    if [[ ! -f "${AV_TEMPDIR}" ]] ; then
+        echo "ffmpeg Test failed - volume directory doesn't exist: ${AV_TEMPDIR}"
+        echo "Deploy the container before running the tests"
+        exit 1
+    fi
     sudo docker container start -i ${AV_CONTAINER_NAME}
     echo "Output directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/camera-300s.mp4" ]] ; then
