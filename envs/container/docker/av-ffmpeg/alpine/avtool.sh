@@ -72,7 +72,8 @@ fi
 export $(grep AV_IMAGE_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
-cmd='export $(grep AV_FFMPEG_COMMAND "$repoRoot"/"$configuration_file")'
+var=$(grep AV_FFMPEG_COMMAND "$repoRoot"/"$configuration_file")
+cmd="export $var"
 eval $cmd
 export $(grep AV_VOLUME "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
