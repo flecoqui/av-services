@@ -164,7 +164,7 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "FFMPEG encoding command: ${AV_FFMPEG_COMMAND}"
     echo ""
-    if [[ ! -f "${AV_TEMPDIR}" ]] ; then
+    if [[ ! -d "${AV_TEMPDIR}" ]] ; then
         echo "ffmpeg Test failed - volume directory doesn't exist: ${AV_TEMPDIR}"
         echo "Deploy the container before running the tests"
         exit 1
