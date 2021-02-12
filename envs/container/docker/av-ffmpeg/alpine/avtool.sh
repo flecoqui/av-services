@@ -175,6 +175,7 @@ if [[ "${action}" == "test" ]] ; then
         echo "ffmpeg Test failed - check file ${AV_TEMPDIR}/camera-300s.mp4"
         exit 1
     fi
+    echo "File ${AV_TEMPDIR}/camera-300s.mp4 exists"
     echo "Testing ffmpeg successful"
     echo "TESTS SUCCESSFUL"
     exit 0
