@@ -68,7 +68,7 @@ fi
 AV_IMAGE_NAME=av-ffmpeg-alpine 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=av-ffmpeg-alpine-container
-AV_FFMPEG_COMMAND="-nostats -loglevel 0"
+AV_FFMPEG_COMMAND="-nostats -loglevel 0  -i ./camera-300s.mkv -codec copy ./camera-300s.mp4"
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
