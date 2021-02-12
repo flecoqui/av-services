@@ -125,8 +125,8 @@ if [[ "${action}" == "install" ]] ; then
     echo "Installing docker"
     # removing old version
     sudo apt-get remove docker docker-engine docker.io containerd runc
-    sudo apt-get update
-    sudo apt-get install \
+    sudo apt-get -y update
+    sudo apt-get -y install \
         apt-transport-https \
         ca-certificates \
         curl \
@@ -138,8 +138,8 @@ if [[ "${action}" == "install" ]] ; then
         "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
         $(lsb_release -cs) \
         stable"
-    sudo apt-get update
-    sudo apt-get install docker-ce docker-ce-cli containerd.io    
+    sudo apt-get -y update
+    sudo apt-get -y install docker-ce docker-ce-cli containerd.io    
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
