@@ -2,7 +2,7 @@
 ##########################################################################################################################################################################################
 #- Purpose: Script used to install pre-requisites, deploy/undeploy service, start/stop service, test service
 #- Parameters are:
-#- [-a] action - value: login, install, deploy, undeploy, start, stop, test
+#- [-a] action - value: login, install, deploy, undeploy, start, stop, status, test
 #- [-c] configuration file - by default avtool.env
 #
 # executable
@@ -23,19 +23,6 @@ function usage() {
     echo -e "\tbash avtool.sh -a install "
     echo -e "\tbash avtool.sh -a start -c avtool.env"
     
-}
-test_output_files () {
-    test_output_files_result="1"
-    prefix="$1"
-    for i in 0 1 2 3
-    do
-        echo "checking file: ${AV_TEMPDIR}/${prefix}${i}.mp4 size: $(wc -c ${AV_TEMPDIR}/${prefix}${i}.mp4 | awk '{print $1}')"
-        if [[ ! -f "${AV_TEMPDIR}"/${prefix}${i}.mp4 || $(wc -c "${AV_TEMPDIR}"/${prefix}${i}.mp4 | awk '{print $1}') < 10000 ]]; then 
-            test_output_files_result="0"
-            return
-        fi
-    done 
-    return
 }
 action=
 configuration_file=.avtoolconfig
@@ -60,21 +47,23 @@ if [[ $# -eq 0 || -z $action || -z $configuration_file ]]; then
     usage
     exit 1
 fi
-if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == deploy && ! $action == undeploy && ! $action == test ]]; then
-    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, test"
+if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == status && ! $action == deploy && ! $action == undeploy && ! $action == test ]]; then
+    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, status, test"
     usage
     exit 1
 fi
 AV_IMAGE_NAME=av-ffmpeg-alpine 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=av-ffmpeg-alpine-container
-AV_FFMPEG_COMMAND="-nostats -loglevel 0  -i ./camera-300s.mkv -codec copy ./camera-300s.mp4"
+AV_VOLUME=data1
+AV_FFMPEG_COMMAND="ffmpeg -y -nostats -loglevel 0  -i ./camera-300s.mkv -codec copy /${AV_VOLUME}/camera-300s.mp4"
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
 AV_IMAGE_NAME=${AV_IMAGE_NAME}
 AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
 AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
+AV_VOLUME=${AV_VOLUME}
 AV_FFMPEG_COMMAND=${AV_FFMPEG_COMMAND}
 AV_TEMPDIR=$(mktemp -d)
 EOF
@@ -84,6 +73,7 @@ export $(grep AV_IMAGE_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_FFMPEG_COMMAND "$repoRoot"/"$configuration_file")
+export $(grep AV_VOLUME "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
@@ -131,8 +121,10 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
+    sudo docker container rm ${AV_CONTAINER_NAME}
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
-    sudo docker run  --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} ${AV_FFMPEG_COMMAND}
+    sudo docker run  -it v ${AV_TEMPDIR}:/${AV_VOLUME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} ${AV_FFMPEG_COMMAND}
     echo "Deployment done"
     exit 0
 fi
@@ -142,6 +134,12 @@ if [[ "${action}" == "undeploy" ]] ; then
     sudo docker container rm ${AV_CONTAINER_NAME}
     sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}
     echo "Undeployment done"
+    exit 0
+fi
+if [[ "${action}" == "status" ]] ; then
+    echo "Checking status..."
+    sudo docker container inspect ${AV_CONTAINER_NAME} --format '{{json .State.Status}}'
+    echo "Status done"
     exit 0
 fi
 
@@ -159,89 +157,18 @@ if [[ "${action}" == "stop" ]] ; then
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
-    rm -f "${AV_TEMPDIR}"/testrtmp*.mp4
-    rm -f "${AV_TEMPDIR}"/testhls*.mp4
-    rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
-    rm -f "${AV_TEMPDIR}"/testazure.xml   
-    cmd="az storage blob delete-batch -s ${AV_CONTAINERNAME} --account-name ${AV_STORAGENAME} --pattern *.mp4 --sas-token \"${AV_SASTOKEN}\""
-    eval "$cmd"
-    echo "Testing service..."
+    rm -f "${AV_TEMPDIR}"/*.mp4
+    echo "Start av-ffmpeg container..."
     echo ""
-    echo "Start RTMP Streaming..."
+    echo "FFMPEG encoding command: ${AV_COMMAND}"
     echo ""
-    echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
-    ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} &
-    #jobs
-    echo ""
-    echo " Wait 30 seconds before consuming the outputs..."
-    echo ""
-    sleep 30
-
-    echo ""
-    echo "Testing output RTMP..."
-    echo ""
-    echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
-    echo "RTMP Command: ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  "
-    ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  || true
-    test_output_files testrtmp || true
-    if [[ "$test_output_files_result" == "0" ]] ; then
-        echo "RTMP Test failed - check files testrtmpx.mp4"
-        kill %1
-        exit 0
+    sudo docker container start -i ${AV_CONTAINER_NAME}
+    echo "Output directory : ${AV_TEMPDIR}"
+    if [[ ! -f "${AV_TEMPDIR}/camera-300s.mp4" ]] ; then
+        echo "ffmpeg Test failed - check file ${AV_TEMPDIR}/camera-300s.mp4"
+        exit 1
     fi
-    echo "Testing output RTMP successful"
-    
-    echo ""
-    echo "Testing output HLS..."
-    echo ""
-    echo "Output HLS:  http://${AV_HOSTNAME}:8080/hls/stream.m3u8"
-    echo "HLS Command: ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 "
-    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
-    test_output_files testhls || true
-    if [[ "$test_output_files_result" == "0" ]] ; then
-        echo "HLS Test failed - check files testhlsx.mp4"
-        kill %1
-        exit 0
-    fi
-    echo "Testing output HLS successful"
-
-    echo ""
-    echo "Testing output RTSP..."
-    echo ""
-    echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
-    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
-    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
-    test_output_files testrtsp || true
-    if [[ "$test_output_files_result" == "0" ]] ; then
-        echo "RTSP Test failed - check files testrtsp.mp4"
-        kill %1
-        exit 0
-    fi
-    echo "Testing output RTSP successful"
-
-    echo ""
-    echo "Testing output on Azure Storage..."    
-    echo ""
-    echo "Azure Storage URL: https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
-
-    wget --quiet -O "${AV_TEMPDIR}"/testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
-    blobs=($(grep -oP '(?<=Name>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
-    bloblens=($(grep -oP '(?<=Content-Length>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
-
-    teststorage=0
-    for i in ${!blobs[*]}
-    do
-        echo "File: ${blobs[$i]} size: ${bloblens[$i]}"
-        teststorage=1
-    done
-    if [[ "$teststorage" == "0" ]] ; then
-        echo "Azure Storage Test failed - check files https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
-        kill %1
-        exit 0
-    fi
-    echo "Testing output on Azure Storage successful"
-    #jobs
-    kill %1
+    echo "Testing ffmpeg successful"
     echo "TESTS SUCCESSFUL"
     exit 0
 fi
