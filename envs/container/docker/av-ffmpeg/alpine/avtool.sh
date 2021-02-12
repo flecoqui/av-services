@@ -162,7 +162,7 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/*.mp4
     echo "Start av-ffmpeg container..."
     echo ""
-    echo "FFMPEG encoding command: ${AV_COMMAND}"
+    echo "FFMPEG encoding command: ${AV_FFMPEG_COMMAND}"
     echo ""
     sudo docker container start -i ${AV_CONTAINER_NAME}
     echo "Output directory : ${AV_TEMPDIR}"
