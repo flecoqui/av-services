@@ -70,7 +70,7 @@ fi
 export $(grep AV_IMAGE_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
-export $(AV_RTMP_URL "$repoRoot"/"$configuration_file")
+export $(grep AV_RTMP_URL "$repoRoot"/"$configuration_file")
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
