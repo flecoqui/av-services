@@ -115,7 +115,7 @@ if [[ "${action}" == "deploy" ]] ; then
     sudo docker container rm ${AV_CONTAINER_NAME} || true
     sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
-    sudo docker run  -it -e RTMP_URL=${RTMP_URL} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
+    sudo docker run  -it -e RTMP_URL=${AV_RTMP_URL} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     echo "Deployment done"
     exit 0
 fi
