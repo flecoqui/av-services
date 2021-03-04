@@ -21,8 +21,7 @@ function usage() {
     echo
     echo "Example:"
     echo -e "\tbash avtool.sh -a install "
-    echo -e "\tbash avtool.sh -a start -c avtool.env"
-    
+    echo -e "\tbash avtool.sh -a start -c avtool.env"    
 }
 action=
 configuration_file=.avtoolconfig
