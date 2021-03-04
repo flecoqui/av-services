@@ -32,28 +32,20 @@ You can install Azure CLI on your machine running Linux, MacOS or Windows from h
 ## CREATE RESOURCE GROUP:
 First you need to create the resource group which will be associated with this deployment. For this step, you can use Azure CLI v1 or v2.
 
-* **Azure CLI 1.0:** azure group create "ResourceGroupName" "RegionName"
-
 * **Azure CLI 2.0:** az group create an "ResourceGroupName" -l "RegionName"
 
 For instance:
-
-    azure group create RTMPIngestrg eastus2
 
     az group create -n RTMPIngestrg -l eastus2
 
 ## DEPLOY THE SERVICES:
 
-### DEPLOY REST API ON AZURE FUNCTION, APP SERVICE, VIRTUAL MACHINE:
-You can deploy Azure Function, Azure App Service and Virtual Machine using ARM (Azure Resource Manager) Template and Azure CLI v1 or v2
-
-* **Azure CLI 1.0:** azure group deployment create "ResourceGroupName" "DeploymentName"  -f azuredeploy.json -e azuredeploy.parameters.json*
+### DEPLOY AV-SERVICE ON AZURE VIRTUAL MACHINE:
+You can deploy av-service in Azure Virtual Machine using ARM (Azure Resource Manager) Template and Azure CLI.
 
 * **Azure CLI 2.0:** az group deployment create -g "ResourceGroupName" -n "DeploymentName" --template-file "templatefile.json" --parameters @"templatefile.parameter..json"  --verbose -o json
 
 For instance:
-
-    azure group deployment create RTMPIngestrg RTMPIngestdep -f azuredeploy.json -e azuredeploy.parameters.json -vv
 
     az group deployment create -g RTMPIngestrg -n RTMPIngestdep --template-file azuredeploy.json --parameter @azuredeploy.parameters.json --verbose -o json
 
@@ -117,15 +109,134 @@ You can play with VLC the rtsp stream as well using the following url:
 
 ## DELETE THE RESOURCE GROUP:
 
-* **Azure CLI 1.0:**      azure group delete "ResourceGroupName" "RegionName"
-
 * **Azure CLI 2.0:**  az group delete -n "ResourceGroupName" "RegionName"
 
 For instance:
 
-    azure group delete RTMPIngestrg eastus2
-
     az group delete -n RTMPIngestrg 
+
+
+# Using avtool.sh to deploy the virtual machine 
+
+## Overview
+This av-service is running in an Azure virtual machine.
+This template allows you to deploy from Github a Live RTMP Ingester hosted on Azure Virtual Machine. Moreover, beyond the RTMP Ingester, the a service copy the video chunks on an Azure Storage Account. Moreover, this service allow the user to playback:
+- the HLS stream generated from the incoming RTMP stream
+- the RTMP stream generated from the incoming RTMP stream
+- the RTSP stream generated from the incoming RTMP stream
+
+## Using this av-service running in a virtual machine
+It's recommended to use and manage this av-service service with the avtool.sh command line tool.
+
+### Installing the pre-requisites on the host machine
+As avtool.sh is a Linux bash file, you could run this tool from a machine or virtual machine running Ubuntu 20.04 LTS.
+
+1. Ensure git is installed running the following command
+
+```bash
+    sudo apt-get install git
+```
+
+2. Clone the av-services repository on your machine
+
+```bash
+    mkdir $HOME/git
+    cd $HOME/git
+    git clone https://github.com/flecoqui/av-services.git
+    cd av-services/envs/vm/azure-vm/101-vm-light-hls-rtsp
+```
+3. Run avtool.sh -a install to install docker 
+
+```bash
+    ./avtool.sh -a install
+```
+
+### Deploying/Undeploying av-ffmpeg alpine service
+Once the pre-requisites are installed, you can build the av-ffmpeg alpine container.
+
+
+1. Run the following command to create, deploy and run the virtual machine
+
+```bash
+    ./avtool.sh -a deploy
+```
+
+When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the av-ffmpeg configuration. By default, the file contains these parameters:
+
+```bash
+    RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
+    RESOURCE_REGION=eastus2
+    AV_RTMP_PORT=1935
+    AV_RTMP_PATH=live/stream
+    AV_PREFIXNAME=rtmprtsphls
+    AV_VMNAME="$AV_PREFIXNAME"vm
+    AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
+    AV_CONTAINERNAME=avchunks
+    AV_LOGIN=vmadmin
+    AV_PASSWORD={YourPassword}
+```
+
+Below further information about the parameters in the file .avtoolconfig:
+
+| Variables | Description |
+| ---------------------|:-------------|
+| RESOURCE_GROUP | The name of the Azure resource group where the virtual machine is deployed |
+| RESOURCE_REGION | The Azure region where the virtual machine is deployed  |
+| AV_RTMP_PORT | The rtmp port used for the ingestion   |
+| AV_RTMP_PATH | The rtmp path the ingestion  |
+| AV_PREFIXNAME | The prefix of the virtual machine name   |
+| AV_VMNAME | The virtual machine name   |
+| AV_HOSTNAME | The virtual machine dns name   |
+| AV_CONTAINERNAME | The container name in the storage account where the video chunks will be stored   |
+| AV_LOGIN | The virtual machine administrator login    |
+| AV_PASSWORD | The virtual machine administrator password |
+
+
+
+### Starting/Stopping av-ffmpeg alpine service
+Once the image is built you can start and stop the container .
+
+
+1. Run the following command to start the container
+
+```bash
+    ./avtool.sh -a start
+```
+By default the container will run the following command to encod the MKV file:
+
+
+```bash
+    ffmpeg -y -nostats -loglevel 0  -i ./camera-300s.mkv -codec copy /${AV_VOLUME}/camera-300s.mp4
+```
+
+
+2. If the container is still running, you can run the following command to stop the container
+
+```bash
+    ./avtool.sh -a stop
+```
+
+3. If the container is still running, you can run the following command to get the status of the container
+
+```bash
+    ./avtool.sh -a status
+```
+
+### Testing av-ffmpeg alpine service
+Once the image is built you can test if the container is fully functionning.
+
+1. Run the following command to test the container
+
+```bash
+    ./avtool.sh -a test
+```
+
+For this container, the test feature will check if the output MP4 file has been created in the mounted volume.
+
+
+
+
+
 
 
 
