@@ -113,7 +113,7 @@
       "ubuntu": {
         "publisher": "Canonical",
         "offer": "UbuntuServer",
-        "sku": "18.04-LTS",
+        "sku": "20.04-LTS",
         "version": "latest",
         "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/101-vm-light-hls-rtsp/install-software.sh",
         "installScriptFileName": "install-software.sh",

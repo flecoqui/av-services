@@ -1,7 +1,7 @@
 FROM alpine:3.12 
-COPY camera-300s.mkv /
-# build ffmpeg 4.2.2 from the source code 
-# ffmpeg container
+# copy sample mkv video 
+RUN wget https://github.com/flecoqui/av-services/blob/main/content/camera-300s.mkv?raw=true -O  /camera-300s.mkv
+
+# install ffmpeg 
 RUN apk add ffmpeg 
-#ENTRYPOINT ["ffmpeg"]
 CMD ["@"]

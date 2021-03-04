@@ -16,7 +16,7 @@ cd "$repoRoot"
 function usage() {
     echo
     echo "Arguments:"
-    echo -e "\t-a\t Sets AV Tool action"
+    echo -e "\t-a\t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
     echo -e "\t-c \t Sets the AV Tool configuration file"
     echo
     echo "Example:"
@@ -52,7 +52,9 @@ if [[ ! $action == login && ! $action == install && ! $action == start && ! $act
     usage
     exit 1
 fi
-AV_IMAGE_NAME=av-ffmpeg-alpine 
+AV_SERVICE=av-ffmpeg
+AV_FLAVOR=alpine
+AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=av-ffmpeg-alpine-container
 AV_VOLUME=data1
