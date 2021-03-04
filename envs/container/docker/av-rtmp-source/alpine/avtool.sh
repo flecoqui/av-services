@@ -63,7 +63,7 @@ if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
 AV_IMAGE_NAME=${AV_IMAGE_NAME}
 AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
 AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
-AV_RTMP_URL="${AV_RTMP_URL}"
+AV_RTMP_URL=${AV_RTMP_URL}
 EOF
 fi
 # Read variables in configuration file
