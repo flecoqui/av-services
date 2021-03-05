@@ -69,19 +69,10 @@ RUN apt-get -y update  \
   ca-certificates \
   gettext \
   openssl \
-  pcre \
   lame \
-  libogg \
   curl \
-  libass \
-  libvpx \
-  libvorbis \
-  libwebp \
-  libtheora \
-  opus \
-  rtmpdump \
-  x264-dev \
-  x265-dev
+  rtmpdump 
+
 
 
 # Create directories.
