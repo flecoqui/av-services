@@ -125,6 +125,7 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
+    sudo docker container stop ${AV_CONTAINER_NAME} || true
     sudo docker container rm ${AV_CONTAINER_NAME} || true
     sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
@@ -135,6 +136,7 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
+    sudo docker container stop ${AV_CONTAINER_NAME} || true
     sudo docker container rm ${AV_CONTAINER_NAME} || true
     sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
     echo "Undeployment done"

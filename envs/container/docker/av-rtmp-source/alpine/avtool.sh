@@ -56,7 +56,7 @@ AV_FLAVOR=alpine
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=av-rtmp-source-alpine-container
-AV_RTMP_URL=rtmp://172.17.0.2:1935/live/stream
+AV_RTMP_URL=rtmp://localhost:1935/live/stream
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
@@ -64,6 +64,7 @@ AV_IMAGE_NAME=${AV_IMAGE_NAME}
 AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
 AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
 AV_RTMP_URL=${AV_RTMP_URL}
+AV_TEMPDIR=$(mktemp -d)
 EOF
 fi
 # Read variables in configuration file
@@ -71,6 +72,12 @@ export $(grep AV_IMAGE_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_RTMP_URL "$repoRoot"/"$configuration_file")
+export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
+
+if [[ -z "${AV_TEMPDIR}" ]] ; then
+    AV_TEMPDIR=$(mktemp -d)
+    sed -i 's/AV_TEMPDIR=.*/AV_TEMPDIR=${AV_TEMPDIR}/' "$repoRoot"/"$configuration_file"
+fi
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
@@ -112,6 +119,7 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
+    sudo docker container stop ${AV_CONTAINER_NAME} || true
     sudo docker container rm ${AV_CONTAINER_NAME} || true
     sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
@@ -122,6 +130,7 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
+    sudo docker container stop ${AV_CONTAINER_NAME} || true
     sudo docker container rm ${AV_CONTAINER_NAME} || true
     sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
     echo "Undeployment done"
@@ -149,10 +158,25 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/*.mp4
-    echo "Start av-rtmp-source container..."
+    rm -f "${AV_TEMPDIR}"/*.mkv
+    echo "Downloading content"
+    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv 
+    echo "Starting RTMP sink ${AV_FLAVOR} container"
+    sudo docker container start av-rtmp-sink-${AV_FLAVOR}-container  
+    echo "Start ${AV_CONTAINER_NAME} container..."
+    sudo docker container start ${AV_CONTAINER_NAME}
 
-    sudo docker container start -i ${AV_CONTAINER_NAME}
-    echo "Testing av-rtmp-source successful"
+    echo "Capture 20s of RTMP stream on the host machine..."
+    ffmpeg   -hide_banner -loglevel error  -t 00:00:20 -i ${AV_RTMP_URL} -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
+    sleep 40
+    echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
+    if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
+        echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
+        kill %1
+        exit 1
+    fi
+    echo "Testing ${AV_CONTAINER_NAME} successful"
     echo "TESTS SUCCESSFUL"
+    kill %1
     exit 0
 fi
