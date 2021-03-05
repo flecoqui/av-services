@@ -165,8 +165,26 @@ fi
 if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/*.mp4
     echo "Start av-rtmp-sink container..."
+    sudo docker container start ${AV_CONTAINER_NAME}
 
-    sudo docker container start -i ${AV_CONTAINER_NAME}
+    echo "Start ffmpeg RTMP streamer on the host machine..."
+    ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream &
+    echo "Capture 30s of RTMP stream on the host machine..."
+    ffmpeg   -hide_banner -loglevel error  -t 00:00:30 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
+    sleep 40
+    echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
+    if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
+        echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
+        exit 1
+    fi
+    echo "Capture 30s of HLS stream on the host machine..."
+    ffmpeg   -hide_banner -loglevel error  -t 00:00:30 -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 &
+    sleep 40
+    echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
+    if [[ ! -f "${AV_TEMPDIR}/testhls0.mp4" || ! -f "${AV_TEMPDIR}/testhls1.mp4" ]] ; then
+        echo "RTMP Test failed - check file ${AV_TEMPDIR}/testhls0.mp4"
+        exit 1
+    fi    
     echo "Testing av-rtmp-sink successful"
     echo "TESTS SUCCESSFUL"
     exit 0
