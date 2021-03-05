@@ -206,7 +206,7 @@ if [[ "${action}" == "test" ]] ; then
     ffmpeg   -hide_banner -loglevel error  -t 00:00:20 -rtsp_transport tcp -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 &
     sleep 40
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
-    if [[ ! -f "${AV_TEMPDIR}/testrtsp0.mp4" || ! -f "${AV_TEMPDIR}/testrstp1.mp4" ]] ; then
+    if [[ ! -f "${AV_TEMPDIR}/testrtsp0.mp4" || ! -f "${AV_TEMPDIR}/testrtsp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtsp0.mp4"
         kill %1
         exit 1
