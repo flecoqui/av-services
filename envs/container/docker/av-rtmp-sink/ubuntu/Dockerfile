@@ -85,9 +85,6 @@ RUN  mkdir /testav \
 COPY --from=build-nginx /usr/local/nginx /usr/local/nginx
 COPY --from=build-nginx /etc/nginx /etc/nginx
 
-# install openssl used to create ssl certificates
-RUN apk add openssl;
-
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"
 
