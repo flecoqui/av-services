@@ -180,7 +180,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Downloading content"
     wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv 
     echo "Start ${AV_CONTAINER_NAME} container..."
-    sudo docker container start ${AV_CONTAINER_NAME}
+    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker container start ${AV_CONTAINER_NAME} 
 
     echo "Start ffmpeg RTMP streamer on the host machine..."
     ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i "${AV_TEMPDIR}"/camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream &
@@ -190,6 +191,7 @@ if [[ "${action}" == "test" ]] ; then
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
+        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
         kill %1
         exit 1
     fi
@@ -199,6 +201,7 @@ if [[ "${action}" == "test" ]] ; then
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testhls0.mp4" || ! -f "${AV_TEMPDIR}/testhls1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testhls0.mp4"
+        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
         kill %1
         exit 1
     fi  
@@ -208,11 +211,13 @@ if [[ "${action}" == "test" ]] ; then
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testrtsp0.mp4" || ! -f "${AV_TEMPDIR}/testrtsp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtsp0.mp4"
+        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
         kill %1
         exit 1
     fi        
     echo "Testing ${AV_CONTAINER_NAME} successful"
     echo "TESTS SUCCESSFUL"
+    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
     kill %1
     exit 0
 fi
