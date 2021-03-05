@@ -209,19 +209,19 @@ if [[ "${action}" == "test" ]] ; then
     input="./listtests.txt"
     while read -r line;
     do
-        echo 
-        echo "Test for $line"
-        echo 
-        cd $line
+        echo ;
+        echo "Test for $line";
+        echo ;
+        cd $line ;
         (./avtool.sh -a test)
-        STATUS=$?
-        echo ""
+        STATUS=$? ; 
+        echo "" ;
         if [ $STATUS -eq 0 ]; then 
-            echo "$line ran successfully"
+            echo "$line ran successfully" ;
         else 
-            echo "$line failed"
+            echo "$line failed" ;
         fi
-        echo ""
+        echo "" ;
     done < "$input"
     cd ../../tests
     echo "Testing all the av-services SUCCESSFUL"
