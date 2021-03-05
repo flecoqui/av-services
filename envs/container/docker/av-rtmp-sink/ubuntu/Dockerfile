@@ -13,8 +13,7 @@ RUN apt-get -y update  \
   && apt-get -y install  build-essential curl g++ \
   gcc \
   make \
-  pcre \
-  pcre-dev libpcre3 libpcre3-dev libssl-dev zlib1g-dev \
+  libpcre3 libpcre3-dev libssl-dev zlib1g-dev \
   ca-certificates \
   curl \
   libc-dev \
