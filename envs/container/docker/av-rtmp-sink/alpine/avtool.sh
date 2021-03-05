@@ -187,6 +187,7 @@ if [[ "${action}" == "test" ]] ; then
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
+        kill %1
         exit 1
     fi
     echo "Capture 30s of HLS stream on the host machine..."
@@ -195,9 +196,11 @@ if [[ "${action}" == "test" ]] ; then
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testhls0.mp4" || ! -f "${AV_TEMPDIR}/testhls1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testhls0.mp4"
+        kill %1
         exit 1
     fi    
     echo "Testing av-rtmp-sink successful"
     echo "TESTS SUCCESSFUL"
+    kill %1
     exit 0
 fi
