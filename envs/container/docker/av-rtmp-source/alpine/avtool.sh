@@ -171,7 +171,7 @@ if [[ "${action}" == "test" ]] ; then
     sudo docker run  -d -it -e RTMP_URL=rtmp://${privateIpAddress}:1935/live/stream  --name "test-${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
 
     echo "Capture 20s of RTMP stream on the host machine..."
-    ffmpeg   -hide_banner -loglevel error  -t 00:00:20 -i ${AV_RTMP_URL} -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
+    ffmpeg   -hide_banner -loglevel error -i ${AV_RTMP_URL}  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
     sleep 40
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
