@@ -173,6 +173,8 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/*.mp4
+    echo "Downloading content"
+    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
     echo "Start av-rtmp-sink container..."
     sudo docker container start ${AV_CONTAINER_NAME}
 
