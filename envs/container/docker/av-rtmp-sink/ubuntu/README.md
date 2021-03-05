@@ -1,54 +1,133 @@
-# av-nginx-rtmp ubuntu
-RTMP ingress adaptor container supporting RTMP egress, HLS egress.
+# av-rtmp-sink ubuntu
 
-This container will run a RTMP ingress server.
+## Overview
+This av-service av-rtmp-sink for ubuntu is a container running nginx RTMP server which convert an incoming RTMP stream into RTMP stream, HLS stream. Moreover, the server hosts a basic HTML page to play the HLS content.
 
-# Building the image
-You can build the image using docker build command line.
-For instance:
+## Using av-rtmp-sink ubuntu
+It's recommended to use and manage the av-rtmp-sink ubuntu service with the avtool.sh command line tool.
 
-            docker build -t flecoqui/av-nginx-rtmp-ubuntu .
+### Installing the pre-requisites on the host machine
+As avtool.sh is a Linux bash file, you could run this tool from a machine or virtual machine running Ubuntu 20.04 LTS.
 
+1. Ensure git is installed running the following command
 
-# Running the image
-You can run the image using docker run command line.
-For instance:
+```bash
+    sudo apt-get install git
+```
 
-            docker run -it  flecoqui/av-nginx-rtmp-ubuntu 
-            docker run -it -p 80:80/tcp  -p 8080:8080/tcp -p 443:443/tcp    -p 1935:1935/tcp -p 5443:443/tcp flecoqui/av-nginx-rtmp-ubuntu 
+2. Clone the av-services repository on your machine
 
+```bash
+    mkdir $HOME/git
+    cd $HOME/git
+    git clone https://github.com/flecoqui/av-services.git
+    cd av-services/envs/container/docker/av-rtmp-sink/ubuntu 
+```
+3. Run avtool.sh -a install to install docker 
 
-# Environment variables:
+```bash
+    ./avtool.sh -a install
+```
 
-- HOSTNAME: the host name of the container. Default value: localhost
-- PORT_HLS: the HLS TCP port. Default value: 8080
-- PORT_HTTP: the HTTP port. Default value: 80
-- PORT_SSL: the SSL port. Default value: 443
-- PORT_RTMP: the RTMP port. Default value: 1935
-
-For instance, the command line below set the HOSTNAME variable:
-
-            docker run -it -p 80:80/tcp  -p 8080:8080/tcp    -p 1935:1935/tcp -p 443:443/tcp -e HOSTNAME=mymachine.mydomain.com -d flecoqui/av-nginx-rtmp-ubuntu
-
-# Using docker-compose
-You can use docker-compose to start the container:
-
-            docker-compose up -d
-
-stop the container:
-
-            docker-compose down
+### Deploying/Undeploying av-rtmp-sink ubuntu service
+Once the pre-requisites are installed, you can build the av-rtmp-sink ubuntu container.
 
 
-# Testing the container with ffmpeg
-Run the container locally with docker:
+1. Run the following command to build and run the container
 
-            docker run flecoqui/av-nginx-rtmp-ubuntu
+```bash
+    ./avtool.sh -a deploy
+```
 
-With ffmpeg stream the video associated with your webcam towards the RTMP server:
+When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the av-rtmp-sink configuration. By default, the file contains these parameters:
 
+```bash
+    AV_IMAGE_NAME=av-rtmp-sink-ubuntu
+    AV_IMAGE_FOLDER=av-services
+    AV_CONTAINER_NAME=av-rtmp-sink-ubuntu-container
+    AV_COMPANYNAME=contoso
+    AV_HOSTNAME=localhost
+    AV_PORT_HLS=8080
+    AV_PORT_HTTP=80
+    AV_PORT_SSL=443
+    AV_PORT_RTMP=1935
+```
+
+Below further information about the parameters in the file .avtoolconfig:
+
+| Variables | Description |
+| ---------------------|:-------------|
+| AV_IMAGE_NAME | The suffix of the image name   |
+| AV_IMAGE_FOLDER | The image folder, the image name will be ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}  |
+| AV_CONTAINER_NAME | The name of the container  |
+| AV_COMPANYNAME | The company name used to create the certificate. Default value: contoso |
+| AV_HOSTNAME | The host name of the container. Default value: localhost  |
+| AV_PORT_HLS | The HLS TCP port. Default value: 8080 |
+| AV_PORT_HTTP | The HTTP port. Default value: 80 |
+| AV_PORT_SSL | The SSL port. Default value: 443  |
+| AV_PORT_RTMP | The RTMP port. Default value: 1935  |
+| AV_TEMPDIR | The directory on the host machine used to store MKV and MP4 files for the tests |
+
+When the service is running and fed with a RTMP stream, the following urls could be used for the tests:
+
+- RTMP input url: rtmp://'$HOSTNAME:$PORT_RTMP'/live/stream
+- HTTP url: http://'$HOSTNAME:$PORT_HTTP'/player.html
+- HTTPS url: https://'$HOSTNAME:$PORT_SSL'/player.html
+- HLS url: http://'$HOSTNAME:$PORT_HLS'/live/stream.m3u8
+- RTMP output url: rtmp://'$HOSTNAME:$PORT_RTMP'/live/stream
+
+
+### Starting/Stopping av-rtmp-sink ubuntu service
+Once the image is built you can start and stop the container .
+
+
+1. Run the following command to start the container
+
+```bash
+    ./avtool.sh -a start
+```
+By default the container will run the following command to encod the MKV file:
+
+
+```bash
+    ffmpeg -y -nostats -loglevel 0  -i ./camera-300s.mkv -codec copy /${AV_VOLUME}/camera-300s.mp4
+```
+
+
+2. If the container is still running, you can run the following command to stop the container
+
+```bash
+    ./avtool.sh -a stop
+```
+
+3. If the container is still running, you can run the following command to get the status of the container
+
+```bash
+    ./avtool.sh -a status
+```
+
+### Testing av-rtmp-sink ubuntu service
+Once the image is built you can test if the container is fully functionning.
+
+1. Run the following command to test the container
+
+```bash
+    ./avtool.sh -a test
+```
+
+For this container, the test feature will check if the output MP4 files have been created in the temporary folder from output HLS url and output RTMP url.
+
+By default for the tests, we use an incoming Live RTMP stream created from a MKV file using the following ffmpeg command:
+
+```bash
+        ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i "${AV_TEMPDIR}"/camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream
+```
+
+
+If on the host machine a Webcam is installed, you can use this webcam to generate the incoming RTMP stream using the following ffmpeg command:
+
+```bash
             ffmpeg.exe -v verbose -f dshow -i video="Integrated Webcam":audio="Microphone (Realtek(R) Audio)"  -video_size 1280x720 -strict -2 -c:a aac -b:a 192k -ar 44100 -r 30 -g 60 -keyint_min 60 -b:v 2000000 -c:v libx264 -preset veryfast  -profile main -level 3.0 -pix_fmt yuv420p -bufsize 1800k -maxrate 400k    -f flv rtmp://localhost:1935/live/stream
+```
 
-Open the url https://mymachine.mydomain.com/player.html to play the HLS stream:
 
-        curl https://mymachine.mydomain.com/player.html --verbose -vk

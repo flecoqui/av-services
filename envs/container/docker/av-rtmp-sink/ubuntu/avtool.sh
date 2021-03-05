@@ -52,10 +52,10 @@ if [[ ! $action == login && ! $action == install && ! $action == start && ! $act
     exit 1
 fi
 AV_SERVICE=av-rtmp-sink
-AV_FLAVOR=alpine
+AV_FLAVOR=ubuntu
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
-AV_CONTAINER_NAME=av-rtmp-sink-alpine-container
+AV_CONTAINER_NAME=av-rtmp-sink-ubuntu-container
 AV_COMPANYNAME=contoso
 AV_HOSTNAME=localhost
 AV_PORT_HLS=8080

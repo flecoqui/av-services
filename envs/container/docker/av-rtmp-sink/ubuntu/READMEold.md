@@ -1,4 +1,4 @@
-# av-nginx-rtmp alpine
+# av-nginx-rtmp ubuntu
 RTMP ingress adaptor container supporting RTMP egress, HLS egress.
 
 This container will run a RTMP ingress server.
@@ -7,15 +7,15 @@ This container will run a RTMP ingress server.
 You can build the image using docker build command line.
 For instance:
 
-            docker build -t flecoqui/av-nginx-rtmp-alpine .
+            docker build -t flecoqui/av-nginx-rtmp-ubuntu .
 
 
 # Running the image
 You can run the image using docker run command line.
 For instance:
 
-            docker run -it  flecoqui/av-nginx-rtmp-alpine 
-            docker run -it -p 80:80/tcp  -p 8080:8080/tcp -p 443:443/tcp    -p 1935:1935/tcp -p 5443:443/tcp flecoqui/av-nginx-rtmp-alpine 
+            docker run -it  flecoqui/av-nginx-rtmp-ubuntu 
+            docker run -it -p 80:80/tcp  -p 8080:8080/tcp -p 443:443/tcp    -p 1935:1935/tcp -p 5443:443/tcp flecoqui/av-nginx-rtmp-ubuntu 
 
 
 # Environment variables:
@@ -28,7 +28,7 @@ For instance:
 
 For instance, the command line below set the HOSTNAME variable:
 
-            docker run -it -p 80:80/tcp  -p 8080:8080/tcp    -p 1935:1935/tcp -p 443:443/tcp -e HOSTNAME=mymachine.mydomain.com -d flecoqui/av-nginx-rtmp-alpine
+            docker run -it -p 80:80/tcp  -p 8080:8080/tcp    -p 1935:1935/tcp -p 443:443/tcp -e HOSTNAME=mymachine.mydomain.com -d flecoqui/av-nginx-rtmp-ubuntu
 
 # Using docker-compose
 You can use docker-compose to start the container:
@@ -43,7 +43,7 @@ stop the container:
 # Testing the container with ffmpeg
 Run the container locally with docker:
 
-            docker run flecoqui/av-nginx-rtmp-alpine
+            docker run flecoqui/av-nginx-rtmp-ubuntu
 
 With ffmpeg stream the video associated with your webcam towards the RTMP server:
 
