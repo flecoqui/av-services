@@ -173,13 +173,14 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/*.mp4
+    rm -f "${AV_TEMPDIR}"/*.mkv
     echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
+    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv 
     echo "Start av-rtmp-sink container..."
     sudo docker container start ${AV_CONTAINER_NAME}
 
     echo "Start ffmpeg RTMP streamer on the host machine..."
-    ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream &
+    ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i "${AV_TEMPDIR}"/camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream &
     echo "Capture 30s of RTMP stream on the host machine..."
     ffmpeg   -hide_banner -loglevel error  -t 00:00:30 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
     sleep 40
