@@ -204,3 +204,4 @@ if [[ "${action}" == "test" ]] ; then
     kill %1
     exit 0
 fi
+

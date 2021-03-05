@@ -1,6 +1,0 @@
-AV_IMAGE_NAME=av-ffmpeg-alpine
-AV_IMAGE_FOLDER=av-services
-AV_CONTAINER_NAME=av-ffmpeg-alpine-container
-AV_VOLUME=data1
-AV_FFMPEG_COMMAND="ffmpeg -y -nostats -loglevel 0  -i ./camera-300s.mkv -codec copy /data1/camera-300s.mp4"
-AV_TEMPDIR=/tmp/tmp.TblgL0Cm4d
