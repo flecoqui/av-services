@@ -18,7 +18,6 @@ RUN apt-get -y update  \
   curl \
   libc-dev \
   libgcc \
-  linux-headers \
   musl-dev \
   openssl \
   openssl-dev \
