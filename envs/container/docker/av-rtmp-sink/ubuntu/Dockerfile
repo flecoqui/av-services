@@ -10,22 +10,23 @@ ARG NGINX_RTMP_VERSION
 
 # Build dependencies.
 RUN apt-get -y update  \
-  && apt-get -y install build-base \
+  && apt-get -y install  build-essential curl g++ \
+  gcc \
+  make \
+  pcre \
+  pcre-dev libpcre3 libpcre3-dev libssl-dev zlib1g-dev \
   ca-certificates \
   curl \
-  gcc \
   libc-dev \
   libgcc \
   linux-headers \
-  make \
   musl-dev \
   openssl \
   openssl-dev \
-  pcre \
-  pcre-dev \
   pkgconf \
   pkgconfig \
   zlib-dev
+
 
 # Get nginx source.
 RUN cd /tmp && \
@@ -51,7 +52,6 @@ RUN cd /tmp/nginx-${NGINX_VERSION} && \
   --with-debug \
   --with-cc-opt="-Wimplicit-fallthrough=0" && \
   cd /tmp/nginx-${NGINX_VERSION} && make && make install
-
 
 # Cleanup.
 RUN rm -rf /var/cache/* /tmp/*
