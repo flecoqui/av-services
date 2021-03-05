@@ -17,13 +17,10 @@ RUN apt-get -y update  \
   ca-certificates \
   curl \
   libc-dev \
-  libgcc \
   musl-dev \
   openssl \
-  openssl-dev \
-  pkgconf \
-  pkgconfig \
-  zlib-dev
+  pkgconf 
+
 
 
 # Get nginx source.
