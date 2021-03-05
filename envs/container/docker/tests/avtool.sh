@@ -16,12 +16,12 @@ cd "$repoRoot"
 function usage() {
     echo
     echo "Arguments:"
-    echo -e "\t-a\t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
-    echo -e "\t-c \t Sets the AV Tool configuration file"
+    echo -e "/t-a/t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
+    echo -e "/t-c /t Sets the AV Tool configuration file"
     echo
     echo "Example:"
-    echo -e "\tbash avtool.sh -a install "
-    echo -e "\tbash avtool.sh -a start -c avtool.env"
+    echo -e "/tbash avtool.sh -a install "
+    echo -e "/tbash avtool.sh -a start -c avtool.env"
     
 }
 action=
@@ -55,23 +55,23 @@ fi
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisites for all containers"
-    cd ..\av-ffmpeg\alpine
+    cd ../av-ffmpeg/alpine
     avtool.sh -a install
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a install
-    cd ..\..\av-rtmp-source\alpine
+    cd ../../av-rtmp-source/alpine
     avtool.sh -a install
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a install
-    cd ..\..\av-rtmp-sink\alpine
+    cd ../../av-rtmp-sink/alpine
     avtool.sh -a install
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a install
-    cd ..\..\av-rtmp-rtsp-sink\alpine
+    cd ../../av-rtmp-rtsp-sink/alpine
     avtool.sh -a install
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a install
-    cd ..\..\tests     
+    cd ../../tests     
 
     echo "Installation done"
     exit 0
@@ -85,136 +85,136 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying all services..."
-    cd ..\av-ffmpeg\alpine
+    cd ../av-ffmpeg/alpine
     avtool.sh -a deploy
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a deploy
-    cd ..\..\av-rtmp-source\alpine
+    cd ../../av-rtmp-source/alpine
     avtool.sh -a deploy
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a deploy
-    cd ..\..\av-rtmp-sink\alpine
+    cd ../../av-rtmp-sink/alpine
     avtool.sh -a deploy
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a deploy
-    cd ..\..\av-rtmp-rtsp-sink\alpine
+    cd ../../av-rtmp-rtsp-sink/alpine
     avtool.sh -a deploy
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a deploy
-    cd ..\..\tests     
+    cd ../../tests     
     echo "Deployment done"
     exit 0
 fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying all services..."
-    cd ..\av-ffmpeg\alpine
+    cd ../av-ffmpeg/alpine
     avtool.sh -a undeploy
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a undeploy
-    cd ..\..\av-rtmp-source\alpine
+    cd ../../av-rtmp-source/alpine
     avtool.sh -a undeploy
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a undeploy
-    cd ..\..\av-rtmp-sink\alpine
+    cd ../../av-rtmp-sink/alpine
     avtool.sh -a undeploy
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a undeploy
-    cd ..\..\av-rtmp-rtsp-sink\alpine
+    cd ../../av-rtmp-rtsp-sink/alpine
     avtool.sh -a undeploy
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a undeploy
-    cd ..\..\tests     
+    cd ../../tests     
     echo "Undeployment done"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking all status..."
-    cd ..\av-ffmpeg\alpine
+    cd ../av-ffmpeg/alpine
     avtool.sh -a status
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a status
-    cd ..\..\av-rtmp-source\alpine
+    cd ../../av-rtmp-source/alpine
     avtool.sh -a status
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a status
-    cd ..\..\av-rtmp-sink\alpine
+    cd ../../av-rtmp-sink/alpine
     avtool.sh -a status
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a status
-    cd ..\..\av-rtmp-rtsp-sink\alpine
+    cd ../../av-rtmp-rtsp-sink/alpine
     avtool.sh -a status
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a status
-    cd ..\..\tests     
+    cd ../../tests     
     echo "Status done"
     exit 0
 fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting all services..."
-    cd ..\av-ffmpeg\alpine
+    cd ../av-ffmpeg/alpine
     avtool.sh -a start
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a start
-    cd ..\..\av-rtmp-source\alpine
+    cd ../../av-rtmp-source/alpine
     avtool.sh -a start
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a start
-    cd ..\..\av-rtmp-sink\alpine
+    cd ../../av-rtmp-sink/alpine
     avtool.sh -a start
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a start
-    cd ..\..\av-rtmp-rtsp-sink\alpine
+    cd ../../av-rtmp-rtsp-sink/alpine
     avtool.sh -a start
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a start
-    cd ..\..\tests    
+    cd ../../tests    
     echo "Start done"
     exit 0
 fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping all services..."
-    cd ..\av-ffmpeg\alpine
+    cd ../av-ffmpeg/alpine
     avtool.sh -a stop
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a stop
-    cd ..\..\av-rtmp-source\alpine
+    cd ../../av-rtmp-source/alpine
     avtool.sh -a stop
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a stop
-    cd ..\..\av-rtmp-sink\alpine
+    cd ../../av-rtmp-sink/alpine
     avtool.sh -a stop
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a stop
-    cd ..\..\av-rtmp-rtsp-sink\alpine
+    cd ../../av-rtmp-rtsp-sink/alpine
     avtool.sh -a stop
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a stop
-    cd ..\..\tests    
+    cd ../../tests    
     echo "Stop done"
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
     echo "Testing all the av-services..."
-    cd ..\av-ffmpeg\alpine
+    cd ../av-ffmpeg/alpine
     avtool.sh -a test
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a test
-    cd ..\..\av-rtmp-source\alpine
+    cd ../../av-rtmp-source/alpine
     avtool.sh -a test
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a test
-    cd ..\..\av-rtmp-sink\alpine
+    cd ../../av-rtmp-sink/alpine
     avtool.sh -a test
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a test
-    cd ..\..\av-rtmp-rtsp-sink\alpine
+    cd ../../av-rtmp-rtsp-sink/alpine
     avtool.sh -a test
-    cd ..\ubuntu
+    cd ../ubuntu
     avtool.sh -a test
-    cd ..\..\tests
+    cd ../../tests
     echo "Testing all the av-services SUCCESSFUL"
     exit 0
 fi
