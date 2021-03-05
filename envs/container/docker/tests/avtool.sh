@@ -210,19 +210,19 @@ if [[ "${action}" == "test" ]] ; then
     #while read -r line;
     for line in $(cat ./listtests.txt) ; do
     #while IFS='' read -r line || [[ -n "${line}" ]] ; do    
-        echo 
-        echo "Test for $line"
-        echo 
+        echo "***********************************************************"
+        echo "Running tests for $line"
+        echo "***********************************************************"
         cd $line 
         (./avtool.sh -a test)
         STATUS=$?  
-        echo "" 
+        echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
             echo "$line ran successfully" 
         else 
             echo "$line failed" 
         fi
-        echo "" 
+        echo "***********************************************************"
         cd ../../tests
     done
     echo "Testing all the av-services SUCCESSFUL"
