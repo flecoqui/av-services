@@ -212,7 +212,7 @@ if [[ "${action}" == "test" ]] ; then
         echo 
         echo "Test for $line"
         echo 
-        (cd $line)
+        cd $line
         (./avtool.sh -a test)
         STATUS=$?
         echo ""
