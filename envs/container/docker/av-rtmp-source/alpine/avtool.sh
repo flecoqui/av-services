@@ -162,12 +162,13 @@ if [[ "${action}" == "test" ]] ; then
     echo "Downloading content"
     wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv 
     echo "Starting RTMP sink ${AV_FLAVOR} container"
-    sudo docker container start av-rtmp-sink-${AV_FLAVOR}-container  
+    sudo docker container start "av-rtmp-sink-${AV_FLAVOR}-container"  
     containerId=$(sudo docker ps -a --format "{{.ID}}" -f "name=av-rtmp-sink-${AV_FLAVOR}-container")
     privateIpAddress=$(sudo docker container inspect $containerId  --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
     echo "RTMP sink private IP address: ${privateIpAddress}"
-    echo "Starting ${AV_CONTAINER_NAME} container..."
-    sudo docker run  -d -it -e RTMP_URL=rtmp://${privateIpAddress}:1935/live/stream  --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
+    echo "Starting test-${AV_CONTAINER_NAME} container..."
+    sudo  docker container rm "test-${AV_CONTAINER_NAME}" || true
+    sudo docker run  -d -it -e RTMP_URL=rtmp://${privateIpAddress}:1935/live/stream  --name "test-${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
 
     echo "Capture 20s of RTMP stream on the host machine..."
     ffmpeg   -hide_banner -loglevel error  -t 00:00:20 -i ${AV_RTMP_URL} -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
@@ -177,17 +178,17 @@ if [[ "${action}" == "test" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
         kill %1
         echo "Stopping RTMP sink ${AV_FLAVOR} container"
-        sudo docker container stop av-rtmp-sink-${AV_FLAVOR}-container
+        sudo docker container "stop av-rtmp-sink-${AV_FLAVOR}-container"
         echo "Stopping ${AV_CONTAINER_NAME} container..."
-        sudo docker container stop ${AV_CONTAINER_NAME}  
+        sudo docker container stop "test-${AV_CONTAINER_NAME}"  
         exit 1
     fi
     echo "Testing ${AV_CONTAINER_NAME} successful"
     echo "TESTS SUCCESSFUL"
     echo "Stopping RTMP sink ${AV_FLAVOR} container"
-    sudo docker container stop av-rtmp-sink-${AV_FLAVOR}-container  
+    sudo docker container stop "av-rtmp-sink-${AV_FLAVOR}-container"  
     echo "Stopping ${AV_CONTAINER_NAME} container..."
-    sudo docker container stop ${AV_CONTAINER_NAME}
+    sudo docker container stop "test-${AV_CONTAINER_NAME}"  
     kill %1
     exit 0
 fi
