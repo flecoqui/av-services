@@ -207,7 +207,7 @@ fi
 if [[ "${action}" == "test" ]] ; then
     echo "Testing all the av-services..."
     input="./listtests.txt"
-    while IFS= read -r line
+    while read line;
     do
         echo 
         echo "Test for $line"
