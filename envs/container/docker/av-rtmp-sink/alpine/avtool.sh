@@ -74,6 +74,7 @@ AV_PORT_HLS=${AV_PORT_HLS}
 AV_PORT_HTTP=${AV_PORT_HTTP}
 AV_PORT_SSL=${AV_PORT_SSL}
 AV_PORT_RTMP=${AV_PORT_RTMP}
+AV_TEMPDIR=$(mktemp -d)
 EOF
 fi
 # Read variables in configuration file
@@ -86,6 +87,12 @@ export $(grep AV_PORT_HLS "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_HTTP "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_SSL "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_RTMP "$repoRoot"/"$configuration_file")
+export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
+
+if [[ -z "${AV_TEMPDIR}" ]] ; then
+    AV_TEMPDIR=$(mktemp -d)
+    sed -i 's/AV_TEMPDIR=.*/AV_TEMPDIR=${AV_TEMPDIR}/' "$repoRoot"/"$configuration_file"
+fi
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
