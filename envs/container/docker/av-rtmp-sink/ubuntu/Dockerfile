@@ -9,7 +9,7 @@ ARG NGINX_VERSION
 ARG NGINX_RTMP_VERSION
 
 # Build dependencies.
-RUN apt-get -y --update  \
+RUN apt-get -y update  \
   && apt-get -y install build-base \
   ca-certificates \
   curl \
@@ -69,7 +69,7 @@ ENV PORT_RTMP 1935
 
 
 
-RUN apt-get -y --update  \
+RUN apt-get -y update  \
   && apt-get -y install \
   ca-certificates \
   gettext \
