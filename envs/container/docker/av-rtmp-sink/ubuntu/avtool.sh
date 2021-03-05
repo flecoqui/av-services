@@ -134,9 +134,9 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} || true
-    sudo docker container rm ${AV_CONTAINER_NAME} || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
+    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker container rm ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} &> /dev/null || true
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     sudo docker run  -d -it -p ${AV_PORT_HTTP}:${AV_PORT_HTTP}/tcp  -p ${AV_PORT_HLS}:${AV_PORT_HLS}/tcp    -p ${AV_PORT_RTMP}:${AV_PORT_RTMP}/tcp -p ${AV_PORT_SSL}:${AV_PORT_SSL}/tcp -e PORT_RTMP=${AV_PORT_RTMP} -e PORT_SSL=${AV_PORT_SSL} -e PORT_HTTP=${AV_PORT_HTTP} -e PORT_HLS=${AV_PORT_HLS}  -e HOSTNAME=${AV_HOSTNAME} -e COMPANYNAME=${AV_COMPANYNAME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     echo "Deployment done"
@@ -145,9 +145,9 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} || true
-    sudo docker container rm ${AV_CONTAINER_NAME} || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
+    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker container rm ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} &> /dev/null || true
     echo "Undeployment done"
     exit 0
 fi
