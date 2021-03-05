@@ -119,9 +119,9 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} || true
-    sudo docker container rm ${AV_CONTAINER_NAME} || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
+    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker container rm ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} &> /dev/null || true
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     sudo docker run  -d -it -e RTMP_URL=${AV_RTMP_URL} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     echo "Deployment done"
@@ -130,9 +130,9 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} || true
-    sudo docker container rm ${AV_CONTAINER_NAME} || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} || true
+    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker container rm ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} &> /dev/null || true
     echo "Undeployment done"
     exit 0
 fi
@@ -167,7 +167,7 @@ if [[ "${action}" == "test" ]] ; then
     privateIpAddress=$(sudo docker container inspect $containerId  --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
     echo "RTMP sink private IP address: ${privateIpAddress}"
     echo "Starting test-${AV_CONTAINER_NAME} container..."
-    sudo  docker container rm "test-${AV_CONTAINER_NAME}" || true
+    sudo  docker container rm "test-${AV_CONTAINER_NAME}" &> /dev/null || true
     sudo docker run  -d -it -e RTMP_URL=rtmp://${privateIpAddress}:1935/live/stream  --name "test-${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
 
     echo "Capture 20s of RTMP stream on the host machine..."
@@ -175,20 +175,20 @@ if [[ "${action}" == "test" ]] ; then
     sleep 40
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
-        echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
-        kill %1
         echo "Stopping RTMP sink ${AV_FLAVOR} container"
         sudo docker container "stop av-rtmp-sink-${AV_FLAVOR}-container"
         echo "Stopping ${AV_CONTAINER_NAME} container..."
         sudo docker container stop "test-${AV_CONTAINER_NAME}"  
+        echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
+        kill %1
         exit 1
     fi
-    echo "Testing ${AV_CONTAINER_NAME} successful"
-    echo "TESTS SUCCESSFUL"
     echo "Stopping RTMP sink ${AV_FLAVOR} container"
     sudo docker container stop "av-rtmp-sink-${AV_FLAVOR}-container"  
     echo "Stopping ${AV_CONTAINER_NAME} container..."
     sudo docker container stop "test-${AV_CONTAINER_NAME}"  
+    echo "Testing ${AV_CONTAINER_NAME} successful"
+    echo "TESTS SUCCESSFUL"
     kill %1
     exit 0
 fi
