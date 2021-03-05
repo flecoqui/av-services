@@ -19,7 +19,7 @@ RUN apt-get -y update  \
   libc-dev \
   musl-dev \
   openssl \
-  pkgconf 
+  pkgconf wget
 
 
 
