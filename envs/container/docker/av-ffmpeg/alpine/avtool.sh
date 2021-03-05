@@ -177,10 +177,12 @@ if [[ "${action}" == "test" ]] ; then
     echo "Output directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/camera-300s.mp4" ]] ; then
         echo "ffmpeg Test failed - check file ${AV_TEMPDIR}/camera-300s.mp4"
+        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
         exit 1
     fi
     echo "File ${AV_TEMPDIR}/camera-300s.mp4 exists"
     echo "Testing ffmpeg successful"
     echo "TESTS SUCCESSFUL"
+    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
     exit 0
 fi

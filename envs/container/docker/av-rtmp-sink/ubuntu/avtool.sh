@@ -190,6 +190,7 @@ if [[ "${action}" == "test" ]] ; then
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
         kill %1
+        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
         exit 1
     fi
     echo "Capture 20s of HLS stream on the host machine..."
@@ -199,11 +200,13 @@ if [[ "${action}" == "test" ]] ; then
     if [[ ! -f "${AV_TEMPDIR}/testhls0.mp4" || ! -f "${AV_TEMPDIR}/testhls1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testhls0.mp4"
         kill %1
+        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
         exit 1
     fi    
     echo "Testing ${AV_CONTAINER_NAME} successful"
     echo "TESTS SUCCESSFUL"
     kill %1
+    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
     exit 0
 fi
 
