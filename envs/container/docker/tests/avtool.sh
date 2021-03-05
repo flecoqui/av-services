@@ -206,8 +206,9 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "test" ]] ; then
     echo "Testing all the av-services..."
-    input="./listtests.txt"
-    while read -r line;
+    #input="./listtests.txt"
+    #while read -r line;
+    while IFS='' read -r line || [[ -n "${line}" ]]; do
     do
         echo 
         echo "Test for $line"
@@ -223,7 +224,7 @@ if [[ "${action}" == "test" ]] ; then
         fi
         echo "" 
         cd ../../tests
-    done < "$input"
+    done < "./listtests.txt"
     echo "Testing all the av-services SUCCESSFUL"
     exit 0
 fi
