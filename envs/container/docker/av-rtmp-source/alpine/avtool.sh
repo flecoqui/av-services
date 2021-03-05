@@ -173,10 +173,14 @@ if [[ "${action}" == "test" ]] ; then
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
         kill %1
+        echo "Stopping RTMP sink ${AV_FLAVOR} container"
+        sudo docker container stop av-rtmp-sink-${AV_FLAVOR}-container  
         exit 1
     fi
     echo "Testing ${AV_CONTAINER_NAME} successful"
     echo "TESTS SUCCESSFUL"
+    echo "Stopping RTMP sink ${AV_FLAVOR} container"
+    sudo docker container stop av-rtmp-sink-${AV_FLAVOR}-container  
     kill %1
     exit 0
 fi

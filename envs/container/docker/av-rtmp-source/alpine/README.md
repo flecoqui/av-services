@@ -95,6 +95,7 @@ By default the container will run the following command to encod the MKV file:
 
 ### Testing av-rtmp-source alpine service
 Once the image is built you can test if the container is fully functionning.
+As this test requires the container av-rtmp-sink-ubuntu-container, check this container is already deployed on your docker.
 
 1. Run the following command to test the container
 
