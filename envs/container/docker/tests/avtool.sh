@@ -206,15 +206,12 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "test" ]] ; then
     echo "Testing all the av-services..."
-    #input="./listtests.txt"
-    #while read -r line;
     for line in $(cat ./listtests.txt) ; do
-    #while IFS='' read -r line || [[ -n "${line}" ]] ; do    
         echo "***********************************************************"
         echo "Running tests for $line"
         echo "***********************************************************"
         cd $line 
-        (bash ./avtool.sh -a test)
+        (sh ./avtool.sh -a test)
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
