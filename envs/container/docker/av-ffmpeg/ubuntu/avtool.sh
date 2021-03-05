@@ -125,8 +125,8 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    sudo docker container rm ${AV_CONTAINER_NAME} &> /dev/null || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} &> /dev/null || true
+    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     sudo docker run  -d -it -v ${AV_TEMPDIR}:/${AV_VOLUME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} ${AV_FFMPEG_COMMAND}
     echo "Deployment done"
@@ -135,8 +135,8 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    sudo docker container rm ${AV_CONTAINER_NAME} &> /dev/null || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} &> /dev/null || true
+    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     echo "Undeployment done"
     exit 0
 fi
@@ -175,12 +175,12 @@ if [[ "${action}" == "test" ]] ; then
     echo "Output directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/camera-300s.mp4" ]] ; then
         echo "ffmpeg Test failed - check file ${AV_TEMPDIR}/camera-300s.mp4"
-        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
+        sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
         exit 1
     fi
     echo "File ${AV_TEMPDIR}/camera-300s.mp4 exists"
     echo "Testing ffmpeg successful"
     echo "TESTS SUCCESSFUL"
-    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
     exit 0
 fi

@@ -137,9 +137,9 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
-    sudo docker container rm ${AV_CONTAINER_NAME} &> /dev/null || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} &> /dev/null || true
+    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     sudo docker run  -d -it -p ${AV_PORT_HTTP}:${AV_PORT_HTTP}/tcp  -p ${AV_PORT_HLS}:${AV_PORT_HLS}/tcp    -p ${AV_PORT_RTMP}:${AV_PORT_RTMP}/tcp -p ${AV_PORT_RTSP}:${AV_PORT_RTSP}/tcp  -p ${AV_PORT_SSL}:${AV_PORT_SSL}/tcp -e PORT_RTSP=${AV_PORT_RTSP} -e PORT_RTMP=${AV_PORT_RTMP} -e PORT_SSL=${AV_PORT_SSL} -e PORT_HTTP=${AV_PORT_HTTP} -e PORT_HLS=${AV_PORT_HLS}  -e HOSTNAME=${AV_HOSTNAME} -e COMPANYNAME=${AV_COMPANYNAME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     echo "Deployment done"
@@ -148,9 +148,9 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
-    sudo docker container rm ${AV_CONTAINER_NAME} &> /dev/null || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} &> /dev/null || true
+    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     echo "Undeployment done"
     exit 0
 fi
@@ -180,7 +180,7 @@ if [[ "${action}" == "test" ]] ; then
     echo "Downloading content"
     wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv 
     echo "Start ${AV_CONTAINER_NAME} container..."
-    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true
+    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
     sudo docker container start ${AV_CONTAINER_NAME} 
 
     echo "Start ffmpeg RTMP streamer on the host machine..."
@@ -194,7 +194,7 @@ if [[ "${action}" == "test" ]] ; then
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
         kill %1
-        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true    
+        sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
         exit 1
     fi
     echo "Capture 20s of HLS stream on the host machine..."
@@ -204,7 +204,7 @@ if [[ "${action}" == "test" ]] ; then
     if [[ ! -f "${AV_TEMPDIR}/testhls0.mp4" || ! -f "${AV_TEMPDIR}/testhls1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testhls0.mp4"
         kill %1
-        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true    
+        sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
         exit 1
     fi  
     echo "Capture 20s of RTSP stream on the host machine..."
@@ -214,12 +214,12 @@ if [[ "${action}" == "test" ]] ; then
     if [[ ! -f "${AV_TEMPDIR}/testrtsp0.mp4" || ! -f "${AV_TEMPDIR}/testrtsp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtsp0.mp4"
         kill %1
-        sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true    
+        sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
         exit 1
     fi        
     echo "Testing ${AV_CONTAINER_NAME} successful"
     echo "TESTS SUCCESSFUL"
     kill %1
-    sudo docker container stop ${AV_CONTAINER_NAME} &> /dev/null || true    
+    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
     exit 0
 fi
