@@ -56,21 +56,21 @@ fi
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisites for all containers"
     cd ../av-ffmpeg/alpine
-    ./avtool.sh -a install
+    (./avtool.sh -a install)
     cd ../ubuntu
-    ./avtool.sh -a install
+    (./avtool.sh -a install)
     cd ../../av-rtmp-source/alpine
-    ./avtool.sh -a install
+    (./avtool.sh -a install)
     cd ../ubuntu
-    ./avtool.sh -a install
+    (./avtool.sh -a install)
     cd ../../av-rtmp-sink/alpine
-    ./avtool.sh -a install
+    (./avtool.sh -a install)
     cd ../ubuntu
-    ./avtool.sh -a install
+    (./avtool.sh -a install)
     cd ../../av-rtmp-rtsp-sink/alpine
-    ./avtool.sh -a install
+    (./avtool.sh -a install)
     cd ../ubuntu
-    ./avtool.sh -a install
+    (./avtool.sh -a install)
     cd ../../tests     
 
     echo "Installation done"
@@ -86,29 +86,29 @@ fi
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying all services..."
     cd ../av-ffmpeg/alpine
-    ./avtool.sh -a deploy
-    ./avtool.sh -a stop
+    (./avtool.sh -a deploy)
+    (./avtool.sh -a stop)
     cd ../ubuntu
-    ./avtool.sh -a deploy
-    ./avtool.sh -a stop
+    (./avtool.sh -a deploy)
+    (./avtool.sh -a stop)
     cd ../../av-rtmp-source/alpine
-    ./avtool.sh -a deploy
-    ./avtool.sh -a stop
+    (./avtool.sh -a deploy)
+    (./avtool.sh -a stop)
     cd ../ubuntu
-    ./avtool.sh -a deploy
-    ./avtool.sh -a stop
+    (./avtool.sh -a deploy)
+    (./avtool.sh -a stop)
     cd ../../av-rtmp-sink/alpine
-    ./avtool.sh -a deploy
-    ./avtool.sh -a stop
+    (./avtool.sh -a deploy)
+    (./avtool.sh -a stop)
     cd ../ubuntu
-    ./avtool.sh -a deploy
-    ./avtool.sh -a stop
+    (./avtool.sh -a deploy)
+    (./avtool.sh -a stop)
     cd ../../av-rtmp-rtsp-sink/alpine
-    ./avtool.sh -a deploy
-    ./avtool.sh -a stop
+    (./avtool.sh -a deploy)
+    (./avtool.sh -a stop)
     cd ../ubuntu
-    ./avtool.sh -a deploy
-    ./avtool.sh -a stop
+    (./avtool.sh -a deploy)
+    (./avtool.sh -a stop)
     cd ../../tests     
     echo "Deployment done"
     exit 0
@@ -117,21 +117,21 @@ fi
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying all services..."
     cd ../av-ffmpeg/alpine
-    ./avtool.sh -a undeploy
+    (./avtool.sh -a undeploy)
     cd ../ubuntu
-    ./avtool.sh -a undeploy
+    (./avtool.sh -a undeploy)
     cd ../../av-rtmp-source/alpine
-    ./avtool.sh -a undeploy
+    (./avtool.sh -a undeploy)
     cd ../ubuntu
-    ./avtool.sh -a undeploy
+    (./avtool.sh -a undeploy)
     cd ../../av-rtmp-sink/alpine
-    ./avtool.sh -a undeploy
+    (./avtool.sh -a undeploy)
     cd ../ubuntu
-    ./avtool.sh -a undeploy
+    (./avtool.sh -a undeploy)
     cd ../../av-rtmp-rtsp-sink/alpine
-    ./avtool.sh -a undeploy
+    (./avtool.sh -a undeploy)
     cd ../ubuntu
-    ./avtool.sh -a undeploy
+    (./avtool.sh -a undeploy)
     cd ../../tests     
     echo "Undeployment done"
     exit 0
@@ -139,21 +139,21 @@ fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking all status..."
     cd ../av-ffmpeg/alpine
-    ./avtool.sh -a status
+    (./avtool.sh -a status)
     cd ../ubuntu
-    ./avtool.sh -a status
+    (./avtool.sh -a status)
     cd ../../av-rtmp-source/alpine
-    ./avtool.sh -a status
+    (./avtool.sh -a status)
     cd ../ubuntu
-    ./avtool.sh -a status
+    (./avtool.sh -a status)
     cd ../../av-rtmp-sink/alpine
-    ./avtool.sh -a status
+    (./avtool.sh -a status)
     cd ../ubuntu
-    ./avtool.sh -a status
+    (./avtool.sh -a status)
     cd ../../av-rtmp-rtsp-sink/alpine
-    ./avtool.sh -a status
+    (./avtool.sh -a status)
     cd ../ubuntu
-    ./avtool.sh -a status
+    (./avtool.sh -a status)
     cd ../../tests     
     echo "Status done"
     exit 0
@@ -162,21 +162,21 @@ fi
 if [[ "${action}" == "start" ]] ; then
     echo "Starting all services..."
     cd ../av-ffmpeg/alpine
-    ./avtool.sh -a start
+    (./avtool.sh -a start)
     cd ../ubuntu
-    ./avtool.sh -a start
+    (./avtool.sh -a start)
     cd ../../av-rtmp-source/alpine
-    ./avtool.sh -a start
+    (./avtool.sh -a start)
     cd ../ubuntu
-    ./avtool.sh -a start
+    (./avtool.sh -a start)
     cd ../../av-rtmp-sink/alpine
-    ./avtool.sh -a start
+    (./avtool.sh -a start)
     cd ../ubuntu
-    ./avtool.sh -a start
+    (./avtool.sh -a start)
     cd ../../av-rtmp-rtsp-sink/alpine
-    ./avtool.sh -a start
+    (./avtool.sh -a start)
     cd ../ubuntu
-    ./avtool.sh -a start
+    (./avtool.sh -a start)
     cd ../../tests    
     echo "Start done"
     exit 0
@@ -185,43 +185,44 @@ fi
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping all services..."
     cd ../av-ffmpeg/alpine
-    ./avtool.sh -a stop
+    (./avtool.sh -a stop)
     cd ../ubuntu
-    ./avtool.sh -a stop
+    (./avtool.sh -a stop)
     cd ../../av-rtmp-source/alpine
-    ./avtool.sh -a stop
+    (./avtool.sh -a stop)
     cd ../ubuntu
-    ./avtool.sh -a stop
+    (./avtool.sh -a stop)
     cd ../../av-rtmp-sink/alpine
-    ./avtool.sh -a stop
+    (./avtool.sh -a stop)
     cd ../ubuntu
-    ./avtool.sh -a stop
+    (./avtool.sh -a stop)
     cd ../../av-rtmp-rtsp-sink/alpine
-    ./avtool.sh -a stop
+    (./avtool.sh -a stop)
     cd ../ubuntu
-    ./avtool.sh -a stop
+    (./avtool.sh -a stop)
     cd ../../tests    
     echo "Stop done"
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
     echo "Testing all the av-services..."
-    cd ../av-ffmpeg/alpine
-    ./avtool.sh -a test
-    cd ../ubuntu
-    ./avtool.sh -a test
-    cd ../../av-rtmp-source/alpine
-    ./avtool.sh -a test
-    cd ../ubuntu
-    ./avtool.sh -a test
-    cd ../../av-rtmp-sink/alpine
-    ./avtool.sh -a test
-    cd ../ubuntu
-    ./avtool.sh -a test
-    cd ../../av-rtmp-rtsp-sink/alpine
-    ./avtool.sh -a test
-    cd ../ubuntu
-    ./avtool.sh -a test
+    input="./listtests.txt"
+    while IFS= read -r line
+    do
+        echo 
+        echo "Test for $line"
+        echo 
+        (cd $line)
+        OUTPUT=$(./avtool.sh -a test)
+        STATUS=$?
+        echo ""
+        if [ $STATUS -eq 0 ]; then 
+            echo "$line ran successfully"
+        else 
+            echo "$line failed"
+        fi
+        echo ""
+    done < "$input"
     cd ../../tests
     echo "Testing all the av-services SUCCESSFUL"
     exit 0
