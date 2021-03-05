@@ -13,17 +13,17 @@ echo '<!DOCTYPE html>
  </head>
  <body>
 <video id="player" class="video-js vjs-default-skin" height="360" width="640" controls preload="none">
-    <source src="http://'$HOSTNAME:$PORT_HLS'/hls/stream.m3u8" type="application/x-mpegURL" />
+    <source src="http://'$HOSTNAME:$PORT_HLS'/live/stream.m3u8" type="application/x-mpegURL" />
  </video>
  <script>
     var player = videojs("#player");
  </script>
  </body>
  <p>HOSTNAME: '$HOSTNAME'</p>
- <p>PORT_HLS: '$PORT_HLS'</p>
+ <p>PORT_HLS: '$PORT_HLS' - URL: http://'$HOSTNAME:$PORT_HLS'/live/stream.m3u8</p>
  <p>PORT_HTTP: '$PORT_HTTP'</p> 
  <p>PORT_SSL: '$PORT_SSL'</p>
- <p>PORT_RTMP: '$PORT_RTMP'</p>
+ <p>PORT_RTMP: '$PORT_RTMP' - URL: http://'$HOSTNAME:$PORT_RTMP'/live/stream</p>
  </html>' > /usr/local/nginx/html/player.html
 
 echo "worker_processes  1;
@@ -66,7 +66,7 @@ http {
     server {
         sendfile        off;
         listen "$PORT_HLS";
-        location /hls {
+        location /live {
             add_header 'Cache-Control' 'no-cache';
             add_header 'Access-Control-Allow-Origin' '*' always;
             add_header 'Access-Control-Expose-Headers' 'Content-Length';
@@ -97,7 +97,7 @@ rtmp {
             live on;
             interleave on;
             hls on;
-            hls_path /mnt/hls/;
+            hls_path /mnt/live/;
             hls_fragment 3;
             hls_playlist_length 60;
         }
