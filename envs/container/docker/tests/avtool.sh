@@ -214,8 +214,7 @@ if [[ "${action}" == "test" ]] ; then
         echo "Running tests for $line"
         echo "***********************************************************"
         cd $line 
-        OUTPUT=$(bash ./avtool.sh -a test)
-        echo $OUTPUT
+        (bash ./avtool.sh -a test)
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
