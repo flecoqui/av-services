@@ -179,10 +179,12 @@ if [[ "${action}" == "test" ]] ; then
     echo "Start ${AV_CONTAINER_NAME} container..."
     sudo docker container start ${AV_CONTAINER_NAME}
 
+    # Wait 10 seconds before starting  the RTMP stream
+    sleep 10    
     echo "Start ffmpeg RTMP streamer on the host machine..."
     ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i "${AV_TEMPDIR}"/camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream &
-    # Wait 10 seconds before reading the RTMP stream
-    sleep 10    
+    # Wait 20 seconds before reading the RTMP stream
+    sleep 20    
     echo "Capture 20s of RTMP stream on the host machine..."
     ffmpeg   -hide_banner -loglevel error -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
     sleep 40
