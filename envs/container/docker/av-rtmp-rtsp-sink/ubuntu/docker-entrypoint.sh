@@ -119,7 +119,7 @@ fi
 # Start the rtsp process
 export RTSP_PROTOCOLS=tcp 
 export RTSP_RTSPPORT=$PORT_RTSP
-/rtsp-simple-server &
+/usr/local/bin/rtsp-simple-server &
 status=$?
 if [ $status -ne 0 ]; then
   echo "Failed to start rtsp: $status"

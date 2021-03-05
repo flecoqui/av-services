@@ -77,7 +77,7 @@ RUN apt-get -y update  \
   openssl \
   lame \
   curl \
-  rtmpdump 
+  rtmpdump ffmpeg
 
 
 
