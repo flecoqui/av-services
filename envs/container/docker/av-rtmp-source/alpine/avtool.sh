@@ -167,6 +167,7 @@ if [[ "${action}" == "test" ]] ; then
     privateIpAddress=$(sudo docker container inspect $containerId  --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
     echo "RTMP sink private IP address: ${privateIpAddress}"
     echo "Starting test-${AV_CONTAINER_NAME} container..."
+    sudo  docker container stop "test-${AV_CONTAINER_NAME}" || true
     sudo  docker container rm "test-${AV_CONTAINER_NAME}" || true
     sudo docker run  -d -it -e RTMP_URL=rtmp://${privateIpAddress}:1935/live/stream  --name "test-${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
 
