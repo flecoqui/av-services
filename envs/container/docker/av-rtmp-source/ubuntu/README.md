@@ -1,11 +1,11 @@
-# av-rtmp-source alpine
+# av-rtmp-source ubuntu
 
 ## Overview
-This av-service av-rtmp-source for alpine is a container running ffmpeg to stream RTMP content.
+This av-service av-rtmp-source for ubuntu is a container running ffmpeg to stream RTMP content.
 By default this container embeds a MKV file which will be used by ffmpeg to generate the RTMP stream.
 
-## Using av-rtmp-source alpine
-It's recommended to use and manage the av-rtmp-source alpine service with the avtool.sh command line tool.
+## Using av-rtmp-source ubuntu
+It's recommended to use and manage the av-rtmp-source ubuntu service with the avtool.sh command line tool.
 
 ### Installing the pre-requisites on the host machine
 As avtool.sh is a Linux bash file, you could run this tool from a machine or virtual machine running Ubuntu 20.04 LTS.
@@ -22,7 +22,7 @@ As avtool.sh is a Linux bash file, you could run this tool from a machine or vir
     mkdir $HOME/git
     cd $HOME/git
     git clone https://github.com/flecoqui/av-services.git
-    cd av-services/envs/container/docker/av-rtmp-source/alpine 
+    cd av-services/envs/container/docker/av-rtmp-source/ubuntu 
 ```
 3. Run avtool.sh -a install to install docker 
 
@@ -30,8 +30,8 @@ As avtool.sh is a Linux bash file, you could run this tool from a machine or vir
     ./avtool.sh -a install
 ```
 
-### Deploying/Undeploying av-rtmp-source alpine service
-Once the pre-requisites are installed, you can build the av-rtmp-source alpine container.
+### Deploying/Undeploying av-rtmp-source ubuntu service
+Once the pre-requisites are installed, you can build the av-rtmp-source ubuntu container.
 
 
 1. Run the following command to build and run the container
@@ -43,9 +43,9 @@ Once the pre-requisites are installed, you can build the av-rtmp-source alpine c
 When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the av-rtmp-source configuration. By default, the file contains these parameters:
 
 ```bash
-    AV_IMAGE_NAME=av-rtmp-source-alpine
+    AV_IMAGE_NAME=av-rtmp-source-ubuntu
     AV_IMAGE_FOLDER=av-services
-    AV_CONTAINER_NAME=av-rtmp-source-alpine-container
+    AV_CONTAINER_NAME=av-rtmp-source-ubuntu-container
     AV_VOLUME=data1
     AV_FFMPEG_COMMAND="ffmpeg -y -nostats -loglevel 0  -i ./camera-300s.mkv -codec copy /data1/camera-300s.mp4"
     AV_TEMPDIR=/tmp/tmp.TblgL0Cm4d
@@ -64,7 +64,7 @@ Below further information about the parameters in the file .avtoolconfig:
 
 
 
-### Starting/Stopping av-rtmp-source alpine service
+### Starting/Stopping av-rtmp-source ubuntu service
 Once the image is built you can start and stop the container .
 
 
@@ -93,7 +93,7 @@ By default the container will run the following command to encod the MKV file:
     ./avtool.sh -a status
 ```
 
-### Testing av-rtmp-source alpine service
+### Testing av-rtmp-source ubuntu service
 Once the image is built you can test if the container is fully functionning.
 As this test requires the container av-rtmp-sink-ubuntu-container, check this container is already deployed on your docker.
 

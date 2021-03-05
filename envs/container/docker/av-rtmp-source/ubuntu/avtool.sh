@@ -52,10 +52,10 @@ if [[ ! $action == login && ! $action == install && ! $action == start && ! $act
     exit 1
 fi
 AV_SERVICE=av-rtmp-source
-AV_FLAVOR=alpine
+AV_FLAVOR=ubuntu
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
-AV_CONTAINER_NAME=av-rtmp-source-alpine-container
+AV_CONTAINER_NAME=av-rtmp-source-ubuntu-container
 AV_RTMP_URL=rtmp://localhost:1935/live/stream
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
