@@ -214,13 +214,14 @@ if [[ "${action}" == "test" ]] ; then
         echo "Running tests for $line"
         echo "***********************************************************"
         cd $line 
-        (./avtool.sh -a test)
+        OUTPUT=$(./avtool.sh -a test)
+        cat $OUTPUT
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "$line ran successfully" 
+            echo "Tests for $line ran successfully" 
         else 
-            echo "$line failed" 
+            echo "Tests for $line failed" 
         fi
         echo "***********************************************************"
         cd ../../tests
