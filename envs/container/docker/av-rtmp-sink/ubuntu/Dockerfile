@@ -9,8 +9,8 @@ ARG NGINX_VERSION
 ARG NGINX_RTMP_VERSION
 
 # Build dependencies.
-RUN apk add --update \
-  build-base \
+RUN apt-get -y --update  \
+  && apt-get -y install build-base \
   ca-certificates \
   curl \
   gcc \
@@ -69,7 +69,8 @@ ENV PORT_RTMP 1935
 
 
 
-RUN apk add --update \
+RUN apt-get -y --update  \
+  && apt-get -y install \
   ca-certificates \
   gettext \
   openssl \
