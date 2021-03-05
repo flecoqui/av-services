@@ -87,20 +87,28 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying all services..."
     cd ../av-ffmpeg/alpine
     ./avtool.sh -a deploy
+    ./avtool.sh -a stop
     cd ../ubuntu
     ./avtool.sh -a deploy
+    ./avtool.sh -a stop
     cd ../../av-rtmp-source/alpine
     ./avtool.sh -a deploy
+    ./avtool.sh -a stop
     cd ../ubuntu
     ./avtool.sh -a deploy
+    ./avtool.sh -a stop
     cd ../../av-rtmp-sink/alpine
     ./avtool.sh -a deploy
+    ./avtool.sh -a stop
     cd ../ubuntu
     ./avtool.sh -a deploy
+    ./avtool.sh -a stop
     cd ../../av-rtmp-rtsp-sink/alpine
     ./avtool.sh -a deploy
+    ./avtool.sh -a stop
     cd ../ubuntu
     ./avtool.sh -a deploy
+    ./avtool.sh -a stop
     cd ../../tests     
     echo "Deployment done"
     exit 0
