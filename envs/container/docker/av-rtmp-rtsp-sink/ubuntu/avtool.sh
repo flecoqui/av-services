@@ -185,6 +185,8 @@ if [[ "${action}" == "test" ]] ; then
 
     echo "Start ffmpeg RTMP streamer on the host machine..."
     ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i "${AV_TEMPDIR}"/camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream &
+    # Wait 10 seconds before reading the RTMP stream
+    sleep 10
     echo "Capture 20s of RTMP stream on the host machine..."
     ffmpeg   -hide_banner -loglevel error   -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream -c copy  -t 00:00:20 -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
     sleep 40
