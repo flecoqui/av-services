@@ -201,9 +201,9 @@ if [[ "${action}" == "test" ]] ; then
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "Tests for $line ran successfully" 
+            echo "\e[32mTests for $line ran successfully" 
         else 
-            echo "Tests for $line failed" 
+            echo "\e[91mTests for $line failed" 
         fi
         echo "***********************************************************"
         cd ../../tests
