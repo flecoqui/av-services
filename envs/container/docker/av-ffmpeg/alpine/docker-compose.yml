@@ -1,7 +1,13 @@
-version: '3.8'
+version: '3.9'
 services:
-  ffmpeg:
+  av-ffmpeg-alpine:
     build: 
       context: .
       dockerfile: Dockerfile
-    command: "-help"
+    image: av-services/av-ffmpeg-alpine
+    container_name: av-ffmpeg-alpine-container
+    ports:
+      - "5000:5000"
+    volumes:
+      - "..:/data1"
+    command: "ffmpeg -y -nostats -loglevel 0  -i ./camera-300s.mkv -codec copy /data1/camera-300s.mp4"
