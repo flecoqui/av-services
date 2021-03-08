@@ -155,7 +155,7 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Creating docker-compose file..."
-    Command1="s/\${${AV_IMAGE_NAME}}/$${AV_IMAGE_NAME}/g"
+    Command1="s/\${AV_IMAGE_NAME}/$AV_IMAGE_NAME/g"
     Command2="s/\${AV_CONTAINER_NAME}/$AV_CONTAINER_NAME/g"
     Command3="s/\${AV_TEMPDIR}/$AV_TEMPDIR/g"
     Command4="s/\${AV_VOLUME}/$AV_VOLUME/g"
