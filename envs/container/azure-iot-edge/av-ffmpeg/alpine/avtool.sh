@@ -159,7 +159,7 @@ if [[ "${action}" == "deploy" ]] ; then
     Command2="s/\${AV_CONTAINER_NAME}/$AV_CONTAINER_NAME/g"
     Command3="s/\${AV_TEMPDIR}/$AV_TEMPDIR/g"
     Command4="s/\${AV_VOLUME}/$AV_VOLUME/g"
-    Command4="s/\${AV_FFMPEG_COMMAND}/$AV_FFMPEG_COMMAND/g"
+    Command5="s/\${AV_FFMPEG_COMMAND}/$AV_FFMPEG_COMMAND/g"
     cat ../../../docker/av-ffmpeg/alpine/docker-compose.template.yml \
       | sed "$Command1" \
       | sed "$Command2" \
