@@ -29,7 +29,7 @@ checkAVError() {
 #- function used to escape character in string 
 #######################################################
 function sedescape {
-  sed -i "s/$(echo $1 | sed -e 's/\([[\/.*]\|\]\)/\\&/g')/$(echo $2 | sed -e 's/[\/&]/\\&/g')/g" $3
+ printf '%s\n' "$1" | sed -e 's/[\/&]/\\&/g'
 }
 
 #######################################################
