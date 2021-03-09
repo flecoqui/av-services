@@ -161,7 +161,7 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Creating docker-compose file..."
-    AV_FFMPEG_COMMAND_ESCAPE=sedescape "$AV_FFMPEG_COMMAND"
+    AV_FFMPEG_COMMAND_ESCAPE=$(printf '%s\n' "$AV_FFMPEG_COMMAND" | sed -e 's/[\/&]/\\&/g') 
     AV_IMAGE_NAME_ESCAPE=sedescape "$AV_IMAGE_NAME"
     AV_CONTAINER_NAME_ESCAPE=sedescape "$AV_CONTAINER_NAME"
     AV_TEMPDIR_ESCAPE=sedescape "$AV_TEMPDIR"
