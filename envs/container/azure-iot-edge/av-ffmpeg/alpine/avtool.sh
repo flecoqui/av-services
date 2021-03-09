@@ -194,6 +194,7 @@ if [[ "${action}" == "deploy" ]] ; then
     sudo docker-compose up --build
     checkAVError
     echo "Creating the IoT Edge project..."
+    rm -r ../../${AV_SERVICE}-${AV_FLAVOR}-edge/* > /dev/null 2> /dev/null  || true
     sudo iotedge-compose -t project -i docker-compose.yml -o ../../${AV_SERVICE}-${AV_FLAVOR}-edge
     checkAVError
     echo "Deployment done"
