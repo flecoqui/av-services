@@ -166,11 +166,11 @@ if [[ "${action}" == "deploy" ]] ; then
     AV_CONTAINER_NAME_ESCAPE=$(printf '%s\n' "$AV_CONTAINER_NAME" | sed -e 's/[\/&]/\\&/g')
     AV_TEMPDIR_ESCAPE=$(printf '%s\n' "$AV_TEMPDIR" | sed -e 's/[\/&]/\\&/g')
     AV_VOLUME_ESCAPE=$(printf '%s\n' "$AV_VOLUME"  | sed -e 's/[\/&]/\\&/g')    
-    echo "$AV_FFMPEG_COMMAND_ESCAPE"
-    echo "$AV_IMAGE_NAME_ESCAPE"
-    echo "$AV_CONTAINER_NAME_ESCAPE"
-    echo "$AV_TEMPDIR_ESCAPE"
-    echo "$AV_VOLUME_ESCAPE"
+#    echo "$AV_FFMPEG_COMMAND_ESCAPE"
+#    echo "$AV_IMAGE_NAME_ESCAPE"
+#    echo "$AV_CONTAINER_NAME_ESCAPE"
+#    echo "$AV_TEMPDIR_ESCAPE"
+#    echo "$AV_VOLUME_ESCAPE"
     Command0="s/\${AV_FFMPEG_COMMAND}/$AV_FFMPEG_COMMAND_ESCAPE/g"
     Command1="s/\${AV_IMAGE_NAME}/$AV_IMAGE_NAME_ESCAPE/g"
     Command2="s/\${AV_CONTAINER_NAME}/$AV_CONTAINER_NAME_ESCAPE/g"
@@ -184,11 +184,13 @@ if [[ "${action}" == "deploy" ]] ; then
       | sed "$Command4" \
       > ./docker-compose.yml
     cp  ../../../docker/av-ffmpeg/alpine/Dockerfile ./Dockerfile
-    echo "Deploying service..."
+    echo "Deploying service locally..."
+    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true     
     sudo docker-compose up --build
     checkAVError
-    echo "Deploying service..."
-    checkAVError
+    echo "Creating the IoT Edge project..."
     sudo iotedge-compose -t project -i ./docker-compose.yml -o av-ffmpeg-alpine-edge
     checkAVError
     echo "Deployment done"
