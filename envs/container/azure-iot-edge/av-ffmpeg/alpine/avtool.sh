@@ -165,7 +165,8 @@ if [[ "${action}" == "deploy" ]] ; then
     AV_IMAGE_NAME_ESCAPE=$(printf '%s\n' "$AV_IMAGE_NAME" | sed -e 's/[\/&]/\\&/g')
     AV_CONTAINER_NAME_ESCAPE=$(printf '%s\n' "$AV_CONTAINER_NAME" | sed -e 's/[\/&]/\\&/g')
     AV_TEMPDIR_ESCAPE=$(printf '%s\n' "$AV_TEMPDIR" | sed -e 's/[\/&]/\\&/g')
-    AV_VOLUME_ESCAPE=$(printf '%s\n' "$AV_VOLUME"  | sed -e 's/[\/&]/\\&/g')    
+    AV_VOLUME_ESCAPE=$(printf '%s\n' "$AV_VOLUME"  | sed -e 's/[\/&]/\\&/g')  
+    AV_IMAGE_FOLDER_ESCAPE=$(printf '%s\n' "$AV_IMAGE_FOLDER"  | sed -e 's/[\/&]/\\&/g')
 #    echo "$AV_FFMPEG_COMMAND_ESCAPE"
 #    echo "$AV_IMAGE_NAME_ESCAPE"
 #    echo "$AV_CONTAINER_NAME_ESCAPE"
@@ -176,12 +177,15 @@ if [[ "${action}" == "deploy" ]] ; then
     Command2="s/\${AV_CONTAINER_NAME}/$AV_CONTAINER_NAME_ESCAPE/g"
     Command3="s/\${AV_TEMPDIR}/$AV_TEMPDIR_ESCAPE/g"
     Command4="s/\${AV_VOLUME}/$AV_VOLUME_ESCAPE/g"
+    Command5="s/\${AV_IMAGE_FOLDER}/$AV_IMAGE_FOLDER_ESCAPE/g"
+    
     cat ../../../docker/av-ffmpeg/alpine/docker-compose.template.yml \
       | sed "$Command0" \
       | sed "$Command1" \
       | sed "$Command2" \
       | sed "$Command3" \
       | sed "$Command4" \
+      | sed "$Command5" \
       > ./docker-compose.yml
     cp  ../../../docker/av-ffmpeg/alpine/Dockerfile ./Dockerfile
     echo "Deploying service locally..."
