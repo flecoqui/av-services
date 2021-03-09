@@ -161,11 +161,11 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Creating docker-compose file..."
-    AV_FFMPEG_COMMAND_ESCAPE=sedescape $AV_FFMPEG_COMMAND
-    AV_IMAGE_NAME_ESCAPE=sedescape $AV_IMAGE_NAME
-    AV_CONTAINER_NAME_ESCAPE=sedescape $AV_CONTAINER_NAME
-    AV_TEMPDIR_ESCAPE=sedescape $AV_TEMPDIR
-    AV_VOLUME_ESCAPE=sedescape $AV_VOLUME    
+    AV_FFMPEG_COMMAND_ESCAPE=sedescape "$AV_FFMPEG_COMMAND"
+    AV_IMAGE_NAME_ESCAPE=sedescape "$AV_IMAGE_NAME"
+    AV_CONTAINER_NAME_ESCAPE=sedescape "$AV_CONTAINER_NAME"
+    AV_TEMPDIR_ESCAPE=sedescape "$AV_TEMPDIR"
+    AV_VOLUME_ESCAPE=sedescape "$AV_VOLUME"    
     Command0="s/\${AV_FFMPEG_COMMAND}/$AV_FFMPEG_COMMAND_ESCAPE/g"
     Command1="s/\${AV_IMAGE_NAME}/$AV_IMAGE_NAME_ESCAPE/g"
     Command2="s/\${AV_CONTAINER_NAME}/$AV_CONTAINER_NAME_ESCAPE/g"
