@@ -179,7 +179,7 @@ if [[ "${action}" == "deploy" ]] ; then
     Command4="s/\${AV_VOLUME}/$AV_VOLUME_ESCAPE/g"
     Command5="s/\${AV_IMAGE_FOLDER}/$AV_IMAGE_FOLDER_ESCAPE/g"
     
-    cat ../../../docker/av-ffmpeg/alpine/docker-compose.template.yml \
+    cat ../../../docker/${AV_SERVICE}/${AV_FLAVOR}/docker-compose.template.yml \
       | sed "$Command0" \
       | sed "$Command1" \
       | sed "$Command2" \
@@ -187,15 +187,14 @@ if [[ "${action}" == "deploy" ]] ; then
       | sed "$Command4" \
       | sed "$Command5" \
       > ./docker-compose.yml
-    cp  ../../../docker/av-ffmpeg/alpine/Dockerfile ./Dockerfile
+    echo "Copying Dockerfile..."  
+    cp  ../../../docker/${AV_SERVICE}/${AV_FLAVOR}/Dockerfile ./Dockerfile
     echo "Deploying service locally..."
-    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true     
+    sudo  docker-compose down > /dev/null 2> /dev/null  || true
     sudo docker-compose up --build
     checkAVError
     echo "Creating the IoT Edge project..."
-    sudo iotedge-compose -t project -i ./docker-compose.yml -o av-ffmpeg-alpine-edge
+    sudo iotedge-compose -t project -i docker-compose.yml -o ../../${AV_SERVICE}-${AV_FLAVOR}-edge
     checkAVError
     echo "Deployment done"
     exit 0
@@ -210,7 +209,7 @@ if [[ "${action}" == "undeploy" ]] ; then
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
-    sudo docker container inspect ${AV_CONTAINER_NAME} --format '{{json .State.Status}}'
+    sudo docker-compose ps
     checkAVError
     echo "Status done"
     exit 0
@@ -233,7 +232,7 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/*.mp4
-    echo "Start av-ffmpeg container..."
+    echo "Start ${AV_SERVICE} container..."
     echo ""
     echo "FFMPEG encoding command: ${AV_FFMPEG_COMMAND}"
     echo ""
@@ -242,7 +241,7 @@ if [[ "${action}" == "test" ]] ; then
         echo "Deploy the container before running the tests"
         exit 1
     fi
-    sudo docker container start -i ${AV_CONTAINER_NAME}
+    sudo docker-compose start
     checkAVError
     echo "Output directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/camera-300s.mp4" ]] ; then
