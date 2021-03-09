@@ -25,6 +25,12 @@ checkAVError() {
         exit 1
     fi
 }
+#######################################################
+#- function used to escape character in string 
+#######################################################
+function sedescape {
+  sed -i "s/$(echo $1 | sed -e 's/\([[\/.*]\|\]\)/\\&/g')/$(echo $2 | sed -e 's/[\/&]/\\&/g')/g" $3
+}
 
 #######################################################
 #- function used to print out script usage
@@ -155,17 +161,22 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Creating docker-compose file..."
-    Command1="s/\${AV_IMAGE_NAME}/$AV_IMAGE_NAME/g"
-    Command2="s/\${AV_CONTAINER_NAME}/$AV_CONTAINER_NAME/g"
-    Command3="s/\${AV_TEMPDIR}/$AV_TEMPDIR/g"
-    Command4="s/\${AV_VOLUME}/$AV_VOLUME/g"
-    Command5="s/\${AV_FFMPEG_COMMAND}/$AV_FFMPEG_COMMAND/g"
+    AV_FFMPEG_COMMAND_ESCAPE=sedescape $AV_FFMPEG_COMMAND
+    AV_IMAGE_NAME_ESCAPE=sedescape $AV_IMAGE_NAME
+    AV_CONTAINER_NAME_ESCAPE=sedescape $AV_CONTAINER_NAME
+    AV_TEMPDIR_ESCAPE=sedescape $AV_TEMPDIR
+    AV_VOLUME_ESCAPE=sedescape $AV_VOLUME    
+    Command0="s/\${AV_FFMPEG_COMMAND}/$AV_FFMPEG_COMMAND_ESCAPE/g"
+    Command1="s/\${AV_IMAGE_NAME}/$AV_IMAGE_NAME_ESCAPE/g"
+    Command2="s/\${AV_CONTAINER_NAME}/$AV_CONTAINER_NAME_ESCAPE/g"
+    Command3="s/\${AV_TEMPDIR}/$AV_TEMPDIR_ESCAPE/g"
+    Command4="s/\${AV_VOLUME}/$AV_VOLUME_ESCAPE/g"
     cat ../../../docker/av-ffmpeg/alpine/docker-compose.template.yml \
+      | sed "$Command0" \
       | sed "$Command1" \
       | sed "$Command2" \
       | sed "$Command3" \
       | sed "$Command4" \
-      | sed "$Command5" \
       > ./docker-compose.yml
     cp  ../../../docker/av-ffmpeg/alpine/Dockerfile ./Dockerfile
     echo "Deploying service..."
