@@ -162,10 +162,10 @@ fi
 if [[ "${action}" == "deploy" ]] ; then
     echo "Creating docker-compose file..."
     AV_FFMPEG_COMMAND_ESCAPE=$(printf '%s\n' "$AV_FFMPEG_COMMAND" | sed -e 's/[\/&]/\\&/g') 
-    AV_IMAGE_NAME_ESCAPE=sedescape "$AV_IMAGE_NAME"
-    AV_CONTAINER_NAME_ESCAPE=sedescape "$AV_CONTAINER_NAME"
-    AV_TEMPDIR_ESCAPE=sedescape "$AV_TEMPDIR"
-    AV_VOLUME_ESCAPE=sedescape "$AV_VOLUME"    
+    AV_IMAGE_NAME_ESCAPE=$(printf '%s\n' "$AV_IMAGE_NAME" | sed -e 's/[\/&]/\\&/g')
+    AV_CONTAINER_NAME_ESCAPE=$(printf '%s\n' "$AV_CONTAINER_NAME" | sed -e 's/[\/&]/\\&/g')
+    AV_TEMPDIR_ESCAPE=$(printf '%s\n' "$AV_TEMPDIR" | sed -e 's/[\/&]/\\&/g')
+    AV_VOLUME_ESCAPE=$(printf '%s\n' "$AV_VOLUME"  | sed -e 's/[\/&]/\\&/g')    
     echo "$AV_FFMPEG_COMMAND_ESCAPE"
     echo "$AV_IMAGE_NAME_ESCAPE"
     echo "$AV_CONTAINER_NAME_ESCAPE"
