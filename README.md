@@ -221,11 +221,14 @@ Once the av-service is built, you can test the av-service .
 
 # Next Steps
 
-Below a list of possible improvements 
+Below a list of possible improvements: 
 
-1. Add a RTSP source
-2. Add components supporting smooth streaming
-3. Update the astool.sh files to automate the tests.
-2. Provide Samples of Audio/Video renderer components
-3. Provide Samples of Audio/Video splitter components supporting multicast
+1. Add IOT Edge support - to be delivered in March 2021
+2. Automate Tests and deployment - to be delivered in March 2021
+3. Add a HLS source
+4. Add a RTSP source
+5. Add components supporting smooth streaming
+6. Update the astool.sh files to automate the tests.
+7. Provide Samples of Audio/Video renderer components
+8. Provide Samples of Audio/Video splitter components supporting multicast
  
