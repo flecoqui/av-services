@@ -53,7 +53,7 @@ For instance:
 When you deploy the service you can define the following parameters:</p>
 * **namePrefix:** The name prefix which will be used for all the services deployed with this ARM Template</p>
 * **vmAdminUsername:** VM login by default "VMAdmin"</p>
-* **vmAdminPassword:** VM password by default "VMP@ssw0rd"</p>
+* **vmAdminPassword:** VM password by default "{YourPassword}"</p>
 * **vmOS:** supported values "debian","ubuntu","centos","redhat" by default "debian"</p>
 * **vmSize:** supported values"Small" (Standard_D2s_v3),"Medium" (Standard_D4s_v3),"Large" (Standard_D8s_v3),"XLarge" (Standard_D16s_v3) by default "Small"</p>
 * **containerName:** the name of the container on the Azure Storage where the audio/video chunks will be recorded, by default "rtmpcontainer"</p>
@@ -161,14 +161,7 @@ Before deploying the service, the Azure Login is required. You can run the follo
 ```
 
 ### Deploying/Undeploying the virtual machine running RTMP to RTSP Adaptor service
-Once the pre-requisites are installed, you can deploy build the virtual machine running RTMP to RTSP Adaptor service.
-
-
-1. Run the following command to create, deploy and run the virtual machine
-
-```bash
-    ./avtool.sh -a deploy
-```
+Once the pre-requisites are installed and the Azure CLI connected to Azure, you can deploy build the virtual machine running RTMP to RTSP Adaptor service.
 
 When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the virtual machine configuration. By default, the file contains these parameters:
 
@@ -181,7 +174,7 @@ When you run avtool.sh for the first time, it creates a file called .avtoolconfi
     AV_VMNAME="$AV_PREFIXNAME"vm
     AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
     AV_CONTAINERNAME=avchunks
-    AV_LOGIN=vmadmin
+    AV_LOGIN=avvmadmin
     AV_PASSWORD={YourPassword}
 ```
 
@@ -199,6 +192,16 @@ Below further information about the parameters in the file .avtoolconfig:
 | AV_CONTAINERNAME | The container name in the storage account where the video chunks will be stored   |
 | AV_LOGIN | The virtual machine administrator login    |
 | AV_PASSWORD | The virtual machine administrator password |
+
+1. Edit the file .avtoolconfig to update the virtual machine password.
+
+2. Run the following command to create, deploy and run the virtual machine
+
+```bash
+    ./avtool.sh -a deploy
+```
+
+
 
 
 

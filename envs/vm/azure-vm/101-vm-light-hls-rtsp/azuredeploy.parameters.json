@@ -9,7 +9,7 @@
       "value": "vmadmin"
     },
     "vmAdminPassword": {
-      "value": "P@ssw0rd!"
+      "value": "{YourPassword}"
     },
     "vmOS": {
       "value": "ubuntu"

@@ -74,7 +74,7 @@ AV_VMNAME="$AV_PREFIXNAME"vm
 AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
 AV_LOGIN=avvmadmin
-AV_PASSWORD=avvmP@ssw0rd!
+AV_PASSWORD={YourPassword}
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
