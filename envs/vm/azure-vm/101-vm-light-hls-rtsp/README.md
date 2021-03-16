@@ -145,14 +145,23 @@ As avtool.sh is a Linux bash file, you could run this tool from a machine or vir
     git clone https://github.com/flecoqui/av-services.git
     cd av-services/envs/vm/azure-vm/101-vm-light-hls-rtsp
 ```
-3. Run avtool.sh -a install to install docker 
+3. Run avtool.sh -a install to install Azure CLI and ffmpeg
 
 ```bash
     ./avtool.sh -a install
 ```
+### Azure Login 
+Before deploying the service, the Azure Login is required. You can run the following command:
 
-### Deploying/Undeploying av-ffmpeg alpine service
-Once the pre-requisites are installed, you can build the av-ffmpeg alpine container.
+
+1. Run the following command to launch the Azure login
+
+```bash
+    ./avtool.sh -a login
+```
+
+### Deploying/Undeploying the virtual machine running RTMP to RTSP Adaptor service
+Once the pre-requisites are installed, you can deploy build the virtual machine running RTMP to RTSP Adaptor service.
 
 
 1. Run the following command to create, deploy and run the virtual machine
@@ -161,7 +170,7 @@ Once the pre-requisites are installed, you can build the av-ffmpeg alpine contai
     ./avtool.sh -a deploy
 ```
 
-When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the av-ffmpeg configuration. By default, the file contains these parameters:
+When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the virtual machine configuration. By default, the file contains these parameters:
 
 ```bash
     RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
@@ -193,37 +202,31 @@ Below further information about the parameters in the file .avtoolconfig:
 
 
 
-### Starting/Stopping av-ffmpeg alpine service
-Once the image is built you can start and stop the container .
+### Starting/Stopping the virtual machine
+Once the image is built you can start and stop the virtual machine.
 
 
-1. Run the following command to start the container
+1. Run the following command to start the virtual machine
 
 ```bash
     ./avtool.sh -a start
 ```
-By default the container will run the following command to encod the MKV file:
 
 
-```bash
-    ffmpeg -y -nostats -loglevel 0  -i ./camera-300s.mkv -codec copy /${AV_VOLUME}/camera-300s.mp4
-```
-
-
-2. If the container is still running, you can run the following command to stop the container
+2. If the virtual machine is still running, you can run the following command to stop the virtual machine 
 
 ```bash
     ./avtool.sh -a stop
 ```
 
-3. If the container is still running, you can run the following command to get the status of the container
+3. If the virtual machine  is still running, you can run the following command to get the status of the virtual machine 
 
 ```bash
     ./avtool.sh -a status
 ```
 
-### Testing av-ffmpeg alpine service
-Once the image is built you can test if the container is fully functionning.
+### Testing the virtual machine 
+Once the image is built you can test if the virtual machine is fully functionning.
 
 1. Run the following command to test the container
 
@@ -231,7 +234,11 @@ Once the image is built you can test if the container is fully functionning.
     ./avtool.sh -a test
 ```
 
-For this container, the test feature will check if the output MP4 file has been created in the mounted volume.
+For this virtual machine, the test feature will check if the following outputs are fully functionning:
+- RTMP stream
+- HLS stream
+- RTSP stream
+- Audio/Video Chunks stored in the Azure Storage container
 
 
 
