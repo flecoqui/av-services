@@ -73,8 +73,8 @@ AV_PREFIXNAME=rtmprtsphls
 AV_VMNAME="$AV_PREFIXNAME"vm
 AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
-AV_LOGIN=vmadmin
-AV_PASSWORD=P@ssw0rd!
+AV_LOGIN=avvmadmin
+AV_PASSWORD=avvmP@ssw0rd!
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
