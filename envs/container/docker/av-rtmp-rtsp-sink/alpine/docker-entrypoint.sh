@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+#set -e
 
 openssl req -x509 -nodes -days 365 -subj "/C=CA/ST=QC/O=$COMPANYNAME, Inc./CN=$HOSTNAME" -addext "subjectAltName=DNS:$HOSTNAME" -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt;
 echo '<!DOCTYPE html>
@@ -154,6 +154,9 @@ while sleep 60; do
   # If the greps above find anything, they exit with 0 status
   # If they are not both 0, then something is wrong
   if [ $PROCESS_1_STATUS -ne 0 -o $PROCESS_2_STATUS -ne 0 -o $PROCESS_3_STATUS -ne 0 ]; then
+    if [[ $PROCESS_1_STATUS -ne 0 ]] ; then echo "nginx process stopped" fi
+    if [[ $PROCESS_2_STATUS -ne 0 ]] ; then echo "rtsp-simple-server process stopped" fi
+    if [[ $PROCESS_3_STATUS -ne 0 ]] ; then echo "ffmpeg process stopped" fi
     echo "One of the processes has already exited."
     exit 1
   fi

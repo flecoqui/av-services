@@ -107,6 +107,9 @@ RUN apk add openssl;
 RUN apk add ffmpeg 
 # install rtsp-simple-server
 COPY --from=server /rtsp-simple-server /rtsp-simple-server
+COPY --from=server /rtsp-simple-server.yml /rtsp-simple-server.yml
+# disable rtmp ingestion for rtsp-simple-server
+RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g'  ./rtsp-simple-server.yml
 
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"
