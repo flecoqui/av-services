@@ -92,6 +92,7 @@ COPY --from=build-nginx /usr/local/nginx /usr/local/nginx
 COPY --from=build-nginx /etc/nginx /etc/nginx
 COPY --from=build-nginx /usr/local/bin/rtsp-simple-server /usr/local/bin/rtsp-simple-server 
 COPY --from=build-nginx /usr/local/bin/rtsp-simple-server.yml /usr/local/bin/rtsp-simple-server.yml 
+RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g'  /usr/local/bin/rtsp-simple-server.yml 
 
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"
