@@ -689,7 +689,7 @@ http {
         sendfile        off;
         listen 8080;
 
-        location /hls {
+        location /live {
             # Disable cache
             add_header 'Cache-Control' 'no-cache';
 
@@ -733,7 +733,7 @@ rtmp {
             live on;
             interleave on;
             hls on;
-            hls_path /mnt/hls/;
+            hls_path /mnt/live/;
             hls_fragment 3;
             hls_playlist_length 60;
             # disable consuming the stream from nginx as rtmp
@@ -866,7 +866,7 @@ rtmp {
             live on;
             interleave on;
             hls on;
-            hls_path /mnt/hls/;
+            hls_path /mnt/live/;
             hls_fragment 3;
             hls_playlist_length 60;
             # disable consuming the stream from nginx as rtmp
