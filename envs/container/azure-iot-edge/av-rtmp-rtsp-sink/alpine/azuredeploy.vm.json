@@ -25,7 +25,7 @@
     "customData": {
       "type": "string",
       "metadata": {
-        "description": "Custom data toinitialize the virtual machine."
+        "description": "Base64 Custom data to initialize the virtual machine."
       }
     },    
     "vmSize": {
@@ -90,8 +90,7 @@
     "publicIPAddressType": "Dynamic",
     "virtualNetworkName": "[concat(parameters('namePrefix'), 'vnet')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
-    "customDataBase64": "[base64(parameters('customData'))]"
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
   },
   "resources": [
     {
@@ -321,7 +320,7 @@
           "computerName": "[variables('vmName')]",
           "adminUsername": "[parameters('vmAdminUsername')]",
           "adminPassword": "[parameters('vmAdminPassword')]",
-          "customData": "[variables('customDataBase64')]"
+          "customData": "[parameters('customData')]"
         },
         "storageProfile": {
           "imageReference": {
