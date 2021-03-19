@@ -418,8 +418,8 @@ do
 folder=\$(date  +"%F-%X.%S")
 echo Starting rtsp loop \$folder >> /testrtmp/log/ffmpegrtsp.log
 #ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -framerate 25 -video_size 640x480  -pix_fmt yuv420p -bsf:v h264_mp4toannexb -profile:v baseline -level:v 3.2 -c:v libx264 -x264-params keyint=120:scenecut=0 -c:a aac -b:a 128k -ar 44100 -f rtsp -muxdelay 0.1 rtsp://127.0.0.1:8554/test
-#ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -f rtsp  rtsp://127.0.0.1:8554/test 
-ffmpeg  -i rtmp://127.0.0.1:1935/live/stream   -codec copy -bsf:v h264_mp4toannexb -f rtsp  rtsp://127.0.0.1:8554/test
+#ffmpeg  -i rtmp://127.0.0.1:1935/live/stream  -f rtsp  rtsp://127.0.0.1:8554/rtsp/stream 
+ffmpeg  -i rtmp://127.0.0.1:1935/live/stream   -codec copy -bsf:v h264_mp4toannexb -f rtsp  rtsp://127.0.0.1:8554/rtsp/stream
 sleep 5
 done
 EOF
@@ -629,12 +629,18 @@ cat <<EOF > /usr/local/nginx/html/player.html
 </head>
 <body>
 <video id="player" class="video-js vjs-default-skin" height="360" width="640" controls preload="none">
-    <source src="http://$1:8080/hls/stream.m3u8" type="application/x-mpegURL" />
+    <source src="http://$1:8080/live/stream.m3u8" type="application/x-mpegURL" />
 </video>
 <script>
     var player = videojs('#player');
 </script>
 </body>
+ <p>HOSTNAME: '$1'</p>
+ <p>PORT_HTTP: 80 - URL: 'http://$1:80/player.html'</p>
+ <p>PORT_SSL: 443 - URL: 'https://$1:443/player.html'</p>
+ <p>PORT_RTMP: 1935 - URL: 'rtmp://$1:1935/live/stream'</p> 
+ <p>PORT_HLS: 8080 - URL: 'http://$1:8080/live/stream.m3u8'</p>
+ <p>PORT_RTSP: 8554 - URL: 'rtsp://$1:8554/rtsp/stream'</p> 
 </html>
 EOF
 
@@ -757,12 +763,18 @@ cat <<EOF > /etc/nginx/html/player.html
 </head>
 <body>
 <video id="player" class="video-js vjs-default-skin" height="360" width="640" controls preload="none">
-    <source src="http://$1:8080/hls/stream.m3u8" type="application/x-mpegURL" />
+    <source src="http://$1:8080/live/stream.m3u8" type="application/x-mpegURL" />
 </video>
 <script>
     var player = videojs('#player');
 </script>
 </body>
+ <p>HOSTNAME: '$1'</p>
+ <p>PORT_HTTP: 80 - URL: 'http://$1:80/player.html'</p>
+ <p>PORT_SSL: 443 - URL: 'https://$1:443/player.html'</p>
+ <p>PORT_RTMP: 1935 - URL: 'rtmp://$1:1935/live/stream'</p> 
+ <p>PORT_HLS: 8080 - URL: 'http://$1:8080/live/stream.m3u8'</p>
+ <p>PORT_RTSP: 8554 - URL: 'rtsp://$1:8554/rtsp/stream'</p> 
 </html>
 EOF
 
@@ -810,7 +822,7 @@ http {
         sendfile        off;
         listen 8080;
 
-        location /hls {
+        location /live {
             # Disable cache
             add_header 'Cache-Control' 'no-cache';
 

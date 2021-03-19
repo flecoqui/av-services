@@ -137,7 +137,7 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az group create -n ${RESOURCE_GROUP} -l ${RESOURCE_REGION}
+
     az deployment group create -g ${RESOURCE_GROUP} -n ${RESOURCE_GROUP}dep --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
     outputs=$(az deployment group show --name ${RESOURCE_GROUP}dep  -g ${RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
@@ -219,9 +219,9 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "Testing output HLS..."
     echo ""
-    echo "Output HLS:  http://${AV_HOSTNAME}:8080/hls/stream.m3u8"
-    echo "HLS Command: ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 "
-    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/hls/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
+    echo "Output HLS:  http://${AV_HOSTNAME}:8080/live/stream.m3u8"
+    echo "HLS Command: ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 "
+    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
     test_output_files testhls || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "HLS Test failed - check files testhlsx.mp4"
@@ -233,9 +233,9 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "Testing output RTSP..."
     echo ""
-    echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/test"
-    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
-    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/test -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
+    echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/rtsp/stream"
+    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
+    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
     test_output_files testrtsp || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTSP Test failed - check files testrtsp.mp4"

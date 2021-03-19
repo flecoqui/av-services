@@ -20,10 +20,10 @@ echo '<!DOCTYPE html>
  </script>
  </body>
  <p>HOSTNAME: '$HOSTNAME'</p>
- <p>PORT_HLS: '$PORT_HLS' - URL: http://'$HOSTNAME:$PORT_HLS'/live/stream.m3u8</p>
- <p>PORT_HTTP: '$PORT_HTTP' - URL: http://'$HOSTNAME:$PORT_HTTP'/player.html</p>
- <p>PORT_SSL: '$PORT_SSL' - URL: https://'$HOSTNAME:$PORT_SSL'/player.html</p>
- <p>PORT_RTMP: '$PORT_RTMP' - URL: rtmp://'$HOSTNAME:$PORT_RTMP'/live/stream</p>
+ <p>PORT_HTTP: '$PORT_HTTP' - URL: 'http://$HOSTNAME:$PORT_HTTP/player.html'</p>
+ <p>PORT_SSL: '$PORT_SSL' - URL: 'https://$HOSTNAME:$PORT_SSL/player.html'</p>
+ <p>PORT_RTMP: '$PORT_RTMP' - URL: 'rtmp://$HOSTNAME:$PORT_RTMP/live/stream'</p> 
+ <p>PORT_HLS: '$PORT_HLS' - URL: 'http://$HOSTNAME:$PORT_HLS/live/stream.m3u8'</p>
  </html>' > /usr/local/nginx/html/player.html
 
 echo "worker_processes  1;
