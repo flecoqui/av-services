@@ -196,7 +196,7 @@ if [[ "${action}" == "deploy" ]] ; then
     DEVICE_CONNECTION_STRING=$(az iot hub device-identity connection-string show --device-id $AV_EDGE_DEVICE --hub-name $IOTHUB --query='connectionString')
     echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
     DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING//\//\\/} 
-    CUSTOM_STRING=$(sed "s/xDEVICE_CONNECTION_STRINGx/${DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | base64 )
+    CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g"  | base64 )
 
     az deployment group create -g ${RESOURCE_GROUP} -n "${RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} customData="${CUSTOM_STRING}" --verbose -o json
     checkError

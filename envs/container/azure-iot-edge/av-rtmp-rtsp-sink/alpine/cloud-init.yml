@@ -41,28 +41,28 @@ runcmd:
         # Prevent iotedge from starting before the device connection string is set in config.yaml
         sudo ln -s /dev/null /etc/systemd/system/iotedge.service
         apt install iotedge
-        sed -i "s#\(device_connection_string: \).*#\1\"xDEVICE_CONNECTION_STRINGx\"#g" /etc/iotedge/config.yaml 
+        sed -i "s#\(device_connection_string: \).*#\1\"{DEVICE_CONNECTION_STRING}\"#g" /etc/iotedge/config.yaml 
         systemctl unmask iotedge
         systemctl start iotedge
 
-        mkdir /home/lvaadmin/samples
-        mkdir /home/lvaadmin/samples/input
-        mkdir /home/lvaadmin/samples/output
+        mkdir /home/{AV_ADMIN}/samples
+        mkdir /home/{AV_ADMIN}/samples/input
+        mkdir /home/{AV_ADMIN}/samples/output
 
-        curl https://lvamedia.blob.core.windows.net/public/camera-300s.mkv > /home/lvaadmin/samples/input/camera-300s.mkv
-        curl https://lvamedia.blob.core.windows.net/public/lots_284.mkv > /home/lvaadmin/samples/input/lots_284.mkv
-        curl https://lvamedia.blob.core.windows.net/public/lots_015.mkv > /home/lvaadmin/samples/input/lots_015.mkv
-        curl https://lvamedia.blob.core.windows.net/public/t2.mkv > /home/lvaadmin/samples/input/t2.mkv
+        curl https://lvamedia.blob.core.windows.net/public/camera-300s.mkv > /home/{AV_ADMIN}/samples/input/camera-300s.mkv
+        curl https://lvamedia.blob.core.windows.net/public/lots_284.mkv > /home/{AV_ADMIN}/samples/input/lots_284.mkv
+        curl https://lvamedia.blob.core.windows.net/public/lots_015.mkv > /home/{AV_ADMIN}/samples/input/lots_015.mkv
+        curl https://lvamedia.blob.core.windows.net/public/t2.mkv > /home/{AV_ADMIN}/samples/input/t2.mkv
 
-        chown -R lvaadmin /home/lvaadmin/samples/
+        chown -R {AV_ADMIN} /home/{AV_ADMIN}/samples/
 
         mkdir /var/local/mediaservices
         mkdir /var/local/mediaservices/tmp
         mkdir /var/lib/azuremediaservices
         mkdir /var/media
 
-        chown -R lvaadmin /var/local/mediaservices/
-        chown -R lvaadmin /var/lib/azuremediaservices
-        chown -R lvaadmin /var/media
+        chown -R {AV_ADMIN} /var/local/mediaservices/
+        chown -R {AV_ADMIN} /var/lib/azuremediaservices
+        chown -R {AV_ADMIN} /var/media
 
       ) &
