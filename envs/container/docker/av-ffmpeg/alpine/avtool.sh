@@ -137,7 +137,7 @@ if [[ "${action}" == "install" ]] ; then
         stable"
     sudo apt-get -y update
     checkAVError
-    sudo apt-get -y install docker-ce docker-ce-cli containerd.io    
+    sudo apt-get -y install docker.io    
     checkAVError
     sudo groupadd docker || true
     sudo usermod -aG docker ${USER} || true
