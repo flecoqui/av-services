@@ -138,8 +138,8 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-
-    az deployment group create -g ${RESOURCE_GROUP} -n ${RESOURCE_GROUP}dep --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
+    az create -n ${RESOURCE_GROUP}  -l ${RESOURCE_REGION} 
+    az deployment group create -g ${RESOURCE_GROUP} -n "${RESOURCE_GROUP}dep" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
     outputs=$(az deployment group show --name ${RESOURCE_GROUP}dep  -g ${RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
     AV_SASTOKEN=$(jq -r .storageSasToken.value <<< $outputs)
