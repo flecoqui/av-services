@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Service name prefix must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 50 characters in length."
+      }
+    }
+  },
+  "variables": {
+    "registryNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
+    "registryName": "[concat(variables('registryNamePrefix'), uniqueString(concat(resourceGroup().id, variables('registryNamePrefix'))),'acr')]",
+    "iotHubName": "[toLower(concat(parameters('namePrefix'),'iothub' ))]"
+  },
+  "resources": [   
+    {
+      "type": "Microsoft.Devices/IotHubs",
+      "comments": "LVA is hosted on an IoT Edge device. The host device is managed through an IoT Hub. The keys for accessing the hub are in the template's output.",
+      "apiVersion": "2019-11-04",
+      "name": "[variables('iotHubName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+          "name": "S1",
+          "capacity": 1
+      },
+      "properties": {
+      }
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "comments": "The basic sample scenarios do not require a registry. However, this will be used for more advanced scenarios.",
+      "apiVersion": "2019-05-01",
+      "name": "[variables('registryName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+          "name": "Basic"
+      },
+      "properties": {
+          "adminUserEnabled": true
+      }
+    }    
+  ],
+  "outputs": {
+    "iotHubName": {
+      "type": "string",
+      "value": "[variables('iotHubName')]"
+    },
+    "registryName": {
+      "type": "string",
+      "value": "[variables('registryName')]"
+    }
+ }
+}
