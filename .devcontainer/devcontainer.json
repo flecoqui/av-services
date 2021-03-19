@@ -1,0 +1,17 @@
+{
+  "name": "Audio Video Workspace",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "avworkspace",
+  "workspaceFolder": "/avworkspace",
+  "settings": {
+    "terminal.integrated.inheritEnv": false,
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "extensions": [
+    "yzhang.markdown-all-in-one",
+    "tomoyukim.vscode-mermaid-editor",
+    "eamodio.gitlens",
+    "DavidAnson.vscode-markdownlint"
+  ],
+  "postAttachCommand": "mkdir -p /home/$(id -un)/.ssh && touch /home/$(id -un)/.ssh/config "
+}

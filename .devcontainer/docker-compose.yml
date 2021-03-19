@@ -1,0 +1,13 @@
+version: '3'
+services:
+  avworkspace:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - "..:/avworkspace"
+      - "~/.gitignore:/home/avuser/.gitignore"
+      - "~/.ssh:/home/avuser/.ssh"
+    ports:
+      - "127.0.0.1:8888:8888"
+    command: sleep infinity
