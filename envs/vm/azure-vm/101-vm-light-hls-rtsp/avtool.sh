@@ -60,7 +60,7 @@ if [[ $# -eq 0 || -z $action || -z $configuration_file ]]; then
     usage
     exit 1
 fi
-if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == deploy && ! $action == undeploy && ! $action == test ! $action == status ]]; then
+if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == deploy && ! $action == undeploy && ! $action == test &&  ! $action == status ]]; then
     echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, test"
     usage
     exit 1
