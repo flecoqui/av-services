@@ -177,6 +177,12 @@ if [[ "${action}" == "stop" ]] ; then
     echo "Stop done"
     exit 0
 fi
+if [[ "${action}" == "status" ]] ; then
+    echo "Checking status..."
+    az vm get-instance-view -n ${AV_VMNAME} -g ${RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
+    echo "Status done"
+    exit 0
+fi
 if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testrtmp*.mp4
     rm -f "${AV_TEMPDIR}"/testhls*.mp4
