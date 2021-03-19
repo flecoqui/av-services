@@ -133,6 +133,7 @@ if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
     echo "Installing azure cli"
     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    az config set extension.use_dynamic_install=yes_without_prompt
     echo "Installing ffmpeg"
     sudo apt-get -y update
     sudo apt-get -y install ffmpeg
@@ -176,18 +177,24 @@ if [[ "${action}" == "deploy" ]] ; then
 
     # capture resource configuration in variables
     IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
+    echo "IOTHUB=${IOTHUB}"
     IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${IOTHUB} --query='connectionString')
+    echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
     CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
+    echo "CONTAINER_REGISTRY=${CONTAINER_REGISTRY}"
     CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $CONTAINER_REGISTRY --query 'username' | tr -d \")
+    echo "CONTAINER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}"
     CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
+    echo "CONTAINER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}"
 
     # configure the hub for an edge device
     echo "registering device..."
     if test -z "$(az iot hub device-identity list -n $IOTHUB | grep "deviceId" | grep $AV_EDGE_DEVICE)"; then
-        az iot hub device-identity create --hub-name $IOTHUB --device-id $EDGE_DEVICE --edge-enabled -o none
+        az iot hub device-identity create --hub-name $IOTHUB --device-id $AV_EDGE_DEVICE --edge-enabled -o none
         checkError
     fi
     DEVICE_CONNECTION_STRING=$(az iot hub device-identity connection-string show --device-id $AV_EDGE_DEVICE --hub-name $IOTHUB --query='connectionString')
+    echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
     DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING//\//\\/} 
     CUSTOM_STRING=$(sed "s/xDEVICE_CONNECTION_STRINGx/${DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml)
 
