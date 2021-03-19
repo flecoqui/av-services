@@ -123,6 +123,7 @@ if [[ "${action}" == "install" ]] ; then
         $(lsb_release -cs) \
         stable"
     sudo apt-get -y update
+    sudo apt-get -y install  jq
     sudo apt-get -y install docker.io    
     sudo groupadd docker || true
     sudo usermod -aG docker ${USER} || true

@@ -120,6 +120,7 @@ if [[ "${action}" == "install" ]] ; then
     echo "Installing ffmpeg"
     sudo apt-get -y update
     sudo apt-get -y install ffmpeg
+    sudo apt-get -y install  jq
     echo "Downloading content"
     wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
     exit 0

@@ -137,6 +137,7 @@ if [[ "${action}" == "install" ]] ; then
         stable"
     sudo apt-get -y update
     checkAVError
+    sudo apt-get -y install  jq
     sudo apt-get -y install docker.io    
     checkAVError
     sudo groupadd docker || true
