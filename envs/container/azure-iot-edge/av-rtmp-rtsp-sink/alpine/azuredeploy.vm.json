@@ -35,13 +35,42 @@
         "description": "Virtual Machine Size: Standard_DS3_v2"
       }
     },
-    "rtmpPath": {
+    "portHTTP": {
       "type": "string",
-      "defaultValue": "live/stream",
+      "defaultValue": "80",
       "metadata": {
-        "description": "RTMP path associated with the live service"
+        "description": "http port"
       }
     },
+    "portSSL": {
+      "type": "string",
+      "defaultValue": "443",
+      "metadata": {
+        "description": "ssl port"
+      }
+    },
+    "portRTMP": {
+      "type": "string",
+      "defaultValue": "1935",
+      "metadata": {
+        "description": "rtmp port"
+      }
+    },
+    "portRTSP": {
+      "type": "string",
+      "defaultValue": "8554",
+      "metadata": {
+        "description": "rtsp port"
+      }
+    },
+    "portHLS": {
+      "type": "string",
+      "defaultValue": "8080",
+      "metadata": {
+        "description": "hls port"
+      }
+    },
+
     "containerName": {
       "type": "string",
       "defaultValue": "rtmpcontainer",
@@ -138,26 +167,12 @@
             }
           },
           {
-            "name": "rdp",
-            "properties": {
-              "description": "RDP port",
-              "protocol": "Tcp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "3389",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 101,
-              "direction": "Inbound"
-            }
-          },
-          {
             "name": "rtmp",
             "properties": {
               "description": "rtmp port",
               "protocol": "Tcp",
               "sourcePortRange": "*",
-              "destinationPortRange": "1935",
+              "destinationPortRange": "[parameters('portRTMP')]",
               "sourceAddressPrefix": "Internet",
               "destinationAddressPrefix": "*",
               "access": "Allow",
@@ -171,7 +186,7 @@
               "description": "hls server port",
               "protocol": "Tcp",
               "sourcePortRange": "*",
-              "destinationPortRange": "8080",
+              "destinationPortRange": "[parameters('portHLS')]",
               "sourceAddressPrefix": "Internet",
               "destinationAddressPrefix": "*",
               "access": "Allow",
@@ -185,11 +200,25 @@
               "description": "http server port",
               "protocol": "Tcp",
               "sourcePortRange": "*",
-              "destinationPortRange": "80",
+              "destinationPortRange": "[parameters('portHTTP')]",
               "sourceAddressPrefix": "Internet",
               "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 104,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "ssl",
+            "properties": {
+              "description": "ssl server port",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[parameters('portSSL')]",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 105,
               "direction": "Inbound"
             }
           },
@@ -199,11 +228,11 @@
               "description": "rtsp server port",
               "protocol": "Tcp",
               "sourcePortRange": "*",
-              "destinationPortRange": "8554",
+              "destinationPortRange": "[parameters('portRTSP')]",
               "sourceAddressPrefix": "Internet",
               "destinationAddressPrefix": "*",
               "access": "Allow",
-              "priority": 105,
+              "priority": 106,
               "direction": "Inbound"
             }
           },
@@ -213,28 +242,14 @@
               "description": "rtsp server udp port",
               "protocol": "Udp",
               "sourcePortRange": "*",
-              "destinationPortRange": "8554",
-              "sourceAddressPrefix": "Internet",
-              "destinationAddressPrefix": "*",
-              "access": "Allow",
-              "priority": 106,
-              "direction": "Inbound"
-            }
-          },
-          {
-            "name": "rtspudp2",
-            "properties": {
-              "description": "rtsp server udp port 2",
-              "protocol": "Udp",
-              "sourcePortRange": "*",
-              "destinationPortRange": "7001",
+              "destinationPortRange": "[parameters('portRTSP')]",
               "sourceAddressPrefix": "Internet",
               "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 107,
               "direction": "Inbound"
             }
-          }      
+          }
         ]
       }
     },
@@ -404,7 +419,7 @@
     },
     "ffmpegCmd": {
       "type": "string",
-      "value": "[concat('ffmpeg.exe -v verbose -f dshow -i video=\"Integrated Webcam\":audio=\"Microphone (Realtek(R) Audio)\"  -video_size 1280x720 -strict -2 -c:a aac -b:a 192k -ar 44100 -r 30 -g 60 -keyint_min 60 -b:v 2000000 -c:v libx264 -preset veryfast  -profile main -level 3.0 -pix_fmt yuv420p -bufsize 1800k -maxrate 400k  -f flv rtmp://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com:1935/',  parameters('rtmpPath'))]"
+      "value": "[concat('ffmpeg.exe -v verbose -f dshow -i video=\"Integrated Webcam\":audio=\"Microphone (Realtek(R) Audio)\"  -video_size 1280x720 -strict -2 -c:a aac -b:a 192k -ar 44100 -r 30 -g 60 -keyint_min 60 -b:v 2000000 -c:v libx264 -preset veryfast  -profile main -level 3.0 -pix_fmt yuv420p -bufsize 1800k -maxrate 400k  -f flv rtmp://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com:1935/live/stream')]"
     }
   }
 }

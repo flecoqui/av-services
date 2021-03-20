@@ -80,6 +80,11 @@ if [[ ! $action == login && ! $action == install && ! $action == start && ! $act
 fi
 RESOURCE_GROUP=av-rtmp-rtsp-lva-rg
 RESOURCE_REGION=eastus2
+AV_SERVICE=av-rtmp-rtsp-sink
+AV_FLAVOR=alpine
+AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
+AV_IMAGE_FOLDER=av-services
+AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
 AV_EDGE_DEVICE=rtmp-rtsp-lva-device
 AV_RTMP_PORT=1935
 AV_RTMP_PATH=live/stream
@@ -89,11 +94,20 @@ AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
 AV_LOGIN=avvmadmin
 AV_PASSWORD={YourPassword}
+AV_COMPANYNAME=contoso
+AV_PORT_HLS=8080
+AV_PORT_HTTP=80
+AV_PORT_SSL=443
+AV_PORT_RTMP=1935
+AV_PORT_RTSP=8554
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
 RESOURCE_GROUP=${RESOURCE_GROUP}
 RESOURCE_REGION=${RESOURCE_REGION}
+AV_IMAGE_NAME=${AV_IMAGE_NAME}
+AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
+AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
 AV_EDGE_DEVICE=${AV_EDGE_DEVICE}
 AV_RTMP_PORT=${AV_RTMP_PORT}
 AV_RTMP_PATH=${AV_RTMP_PATH}
@@ -105,12 +119,22 @@ AV_LOGIN=${AV_LOGIN}
 AV_PASSWORD=${AV_PASSWORD}
 AV_SASTOKEN=
 AV_STORAGENAME=
+AV_COMPANYNAME=${AV_COMPANYNAME}
+AV_HOSTNAME=${AV_HOSTNAME}
+AV_PORT_HLS=${AV_PORT_HLS}
+AV_PORT_HTTP=${AV_PORT_HTTP}
+AV_PORT_SSL=${AV_PORT_SSL}
+AV_PORT_RTMP=${AV_PORT_RTMP}
+AV_PORT_RTSP=${AV_PORT_RTSP}
 AV_TEMPDIR=$(mktemp -d)
 EOF
 fi
 # Read variables in configuration file
 export $(grep RESOURCE_GROUP "$repoRoot"/"$configuration_file")
 export $(grep RESOURCE_REGION "$repoRoot"/"$configuration_file")
+export $(grep AV_IMAGE_NAME "$repoRoot"/"$configuration_file")
+export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
+export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_EDGE_DEVICE "$repoRoot"/"$configuration_file")
 export $(grep AV_RTMP_PORT "$repoRoot"/"$configuration_file")
 export $(grep AV_RTMP_PATH "$repoRoot"/"$configuration_file")
@@ -122,6 +146,13 @@ export $(grep AV_STORAGENAME "$repoRoot"/"$configuration_file")
 export $(grep AV_SASTOKEN "$repoRoot"/"$configuration_file")
 export $(grep AV_LOGIN "$repoRoot"/"$configuration_file"  )
 export $(grep AV_PASSWORD "$repoRoot"/"$configuration_file" )
+export $(grep AV_COMPANYNAME "$repoRoot"/"$configuration_file")
+export $(grep AV_HOSTNAME "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_HLS "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_HTTP "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_SSL "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_RTMP "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_RTSP "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
@@ -163,42 +194,35 @@ if [[ "${action}" == "login" ]] ; then
 fi
 
 if [[ "${action}" == "deploy" ]] ; then
-    echo "Deploying service..."
+    echo "Deploying services..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
+    echo "Deploying IoT Hub and Azure Container Registry..."
     az group create -n ${RESOURCE_GROUP}  -l ${RESOURCE_REGION} 
     checkError
     az deployment group create -g ${RESOURCE_GROUP} -n "${RESOURCE_GROUP}dep" --template-file azuredeploy.iothub.json --parameters namePrefix=${AV_PREFIXNAME} --verbose -o json
     checkError
     
-    echo -e "\nResource group now contains these resources:"
     RESOURCES=$(az resource list --resource-group "${RESOURCE_GROUP}" --query '[].{name:name,"Resource Type":type}' -o table)
-    echo "${RESOURCES}"
-
     # capture resource configuration in variables
     IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
-    echo "IOTHUB=${IOTHUB}"
     IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${IOTHUB} --query='connectionString')
-    echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
     CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
-    echo "CONTAINER_REGISTRY=${CONTAINER_REGISTRY}"
     CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $CONTAINER_REGISTRY --query 'username' | tr -d \")
-    echo "CONTAINER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}"
     CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
-    echo "CONTAINER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}"
 
     # configure the hub for an edge device
-    echo "registering device..."
+    echo "Registering device..."
     if test -z "$(az iot hub device-identity list -n $IOTHUB | grep "deviceId" | grep $AV_EDGE_DEVICE)"; then
         az iot hub device-identity create --hub-name $IOTHUB --device-id $AV_EDGE_DEVICE --edge-enabled -o none
         checkError
     fi
     DEVICE_CONNECTION_STRING=$(az iot hub device-identity connection-string show --device-id $AV_EDGE_DEVICE --hub-name $IOTHUB --query='connectionString')
-    echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
     DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING//\//\\/} 
-    CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g"  | base64 )
+    CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" | base64 )
 
-    az deployment group create -g ${RESOURCE_GROUP} -n "${RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} customData="${CUSTOM_STRING}" --verbose -o json
+    echo "Deploying Virtual Machine..."
+    az deployment group create -g ${RESOURCE_GROUP} -n "${RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} customData="${CUSTOM_STRING}" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP} --verbose -o json
     checkError
     outputs=$(az deployment group show --name ${RESOURCE_GROUP}dep  -g ${RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
@@ -210,8 +234,56 @@ if [[ "${action}" == "deploy" ]] ; then
     RESOURCES=$(az resource list --resource-group "${RESOURCE_GROUP}" --query '[].{name:name,"Resource Type":type}' -o table)
     echo "${RESOURCES}"
     VNET=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Network\/virtualNetworks$/ {print $1}')
+    CONTAINER_REGISTRY_DNS_NAME=$(az acr show -n "${CONTAINER_REGISTRY}" --query loginServer --output json)
+    echo "IOTHUB=${IOTHUB}"
+    echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
+    echo "CONTAINER_REGISTRY=${CONTAINER_REGISTRY}"
+    echo "CONTAINER_REGISTRY_DNS_NAME=${CONTAINER_REGISTRY_DNS_NAME}"
+    echo "CONTAINER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}"
+    echo "CONTAINER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}"
+    echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
 
+    echo "Building container image..."
+    imageNameId=${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}':{{.Run.ID}}'
+    imageTag='latest'
+    latestImageName=${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}':'$imageTag
 
+    az acr task create  --image "$imageNameId"   -n "${AV_CONTAINER_NAME}" -r "${CONTAINER_REGISTRY}" \
+    --arg PORT_RTSP=${AV_PORT_RTSP} --arg  PORT_RTMP=${AV_PORT_RTMP} --arg  PORT_SSL=${AV_PORT_SSL}  \
+     --arg  PORT_HTTP=${AV_PORT_HTTP} --arg  PORT_HLS=${AV_PORT_HLS} --arg  HOSTNAME=${AV_HOSTNAME} --arg  COMPANYNAME=${AV_COMPANYNAME} \
+         -c "https://github.com/flecoqui/av-services.git#main:envs/container/docker/av-rtmp-rtsp-sink/alpine" -f "Dockerfile" \
+         --commit-trigger-enabled false --base-image-trigger-enabled false 
+    echo
+    echo "Launching the task to build service: ${AV_CONTAINER_NAME}" 
+    echo
+    az acr task run  -n "${AV_CONTAINER_NAME}" -r "${CONTAINER_REGISTRY}"
+
+    az iot edge set-modules --device-id [device id] --hub-name [hub name] --content [file path]
+
+    echo
+    echo "Preparing the deployment manifest: deployment.template.json" 
+    echo
+    sed -i "s/{CONTAINER_REGISTRY}/$CONTAINER_REGISTRY/" < ./deployment.rtmp.template.json >  ./deployment.template.json
+    sed -i "s/{CONTAINER_REGISTRY_USERNAME}/$CONTAINER_REGISTRY_USERNAME/" ./deployment.template.json
+    sed -i "s/{CONTAINER_REGISTRY_PASSWORD}/${CONTAINER_REGISTRY_PASSWORD//\//\\/}/" ./deployment.template.json
+    sed -i "s/{CONTAINER_REGISTRY_DNS_NAME}/${CONTAINER_REGISTRY_DNS_NAME//\//\\/}/" ./deployment.template.json
+    sed -i "s/{AV_IMAGE_NAME}/${AV_IMAGE_NAME}/" ./deployment.template.json
+    sed -i "s/{AV_IMAGE_FOLDER}/${AV_IMAGE_FOLDER}/" ./deployment.template.json
+    sed -i "s/{AV_PORT_HTTP}/$AV_PORT_HTTP/" ./deployment.template.json
+    sed -i "s/{AV_PORT_SSL}/$AV_PORT_SSL/" ./deployment.template.json
+    sed -i "s/{AV_PORT_RTMP}/$AV_PORT_RTMP/" ./deployment.template.json
+    sed -i "s/{AV_PORT_RTSP}/$AV_PORT_RTSP/" ./deployment.template.json
+    sed -i "s/{AV_PORT_HLS}/$AV_PORT_HLS/" ./deployment.template.json
+    sed -i "s/{AV_HOSTNAME}/$AV_HOSTNAME/" ./deployment.template.json
+    sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/" ./deployment.template.json
+    sed -i "s/{VIDEO_OUTPUT_FOLDER_ON_DEVICE}/\/var\/media/" ./deployment.template.json
+    sed -i "s/{APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
+    cat ./deployment.template.json
+
+    echo
+    echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${IOTHUB} " 
+    echo
+    az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${IOTHUB} --content [file path]
     echo "Deployment done"
     exit 0
 fi
