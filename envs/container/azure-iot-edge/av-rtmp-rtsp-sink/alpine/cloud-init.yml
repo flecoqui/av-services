@@ -37,39 +37,31 @@ runcmd:
         while [ $(ps -ef | grep -v grep | grep docker | wc -l) -le 0 ]; do 
           sleep 3
         done
-
         # Prevent iotedge from starting before the device connection string is set in config.yaml
         sudo ln -s /dev/null /etc/systemd/system/iotedge.service
         apt install iotedge
         sed -i "s#\(device_connection_string: \).*#\1\"{DEVICE_CONNECTION_STRING}\"#g" /etc/iotedge/config.yaml 
         systemctl unmask iotedge
         systemctl start iotedge
-
         mkdir /home/{AV_ADMIN}/samples
         mkdir /home/{AV_ADMIN}/samples/input
         mkdir /home/{AV_ADMIN}/samples/output
-
         iptables -A INPUT -p tcp --dport {AV_PORT_HTTP} -j ACCEPT
         iptables -A INPUT -p tcp --dport {AV_PORT_HLS} -j ACCEPT
         iptables -A INPUT -p tcp --dport {AV_PORT_RTSP} -j ACCEPT
         iptables -A INPUT -p udp --dport {AV_PORT_RTSP} -j ACCEPT
         iptables -A INPUT -p tcp --dport {AV_PORT_SSL} -j ACCEPT
         iptables -A INPUT -p tcp --dport {AV_PORT_RTMP} -j ACCEPT
-
         curl https://lvamedia.blob.core.windows.net/public/camera-300s.mkv > /home/{AV_ADMIN}/samples/input/camera-300s.mkv
         curl https://lvamedia.blob.core.windows.net/public/lots_284.mkv > /home/{AV_ADMIN}/samples/input/lots_284.mkv
         curl https://lvamedia.blob.core.windows.net/public/lots_015.mkv > /home/{AV_ADMIN}/samples/input/lots_015.mkv
         curl https://lvamedia.blob.core.windows.net/public/t2.mkv > /home/{AV_ADMIN}/samples/input/t2.mkv
-
         chown -R {AV_ADMIN} /home/{AV_ADMIN}/samples/
-
         mkdir /var/local/mediaservices
         mkdir /var/local/mediaservices/tmp
         mkdir /var/lib/azuremediaservices
         mkdir /var/media
-
         chown -R {AV_ADMIN} /var/local/mediaservices/
         chown -R {AV_ADMIN} /var/lib/azuremediaservices
         chown -R {AV_ADMIN} /var/media
-
       ) &
