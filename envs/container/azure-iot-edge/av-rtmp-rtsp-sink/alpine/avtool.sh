@@ -110,7 +110,6 @@ AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
 AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
 AV_EDGE_DEVICE=${AV_EDGE_DEVICE}
 AV_RTMP_PORT=${AV_RTMP_PORT}
-AV_RTMP_PATH=${AV_RTMP_PATH}
 AV_PREFIXNAME=${AV_PREFIXNAME}
 AV_VMNAME=${AV_VMNAME}
 AV_HOSTNAME=${AV_HOSTNAME}
@@ -137,7 +136,6 @@ export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_EDGE_DEVICE "$repoRoot"/"$configuration_file")
 export $(grep AV_RTMP_PORT "$repoRoot"/"$configuration_file")
-export $(grep AV_RTMP_PATH "$repoRoot"/"$configuration_file")
 export $(grep AV_PREFIXNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_VMNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_HOSTNAME "$repoRoot"/"$configuration_file")
@@ -222,7 +220,7 @@ if [[ "${action}" == "deploy" ]] ; then
     CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" | base64 )
 
     echo "Deploying Virtual Machine..."
-    az deployment group create -g ${RESOURCE_GROUP} -n "${RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} customData="${CUSTOM_STRING}" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP} --verbose -o json
+    az deployment group create -g ${RESOURCE_GROUP} -n "${RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD}  containerName=${AV_CONTAINERNAME} customData="${CUSTOM_STRING}" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP} --verbose -o json
     checkError
     outputs=$(az deployment group show --name ${RESOURCE_GROUP}dep  -g ${RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
