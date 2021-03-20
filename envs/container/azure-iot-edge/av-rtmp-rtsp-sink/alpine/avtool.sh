@@ -262,9 +262,9 @@ if [[ "${action}" == "deploy" ]] ; then
     az acr task run  -n "${AV_CONTAINER_NAME}" -r "${CONTAINER_REGISTRY}"
 
     echo
-    echo "Preparing the deployment manifest: deployment.template.json" 
+    echo "Preparing the deployment manifest: deployment.rtmp.amd64.json" 
     echo
-    sed "s/{CONTAINER_REGISTRY}/$CONTAINER_REGISTRY/" < ./deployment.rtmp.template.json >  ./deployment.template.json
+    sed "s/{CONTAINER_REGISTRY}/$CONTAINER_REGISTRY/" < ./deployment.rtmp.amd64.json >  ./deployment.template.json
     sed -i "s/{CONTAINER_REGISTRY_USERNAME}/$CONTAINER_REGISTRY_USERNAME/" ./deployment.template.json
     sed -i "s/{CONTAINER_REGISTRY_PASSWORD}/${CONTAINER_REGISTRY_PASSWORD//\//\\/}/" ./deployment.template.json
     sed -i "s/{CONTAINER_REGISTRY_DNS_NAME}/${CONTAINER_REGISTRY_DNS_NAME//\//\\/}/" ./deployment.template.json
