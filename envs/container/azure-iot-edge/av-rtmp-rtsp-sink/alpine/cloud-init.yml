@@ -46,12 +46,6 @@ runcmd:
         mkdir /home/{AV_ADMIN}/samples
         mkdir /home/{AV_ADMIN}/samples/input
         mkdir /home/{AV_ADMIN}/samples/output
-        sudo iptables -A INPUT -p tcp --dport {AV_PORT_HTTP} -j ACCEPT
-        sudo iptables -A INPUT -p tcp --dport {AV_PORT_HLS} -j ACCEPT
-        sudo iptables -A INPUT -p tcp --dport {AV_PORT_RTSP} -j ACCEPT
-        sudo iptables -A INPUT -p udp --dport {AV_PORT_RTSP} -j ACCEPT
-        sudo iptables -A INPUT -p tcp --dport {AV_PORT_SSL} -j ACCEPT
-        sudo iptables -A INPUT -p tcp --dport {AV_PORT_RTMP} -j ACCEPT
         curl https://lvamedia.blob.core.windows.net/public/camera-300s.mkv > /home/{AV_ADMIN}/samples/input/camera-300s.mkv
         curl https://lvamedia.blob.core.windows.net/public/lots_284.mkv > /home/{AV_ADMIN}/samples/input/lots_284.mkv
         curl https://lvamedia.blob.core.windows.net/public/lots_015.mkv > /home/{AV_ADMIN}/samples/input/lots_015.mkv
