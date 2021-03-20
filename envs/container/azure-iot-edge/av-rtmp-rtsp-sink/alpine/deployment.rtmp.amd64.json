@@ -59,7 +59,6 @@
             }
           }
         }
-      }
     },
     "$edgeHub": {
       "properties.desired": {
