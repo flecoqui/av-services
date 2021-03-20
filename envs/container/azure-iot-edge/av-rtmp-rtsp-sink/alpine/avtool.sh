@@ -261,8 +261,6 @@ if [[ "${action}" == "deploy" ]] ; then
     echo
     az acr task run  -n "${AV_CONTAINER_NAME}" -r "${CONTAINER_REGISTRY}"
 
-    az iot edge set-modules --device-id [device id] --hub-name [hub name] --content [file path]
-
     echo
     echo "Preparing the deployment manifest: deployment.template.json" 
     echo
