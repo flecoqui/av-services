@@ -237,7 +237,7 @@ if [[ "${action}" == "deploy" ]] ; then
     RESOURCES=$(az resource list --resource-group "${RESOURCE_GROUP}" --query '[].{name:name,"Resource Type":type}' -o table)
     echo "${RESOURCES}"
     VNET=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Network\/virtualNetworks$/ {print $1}')
-    CONTAINER_REGISTRY_DNS_NAME=$(az acr show -n "${CONTAINER_REGISTRY}" --query loginServer --output json)
+    CONTAINER_REGISTRY_DNS_NAME=$(az acr show -n "${CONTAINER_REGISTRY}" --query loginServer --output tsv)
     echo "IOTHUB=${IOTHUB}"
     echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
     echo "CONTAINER_REGISTRY=${CONTAINER_REGISTRY}"
@@ -284,7 +284,7 @@ if [[ "${action}" == "deploy" ]] ; then
     echo
     echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${IOTHUB} " 
     echo
-    az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${IOTHUB} --content [file path]
+    az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${IOTHUB} --content ./deployment.template.json
     echo "Deployment done"
     exit 0
 fi
