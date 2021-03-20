@@ -58,6 +58,7 @@
             }
           }
         }
+      }
     },
     "$edgeHub": {
       "properties.desired": {
@@ -86,3 +87,4 @@
     }
   }
 }
+
