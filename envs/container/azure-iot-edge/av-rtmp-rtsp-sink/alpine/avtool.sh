@@ -260,7 +260,20 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Launching the task to build service: ${AV_CONTAINER_NAME}" 
     echo
     az acr task run  -n "${AV_CONTAINER_NAME}" -r "${CONTAINER_REGISTRY}"
-
+    tagIDwithQuotes=$(az acr task list-runs  --registry "${CONTAINER_REGISTRY}" -n "${AV_CONTAINER_NAME}" --query [0].runId) 
+    tagID=$(echo "$tagIDwithQuotes" | tr -d '"')
+    echo "Build Image Run ID: $tagID"
+    count=$(az acr task logs  -n "${AV_CONTAINER_NAME}" -r "${CONTAINER_REGISTRY}"  | grep -c "Run ID: $tagID was successful after") || true
+    if [[ $count = '1' ]]
+    then
+        echo "Image successfully built"
+    else
+        echo "Error while building the image"
+        exit 1
+    fi    
+    az acr repository  untag  -n "${CONTAINER_REGISTRY}" --image ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:latest 
+    az acr  import  -n "${CONTAINER_REGISTRY}" --source ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:${tagID} --image ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:latest
+    
     echo
     echo "Preparing the deployment manifest: deployment.rtmp.amd64.json" 
     echo
