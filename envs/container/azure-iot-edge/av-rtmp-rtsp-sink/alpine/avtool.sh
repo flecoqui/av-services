@@ -259,8 +259,8 @@ if [[ "${action}" == "deploy" ]] ; then
     latestImageName=${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}':'$imageTag
 
     az acr task create  --image "$imageNameId"   -n "${AV_CONTAINER_NAME}" -r "${CONTAINER_REGISTRY}" \
-    --arg PORT_RTSP=${AV_PORT_RTSP} --arg  PORT_RTMP=${AV_PORT_RTMP} --arg  PORT_SSL=${AV_PORT_SSL}  \
-     --arg  PORT_HTTP=${AV_PORT_HTTP} --arg  PORT_HLS=${AV_PORT_HLS} --arg  HOSTNAME=${AV_HOSTNAME} --arg  COMPANYNAME=${AV_COMPANYNAME} \
+    --arg AV_PORT_RTSP=${AV_PORT_RTSP} --arg  AV_PORT_RTMP=${AV_PORT_RTMP} --arg  AV_PORT_SSL=${AV_PORT_SSL}  \
+     --arg  AV_PORT_HTTP=${AV_PORT_HTTP} --arg  AV_PORT_HLS=${AV_PORT_HLS} --arg  AV_HOSTNAME=${AV_HOSTNAME} --arg  AV_COMPANYNAME=${AV_COMPANYNAME} \
          -c "https://github.com/flecoqui/av-services.git#main:envs/container/docker/av-rtmp-rtsp-sink/alpine" -f "Dockerfile" \
          --commit-trigger-enabled false --base-image-trigger-enabled false 
     echo
