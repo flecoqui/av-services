@@ -220,6 +220,8 @@ if [[ "${action}" == "deploy" ]] ; then
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=$AV_STORAGENAME" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=$AV_SASTOKEN" >> "$repoRoot"/"$configuration_file"
 
+    # tempo waiting 
+    sleep 20
     RESOURCES=$(az resource list --resource-group "${RESOURCE_GROUP}" --query '[].{name:name,"Resource Type":type}' -o table)
     # capture resource configuration in variables
     IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
