@@ -307,22 +307,6 @@ if [[ "${action}" == "deploy" ]] ; then
     az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${IOTHUB} --content ./deployment.template.json
 
 
-    echo "IOTHUB=${IOTHUB}"
-    echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
-    echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
-    echo "CONTAINER_REGISTRY=${CONTAINER_REGISTRY}"
-    echo "CONTAINER_REGISTRY_DNS_NAME=${CONTAINER_REGISTRY_DNS_NAME}"
-    echo "CONTAINER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}"
-    echo "CONTAINER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}"
-    echo "AV_HOSTNAME=${AV_HOSTNAME}"
-    echo "SSH command: ssh ${AV_LOGIN}@${AV_HOSTNAME}"
-    echo "SSH password: ${AV_PASSWORD}"
-    echo "RTMP URL: rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream"
-    echo "RTSP URL: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream"
-    echo "HLS  URL: http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"
-    echo "HTTP URL: http://${AV_HOSTNAME}:${AV_PORT_HTTP}/player.html"
-    echo "SSL  URL: https://${AV_HOSTNAME}:${AV_PORT_SSL}/player.html"
-    echo "Deployment done"
 
     sed -i "/AV_IOTHUB=/d" "$repoRoot"/"$configuration_file"; echo "AV_IOTHUB=$IOTHUB" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_IOTHUB_CONNECTION_STRING=/d" "$repoRoot"/"$configuration_file"; echo "AV_IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> "$repoRoot"/"$configuration_file" 
@@ -345,6 +329,7 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> ./.env
     echo "CONTAINER_REGISTRY_USERNAME_myacr=$CONTAINER_REGISTRY_USERNAME" >> ./.env
     echo "CONTAINER_REGISTRY_PASSWORD_myacr=$CONTAINER_REGISTRY_PASSWORD" >> ./.env
+    cat ./.env
 
     echo -e "
     Content of the appsettings.json file which can be used with the Azure IoT Tools in Visual Studio Code:
@@ -356,6 +341,7 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "    \"deviceId\" : \"$AV_EDGE_DEVICE\"," >>  ./appsettings.json
     echo "    \"moduleId\" : \"lvaEdge\"" >>  ./appsettings.json
     echo -n "}" >>  ./appsettings.json
+    cat ./appsettings.json
 
     echo -e "
     Content of operations.json file which can be used with the Azure Cloud To Device Console App:
@@ -363,6 +349,26 @@ if [[ "${action}" == "deploy" ]] ; then
     "
     # write operations.json for sample code
     sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json 
+    echo -e "
+    Deployment parameters:
+    
+    "
+    echo "IOTHUB=${IOTHUB}"
+    echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
+    echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
+    echo "CONTAINER_REGISTRY=${CONTAINER_REGISTRY}"
+    echo "CONTAINER_REGISTRY_DNS_NAME=${CONTAINER_REGISTRY_DNS_NAME}"
+    echo "CONTAINER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}"
+    echo "CONTAINER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}"
+    echo "AV_HOSTNAME=${AV_HOSTNAME}"
+    echo "SSH command: ssh ${AV_LOGIN}@${AV_HOSTNAME}"
+    echo "SSH password: ${AV_PASSWORD}"
+    echo "RTMP URL: rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream"
+    echo "RTSP URL: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream"
+    echo "HLS  URL: http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"
+    echo "HTTP URL: http://${AV_HOSTNAME}:${AV_PORT_HTTP}/player.html"
+    echo "SSL  URL: https://${AV_HOSTNAME}:${AV_PORT_SSL}/player.html"
+    echo "Deployment done"
 
     exit 0
 fi
