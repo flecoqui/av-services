@@ -320,8 +320,7 @@ if [[ "${action}" == "deploy" ]] ; then
 
     SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
     echo -e "
-    Content of the .env file which can be used with the Azure IoT Tools in Visual Studio Code:
-    
+Content of the .env file which can be used with the Azure IoT Tools in Visual Studio Code:    
     "
     # write .env file for edge deployment
     echo "SUBSCRIPTION_ID=\"$SUBSCRIPTION_ID\"" > ./.env
@@ -332,8 +331,7 @@ if [[ "${action}" == "deploy" ]] ; then
     cat ./.env
 
     echo -e "
-    Content of the appsettings.json file which can be used with the Azure IoT Tools in Visual Studio Code:
-    
+Content of the appsettings.json file which can be used with the Azure IoT Tools in Visual Studio Code:    
     "
     # write appsettings for sample code
     echo "{" > ./appsettings.json
@@ -344,14 +342,13 @@ if [[ "${action}" == "deploy" ]] ; then
     cat ./appsettings.json
 
     echo -e "
-    Content of operations.json file which can be used with the Azure Cloud To Device Console App:
-    
+
+Content of operations.json file which can be used with the Azure Cloud To Device Console App:
     "
     # write operations.json for sample code
     sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json 
     echo -e "
-    Deployment parameters:
-    
+Deployment parameters:    
     "
     echo "IOTHUB=${IOTHUB}"
     echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
