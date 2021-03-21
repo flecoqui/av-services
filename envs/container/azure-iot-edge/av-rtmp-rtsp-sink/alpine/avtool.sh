@@ -266,6 +266,8 @@ if [[ "${action}" == "deploy" ]] ; then
     # capture object_id
     OBJECT_ID=$(az ad sp show --id ${AAD_SERVICE_PRINCIPAL_ID} --query 'objectId' | tr -d \")
 
+    sleep 60
+    
     echo -e "
     Updating the Media Services account to use one ${YELLOW}Premium${NC} streaming endpoint."
     az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
