@@ -54,7 +54,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "{CONTAINER_REGISTRY_DNS_NAME}/{AV_IMAGE_FOLDER}/{AV_IMAGE_NAME}:latest",
-              "createOptions": "{\"Env\":[\"PORT_RTSP={AV_PORT_RTSP}\",\"PORT_RTMP={AV_PORT_RTMP}\",\"PORT_SSL={AV_PORT_SSL}\",\"PORT_HTTP={AV_PORT_HTTP}\",\"PORT_HLS={AV_PORT_HLS}\",\"HOSTNAME={AV_HOSTNAME}\",\"COMPANYNAME={AV_COMPANYNAME}\"],\"HostConfig\":{\"PortBindings\":{\"80/tcp\":[{\"HostPort\":\"{AV_PORT_HTTP}\"}],\"8080/tcp\":[{\"HostPort\":\"{AV_PORT_HLS}\"}],\"443/tcp\":[{\"HostPort\":\"{AV_PORT_SSL}\"}],\"8554/tcp\":[{\"HostPort\":\"{AV_PORT_RTSP}\"}],\"1935/tcp\":[{\"HostPort\":\"{AV_PORT_RTMP}\"}]}}}"
+              "createOptions": "{\"Env\":[\"PORT_RTSP={AV_PORT_RTSP}\",\"PORT_RTMP={AV_PORT_RTMP}\",\"PORT_SSL={AV_PORT_SSL}\",\"PORT_HTTP={AV_PORT_HTTP}\",\"PORT_HLS={AV_PORT_HLS}\",\"HOSTNAME={AV_HOSTNAME}\",\"COMPANYNAME={AV_COMPANYNAME}\"],\"HostConfig\":{\"PortBindings\":{\"{AV_PORT_HTTP}/tcp\":[{\"HostPort\":\"{AV_PORT_HTTP}\"}],\"{AV_PORT_HLS}/tcp\":[{\"HostPort\":\"{AV_PORT_HLS}\"}],\"{AV_PORT_SSL}/tcp\":[{\"HostPort\":\"{AV_PORT_SSL}\"}],\"{AV_PORT_RTSP}/tcp\":[{\"HostPort\":\"{AV_PORT_RTSP}\"}],\"{AV_PORT_RTMP}/tcp\":[{\"HostPort\":\"{AV_PORT_RTMP}\"}]}}}"
             }
           }
         }

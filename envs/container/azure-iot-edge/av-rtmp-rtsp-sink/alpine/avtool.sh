@@ -97,7 +97,8 @@ AV_PASSWORD={YourPassword}
 AV_COMPANYNAME=contoso
 AV_PORT_HLS=8080
 AV_PORT_HTTP=80
-AV_PORT_SSL=443
+# use 8443 for SSL port to avoid conflict on IoT Edge with EdgeHub port
+AV_PORT_SSL=8443
 AV_PORT_RTMP=1935
 AV_PORT_RTSP=8554
 # Check if configuration file exists
@@ -238,13 +239,6 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "${RESOURCES}"
     VNET=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Network\/virtualNetworks$/ {print $1}')
     CONTAINER_REGISTRY_DNS_NAME=$(az acr show -n "${CONTAINER_REGISTRY}" --query loginServer --output tsv)
-    echo "IOTHUB=${IOTHUB}"
-    echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
-    echo "CONTAINER_REGISTRY=${CONTAINER_REGISTRY}"
-    echo "CONTAINER_REGISTRY_DNS_NAME=${CONTAINER_REGISTRY_DNS_NAME}"
-    echo "CONTAINER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}"
-    echo "CONTAINER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}"
-    echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
 
     echo "Building container image..."
     imageNameId=${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}':{{.Run.ID}}'
@@ -298,6 +292,23 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${IOTHUB} " 
     echo
     az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${IOTHUB} --content ./deployment.template.json
+
+
+    echo "IOTHUB=${IOTHUB}"
+    echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
+    echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
+    echo "CONTAINER_REGISTRY=${CONTAINER_REGISTRY}"
+    echo "CONTAINER_REGISTRY_DNS_NAME=${CONTAINER_REGISTRY_DNS_NAME}"
+    echo "CONTAINER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}"
+    echo "CONTAINER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}"
+    echo "AV_HOSTNAME=${AV_HOSTNAME}"
+    echo "SSH command: ssh ${AV_LOGIN}@${AV_HOSTNAME}"
+    echo "SSH password: ${AV_PASSWORD}"
+    echo "RTMP URL: rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream"
+    echo "RTSP URL: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream"
+    echo "HLS  URL: http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"
+    echo "HTTP URL: http://${AV_HOSTNAME}:${AV_PORT_HTTP}/player.html"
+    echo "SSL  URL: https://${AV_HOSTNAME}:${AV_PORT_SSL}/player.html"
     echo "Deployment done"
     exit 0
 fi

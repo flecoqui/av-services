@@ -102,27 +102,27 @@
                 "HostConfig": {
 
                   "PortBindings": {
-                    "80/tcp": [
+                    "{AV_PORT_HTTP}/tcp": [
                       {
                         "HostPort": "{AV_PORT_HTTP}"
                       }
                     ],
-                    "8080/tcp": [
+                    "{AV_PORT_HLS}/tcp": [
                       {
                         "HostPort": "{AV_PORT_HLS}"
                       }
                     ],
-                    "443/tcp": [
+                    "{AV_PORT_SSL}/tcp": [
                       {
                         "HostPort": "{AV_PORT_SSL}"
                       }
                     ],
-                    "8554/tcp": [
+                    "{AV_PORT_RTSP}/tcp": [
                       {
                         "HostPort": "{AV_PORT_RTSP}"
                       }
                     ],
-                    "1935/tcp": [
+                    "{AV_PORT_RTMP}/tcp": [
                       {
                         "HostPort": "{AV_PORT_RTMP}"
                       }
