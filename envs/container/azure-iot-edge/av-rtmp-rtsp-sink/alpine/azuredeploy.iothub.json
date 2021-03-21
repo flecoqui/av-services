@@ -26,7 +26,17 @@
     "storageAccountNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
     "storageAccountName": "[concat(variables('storageAccountNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]",
     "storageAccountType": "Standard_LRS",
-    "apiStorageVersion": "2019-04-01"
+    "apiStorageVersion": "2019-04-01",
+    "serviceSasFunctionValues": {
+      "signedServices": "b",
+      "signedResourceTypes": "sco",
+      "signedPermission": "rwdlac",
+      "signedStart": "2020-01-01T00:00:01Z",
+      "signedExpiry": "2030-01-01T00:00:01Z",
+      "signedProtocol": "https",
+      "keyToSign": "key1"
+    }
+
 
   },
   "resources": [   
