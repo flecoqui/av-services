@@ -125,6 +125,13 @@ AV_PORT_HTTP=${AV_PORT_HTTP}
 AV_PORT_SSL=${AV_PORT_SSL}
 AV_PORT_RTMP=${AV_PORT_RTMP}
 AV_PORT_RTSP=${AV_PORT_RTSP}
+AV_IOTHUB=
+AV_IOTHUB_CONNECTION_STRING=
+AV_DEVICE_CONNECTION_STRING=
+AV_CONTAINER_REGISTRY=
+AV_CONTAINER_REGISTRY_DNS_NAME=
+AV_CONTAINER_REGISTRY_USERNAME=
+AV_CONTAINER_REGISTRY_PASSWORD=
 AV_TEMPDIR=$(mktemp -d)
 EOF
 fi
@@ -151,6 +158,13 @@ export $(grep AV_PORT_HTTP "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_SSL "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_RTMP "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_RTSP "$repoRoot"/"$configuration_file")
+export $(grep AV_IOTHUB "$repoRoot"/"$configuration_file")
+export $(grep AV_IOTHUB_CONNECTION_STRING "$repoRoot"/"$configuration_file")
+export $(grep AV_DEVICE_CONNECTION_STRING "$repoRoot"/"$configuration_file")
+export $(grep AV_CONTAINER_REGISTRY "$repoRoot"/"$configuration_file")
+export $(grep AV_CONTAINER_REGISTRY_DNS_NAME "$repoRoot"/"$configuration_file")
+export $(grep AV_CONTAINER_REGISTRY_USERNAME "$repoRoot"/"$configuration_file")
+export $(grep AV_CONTAINER_REGISTRY_PASSWORD "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
@@ -309,6 +323,15 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "HTTP URL: http://${AV_HOSTNAME}:${AV_PORT_HTTP}/player.html"
     echo "SSL  URL: https://${AV_HOSTNAME}:${AV_PORT_SSL}/player.html"
     echo "Deployment done"
+
+    sed -i "/AV_IOTHUB=/d" "$repoRoot"/"$configuration_file"; echo "AV_IOTHUB=$IOTHUB" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_IOTHUB_CONNECTION_STRING=/d" "$repoRoot"/"$configuration_file"; echo "AV_IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_DEVICE_CONNECTION_STRING=/d" "$repoRoot"/"$configuration_file"; echo "AV_DEVICE_CONNECTION_STRING=$DEVICE_CONNECTION_STRING" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_CONTAINER_REGISTRY=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY=$CONTAINER_REGISTRY" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_CONTAINER_REGISTRY_DNS_NAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_DNS_NAME=$CONTAINER_REGISTRY_DNS_NAME" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_CONTAINER_REGISTRY_USERNAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_USERNAME=$CONTAINER_REGISTRY_USERNAME" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_CONTAINER_REGISTRY_PASSWORD=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_PASSWORD=$CONTAINER_REGISTRY_PASSWORD" >> "$repoRoot"/"$configuration_file" 
+
     exit 0
 fi
 
@@ -327,7 +350,9 @@ if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az vm start -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+    #az vm start -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+    az iot hub invoke-module-method --method-name 'RestartModule' -n ${AV_IOTHUB}  -d ${AV_EDGE_DEVICE} -m '$edgeAgent' --method-payload '{"schemaVersion": "1.0","id": "rtmpsource"}'
+
     echo "Start done"
     exit 0
 fi
@@ -336,8 +361,27 @@ if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az vm stop -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
-    az vm deallocate -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+#    az vm stop -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+#    az vm deallocate -n ${AV_VMNAME} -g ${RESOURCE_GROUP}
+    sed "s/{CONTAINER_REGISTRY}/$AV_CONTAINER_REGISTRY/g" < ./deployment.rtmp.stopped.amd64.json >  ./deployment.template.json
+    sed -i "s/{CONTAINER_REGISTRY_USERNAME}/$AV_CONTAINER_REGISTRY_USERNAME/" ./deployment.template.json
+    sed -i "s/{CONTAINER_REGISTRY_PASSWORD}/${AV_CONTAINER_REGISTRY_PASSWORD//\//\\/}/" ./deployment.template.json
+    sed -i "s/{CONTAINER_REGISTRY_DNS_NAME}/${AV_CONTAINER_REGISTRY_DNS_NAME//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AV_IMAGE_NAME}/${AV_IMAGE_NAME}/g" ./deployment.template.json
+    sed -i "s/{AV_IMAGE_FOLDER}/${AV_IMAGE_FOLDER}/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_HTTP}/$AV_PORT_HTTP/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_SSL}/$AV_PORT_SSL/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_RTMP}/$AV_PORT_RTMP/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_RTSP}/$AV_PORT_RTSP/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_HLS}/$AV_PORT_HLS/g" ./deployment.template.json
+    sed -i "s/{AV_HOSTNAME}/$AV_HOSTNAME/g" ./deployment.template.json
+    sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/g" ./deployment.template.json
+    sed -i "s/{VIDEO_OUTPUT_FOLDER_ON_DEVICE}/\/var\/media/" ./deployment.template.json
+    sed -i "s/{APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
+    cat ./deployment.template.json
+
+    az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json
+
     echo "Stop done"
     exit 0
 fi
