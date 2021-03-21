@@ -271,19 +271,19 @@ if [[ "${action}" == "deploy" ]] ; then
     echo
     echo "Preparing the deployment manifest: deployment.rtmp.amd64.json" 
     echo
-    sed "s/{CONTAINER_REGISTRY}/$CONTAINER_REGISTRY/" < ./deployment.rtmp.amd64.json >  ./deployment.template.json
+    sed "s/{CONTAINER_REGISTRY}/$CONTAINER_REGISTRY/g" < ./deployment.rtmp.amd64.json >  ./deployment.template.json
     sed -i "s/{CONTAINER_REGISTRY_USERNAME}/$CONTAINER_REGISTRY_USERNAME/" ./deployment.template.json
     sed -i "s/{CONTAINER_REGISTRY_PASSWORD}/${CONTAINER_REGISTRY_PASSWORD//\//\\/}/" ./deployment.template.json
-    sed -i "s/{CONTAINER_REGISTRY_DNS_NAME}/${CONTAINER_REGISTRY_DNS_NAME//\//\\/}/" ./deployment.template.json
-    sed -i "s/{AV_IMAGE_NAME}/${AV_IMAGE_NAME}/" ./deployment.template.json
-    sed -i "s/{AV_IMAGE_FOLDER}/${AV_IMAGE_FOLDER}/" ./deployment.template.json
-    sed -i "s/{AV_PORT_HTTP}/$AV_PORT_HTTP/" ./deployment.template.json
-    sed -i "s/{AV_PORT_SSL}/$AV_PORT_SSL/" ./deployment.template.json
-    sed -i "s/{AV_PORT_RTMP}/$AV_PORT_RTMP/" ./deployment.template.json
-    sed -i "s/{AV_PORT_RTSP}/$AV_PORT_RTSP/" ./deployment.template.json
-    sed -i "s/{AV_PORT_HLS}/$AV_PORT_HLS/" ./deployment.template.json
-    sed -i "s/{AV_HOSTNAME}/$AV_HOSTNAME/" ./deployment.template.json
-    sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/" ./deployment.template.json
+    sed -i "s/{CONTAINER_REGISTRY_DNS_NAME}/${CONTAINER_REGISTRY_DNS_NAME//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AV_IMAGE_NAME}/${AV_IMAGE_NAME}/g" ./deployment.template.json
+    sed -i "s/{AV_IMAGE_FOLDER}/${AV_IMAGE_FOLDER}/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_HTTP}/$AV_PORT_HTTP/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_SSL}/$AV_PORT_SSL/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_RTMP}/$AV_PORT_RTMP/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_RTSP}/$AV_PORT_RTSP/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_HLS}/$AV_PORT_HLS/g" ./deployment.template.json
+    sed -i "s/{AV_HOSTNAME}/$AV_HOSTNAME/g" ./deployment.template.json
+    sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/g" ./deployment.template.json
     sed -i "s/{VIDEO_OUTPUT_FOLDER_ON_DEVICE}/\/var\/media/" ./deployment.template.json
     sed -i "s/{APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
     cat ./deployment.template.json
