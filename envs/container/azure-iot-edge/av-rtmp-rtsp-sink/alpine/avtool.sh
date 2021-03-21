@@ -332,6 +332,38 @@ if [[ "${action}" == "deploy" ]] ; then
     sed -i "/AV_CONTAINER_REGISTRY_USERNAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_USERNAME=$CONTAINER_REGISTRY_USERNAME" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_CONTAINER_REGISTRY_PASSWORD=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_PASSWORD=$CONTAINER_REGISTRY_PASSWORD" >> "$repoRoot"/"$configuration_file" 
 
+
+
+    SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
+    echo -e "
+    Content of the .env file which can be used with the Azure IoT Tools in Visual Studio Code:
+    
+    "
+    # write .env file for edge deployment
+    echo "SUBSCRIPTION_ID=\"$SUBSCRIPTION_ID\"" > ./.env
+    echo "RESOURCE_GROUP=\"$RESOURCE_GROUP\"" >> ./.env
+    echo "IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> ./.env
+    echo "CONTAINER_REGISTRY_USERNAME_myacr=$CONTAINER_REGISTRY_USERNAME" >> ./.env
+    echo "CONTAINER_REGISTRY_PASSWORD_myacr=$CONTAINER_REGISTRY_PASSWORD" >> ./.env
+
+    echo -e "
+    Content of the appsettings.json file which can be used with the Azure IoT Tools in Visual Studio Code:
+    
+    "
+    # write appsettings for sample code
+    echo "{" > ./appsettings.json
+    echo "    \"IoThubConnectionString\" : $IOTHUB_CONNECTION_STRING," >>  ./appsettings.json
+    echo "    \"deviceId\" : \"$AV_EDGE_DEVICE\"," >>  ./appsettings.json
+    echo "    \"moduleId\" : \"lvaEdge\"" >>  ./appsettings.json
+    echo -n "}" >>  ./appsettings.json
+
+    echo -e "
+    Content of operations.json file which can be used with the Azure Cloud To Device Console App:
+    
+    "
+    # write operations.json for sample code
+    sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json 
+
     exit 0
 fi
 
@@ -377,7 +409,7 @@ if [[ "${action}" == "start" ]] ; then
     cat ./deployment.template.json
 
     az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json
-    echo "Start done"
+    echo "Start command sent"
     exit 0
 fi
 
@@ -406,7 +438,7 @@ if [[ "${action}" == "stop" ]] ; then
 
     az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json
 
-    echo "Stop done"
+    echo "Stop command sent"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
