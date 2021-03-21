@@ -86,8 +86,7 @@ AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR}
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
 AV_EDGE_DEVICE=rtmp-rtsp-lva-device
-AV_RTMP_PORT=1935
-AV_RTMP_PATH=live/stream
+AV_PATH_RTMP=live/stream
 AV_PREFIXNAME=rtmprtsplva
 AV_VMNAME="$AV_PREFIXNAME"vm
 AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
@@ -110,7 +109,7 @@ AV_IMAGE_NAME=${AV_IMAGE_NAME}
 AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
 AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
 AV_EDGE_DEVICE=${AV_EDGE_DEVICE}
-AV_RTMP_PORT=${AV_RTMP_PORT}
+AV_PORT_RTMP=${AV_PORT_RTMP}
 AV_PREFIXNAME=${AV_PREFIXNAME}
 AV_VMNAME=${AV_VMNAME}
 AV_HOSTNAME=${AV_HOSTNAME}
@@ -136,7 +135,7 @@ export $(grep AV_IMAGE_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_EDGE_DEVICE "$repoRoot"/"$configuration_file")
-export $(grep AV_RTMP_PORT "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_RTMP "$repoRoot"/"$configuration_file")
 export $(grep AV_PREFIXNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_VMNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_HOSTNAME "$repoRoot"/"$configuration_file")
@@ -352,15 +351,12 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testrtmp*.mp4
     rm -f "${AV_TEMPDIR}"/testhls*.mp4
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
-    rm -f "${AV_TEMPDIR}"/testazure.xml   
-    cmd="az storage blob delete-batch -s ${AV_CONTAINERNAME} --account-name ${AV_STORAGENAME} --pattern *.mp4 --sas-token \"${AV_SASTOKEN}\""
-    eval "$cmd"
     echo "Testing service..."
     echo ""
     echo "Start RTMP Streaming..."
     echo ""
-    echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
-    ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} &
+    echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP}"
+    ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} &
     #jobs
     echo ""
     echo " Wait 30 seconds before consuming the outputs..."
@@ -370,9 +366,9 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "Testing output RTMP..."
     echo ""
-    echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH}"
-    echo "RTMP Command: ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  "
-    ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_RTMP_PORT}/${AV_RTMP_PATH} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  || true
+    echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP}"
+    echo "RTMP Command: ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  "
+    ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  || true
     test_output_files testrtmp || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTMP Test failed - check files testrtmpx.mp4"
@@ -384,9 +380,9 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "Testing output HLS..."
     echo ""
-    echo "Output HLS:  http://${AV_HOSTNAME}:8080/live/stream.m3u8"
-    echo "HLS Command: ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 "
-    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:8080/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
+    echo "Output HLS:  http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"
+    echo "HLS Command: ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 "
+    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
     test_output_files testhls || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "HLS Test failed - check files testhlsx.mp4"
@@ -398,9 +394,9 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "Testing output RTSP..."
     echo ""
-    echo "Output RTSP: rtsp://${AV_HOSTNAME}:8554/rtsp/stream"
-    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
-    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:8554/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
+    echo "Output RTSP: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream"
+    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
+    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
     test_output_files testrtsp || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTSP Test failed - check files testrtsp.mp4"
@@ -409,28 +405,6 @@ if [[ "${action}" == "test" ]] ; then
     fi
     echo "Testing output RTSP successful"
 
-    echo ""
-    echo "Testing output on Azure Storage..."    
-    echo ""
-    echo "Azure Storage URL: https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
-    # wait 120 seconds to be sure the first chunks are copied on Azure Storage
-    sleep 120
-    wget --quiet -O "${AV_TEMPDIR}"/testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
-    blobs=($(grep -oP '(?<=Name>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
-    bloblens=($(grep -oP '(?<=Content-Length>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
-
-    teststorage=0
-    for i in ${!blobs[*]}
-    do
-        echo "File: ${blobs[$i]} size: ${bloblens[$i]}"
-        teststorage=1
-    done
-    if [[ "$teststorage" == "0" ]] ; then
-        echo "Azure Storage Test failed - check files https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
-        kill %1
-        exit 0
-    fi
-    echo "Testing output on Azure Storage successful"
     #jobs
     kill %1
     echo "TESTS SUCCESSFUL"
