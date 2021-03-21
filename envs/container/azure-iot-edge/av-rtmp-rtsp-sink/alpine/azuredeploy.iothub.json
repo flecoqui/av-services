@@ -82,7 +82,7 @@
       "type": "Microsoft.Media/mediaServices",
       "apiVersion": "2018-07-01",
       "name": "[variables('mediaServiceName')]",
-      "location": "[parameters('location')]",
+      "location": "[resourceGroup().location]",
       "dependsOn": [
           "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
       ],
