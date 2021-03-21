@@ -271,7 +271,7 @@ if [[ "${action}" == "deploy" ]] ; then
         echo "Error while building the image"
         exit 1
     fi    
-    az acr repository  untag  -n "${CONTAINER_REGISTRY}" --image ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:latest 
+    az acr repository  untag  -n "${CONTAINER_REGISTRY}" --image ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:latest || true
     az acr  import  -n "${CONTAINER_REGISTRY}" --source ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:${tagID} --image ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:latest
     
     echo
