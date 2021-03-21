@@ -411,7 +411,8 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
-    az vm get-instance-view -n ${AV_VMNAME} -g ${RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
+    # az vm get-instance-view -n ${AV_VMNAME} -g ${RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
+    az iot hub query -n ${AV_IOTHUB} -q "select * from devices.modules where devices.deviceId = '${AV_EDGE_DEVICE}' and devices.moduleId = '\$edgeAgent' " --query '[].properties.reported.modules.rtmpsource.status'  --output tsv
     echo "Status done"
     exit 0
 fi
