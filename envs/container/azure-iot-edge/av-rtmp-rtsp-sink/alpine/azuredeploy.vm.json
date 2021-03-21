@@ -70,12 +70,11 @@
         "description": "hls port"
       }
     },
-
-    "containerName": {
+    "storageAccountName": {
       "type": "string",
-      "defaultValue": "rtmpcontainer",
+      "defaultValue": "rtmprtsplvasto",
       "metadata": {
-        "description": "Container Name where the audio/video chunks are stored"
+        "description": "Storage Account Name to be used ith the virtual machine"
       }
     },
     "expiryDate": {
@@ -94,13 +93,6 @@
     "partitionCount": "1",
     "hostingMode": "default",
     "apiVersion": "2015-06-15",
-    "apiStorageVersion": "2019-04-01",
-    "storageAccountNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
-    "storageAccountName": "[concat(variables('storageAccountNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]",
-    "storageAccountType": "Standard_LRS",
-    "vmStorageAccountContainerName": "vhds",
-    "OSDiskName": "osdisksimplevm",
-    "dataDisk1VhdName": "[concat(parameters('namePrefix'), 'datadisk')]",
     "networkSecurityGroupName": "[concat(parameters('namePrefix'), 'nsg')]",
     "serviceSasFunctionValues": {
       "signedServices": "b",
@@ -122,29 +114,6 @@
     "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
   },
   "resources": [
-    {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('storageAccountName')]",
-      "apiVersion": "[variables('apiStorageVersion')]",
-      "location": "[resourceGroup().location]",
-      "sku": {
-        "name": "[variables('storageAccountType')]"
-      },
-      "kind": "Storage",
-      "resources": [
-        {
-          "type": "blobServices/containers",
-          "apiVersion": "[variables('apiStorageVersion')]",
-          "name": "[concat('default/', parameters('containerName'))]",
-          "dependsOn": [
-            "[variables('storageAccountName')]"
-          ],
-          "properties": {
-            "publicAccess": "None"
-          }
-        }
-      ]
-    },
     {
       "apiVersion": "[variables('apiVersion')]",
       "type": "Microsoft.Network/networkSecurityGroups",
@@ -319,12 +288,12 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2020-06-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('storageAccountName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "properties": {
@@ -345,21 +314,15 @@
             "version": "latest"
           },
           "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('OSDiskName'),'.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "StandardSSD_LRS"
+            }
           },
           "dataDisks": [
             {
-              "name": "datadisk1",
-              "diskSizeGB": "[variables('vmDataDiskSize')]",
+              "diskSizeGB": 1023,
               "lun": 0,
-              "vhd": {
-                "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('dataDisk1VhdName'),'.vhd')]"
-              },
               "createOption": "Empty"
             }
           ]
@@ -374,33 +337,13 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net')]"
           }
         }
       }
     }    
   ],
   "outputs": {
-    "storageAccount": {
-      "type": "string",
-      "value": "[variables('storageAccountName')]"
-    },
-    "storageAccountUrl": {
-      "type": "string",
-      "value": "[concat('https://',variables('storageAccountName'),'.blob.core.windows.net/', parameters('containerName'))]"
-    },
-    "storageKey": {
-      "type": "string",
-      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),variables('apiStorageVersion')).keys[0].value]"
-    },
-    "storageSasToken": {
-      "type": "string",
-      "value": "[listAccountSas(variables('storageAccountName'), variables('apiStorageVersion'), variables('serviceSasFunctionValues')).accountSasToken]"
-    },
-    "containerUrl": {
-      "type": "string",
-      "value": "[concat('https://',variables('storageAccountName'),'.blob.core.windows.net/', parameters('containerName'),'?', listAccountSas(variables('storageAccountName'), variables('apiStorageVersion'), variables('serviceSasFunctionValues')).accountSasToken, '&comp=list&restype=container')]"
-    },
     "httpPlayerCmd": {
       "type": "string",
       "value": "[concat('http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com/player.html')]"

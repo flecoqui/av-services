@@ -74,6 +74,10 @@
     "lvaEdge": {
       "properties.desired": {
         "applicationDataDirectory": "/var/lib/azuremediaservices",
+        "azureMediaServicesArmId": "/subscriptions/{SUBSCRIPTION_ID}/resourceGroups/{RESOURCE_GROUP}/providers/microsoft.media/mediaservices/{AMS_ACCOUNT}",
+        "aadTenantId": "{AAD_TENANT_ID}",
+        "aadServicePrincipalAppId": "{AAD_SERVICE_PRINCIPAL_ID}",
+        "aadServicePrincipalSecret": "{AAD_SERVICE_PRINCIPAL_SECRET}",
         "aadEndpoint": "https://login.microsoftonline.com",
         "aadResourceId": "https://management.core.windows.net/",
         "armEndpoint": "https://management.azure.com/",
