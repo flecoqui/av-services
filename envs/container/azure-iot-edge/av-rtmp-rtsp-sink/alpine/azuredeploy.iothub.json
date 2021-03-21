@@ -24,7 +24,8 @@
     "iotHubName": "[toLower(concat(parameters('namePrefix'),'iothub' ))]",
     "mediaServiceName": "[toLower(concat(parameters('namePrefix'),'ams' ))]",
     "storageAccountNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
-    "storageAccountName": "[concat(variables('storageAccountNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]"
+    "storageAccountName": "[concat(variables('storageAccountNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]",
+    "storageAccountType": "Standard_LRS"
 
   },
   "resources": [   
