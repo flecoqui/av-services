@@ -194,6 +194,13 @@ if [[ "${action}" == "install" ]] ; then
     fi
     echo "Downloading content"
     wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
+    echo "Installing .Net 5.0 SDK "
+    wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+    sudo dpkg -i packages-microsoft-prod.deb
+    sudo apt-get update; \
+    sudo apt-get install -y apt-transport-https && \
+    sudo apt-get update && \
+    sudo apt-get install -y dotnet-sdk-5.0
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
@@ -267,7 +274,7 @@ if [[ "${action}" == "deploy" ]] ; then
     OBJECT_ID=$(az ad sp show --id ${AAD_SERVICE_PRINCIPAL_ID} --query 'objectId' | tr -d \")
 
     sleep 60
-    
+
     echo -e "
     Updating the Media Services account to use one ${YELLOW}Premium${NC} streaming endpoint."
     az ams streaming-endpoint scale --resource-group $RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
@@ -582,6 +589,14 @@ if [[ "${action}" == "test" ]] ; then
         exit 0
     fi
     echo "Testing output RTSP successful"
+
+    echo ""
+    echo "Testing LVA..."
+    echo ""
+    dotnet restore
+    dotnet build
+    dotnet run 
+    echo "Testing output LVA successful"
 
     #jobs
     kill %1
