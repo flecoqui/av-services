@@ -615,7 +615,7 @@ if [[ "${action}" == "test" ]] ; then
     eval "$cmd"
     checkError
 
-    grep -i '"type": "motion"' events.txt
+    grep -i '"type": "motion"' events.txt &> /dev/null
     status=$?
     if [ $status -ne 0 ]; then
         echo "LVA Test Failed to detect motion events in the results file"
