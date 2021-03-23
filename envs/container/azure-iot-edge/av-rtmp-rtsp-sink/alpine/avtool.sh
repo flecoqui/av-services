@@ -598,19 +598,19 @@ if [[ "${action}" == "test" ]] ; then
     # write operations.json for sample code
     sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json > ./operations.json 
     echo "Activating the LVA Graph"
-    cmd='dotnet run -p ../../../../../src/lvatool --runoperations --operationspath "./operations.json" --connectionstring "$AV_IOTHUB_CONNECTION_STRING" --device "$AV_EDGE_DEVICE"  --module lvaEdge --lastoperation GraphInstanceActivate'
-    echo $cmd
-    eval $cmd
+    cmd="dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --lastoperation GraphInstanceActivate"
+    echo "$cmd"
+    eval "$cmd"
     
     echo "Receiving the LVA events during 60 seconds"
-    cmd='dotnet run -p ../../../../../src/lvatool --readevents --connectionstring "$AV_IOTHUB_CONNECTION_STRING" --timeout 60000'
-    echo $cmd
-    eval $cmd
+    cmd="dotnet run -p ../../../../../src/lvatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
+    echo "$cmd"
+    eval "$cmd"
 
     echo "Deactivating the LVA Graph"
-    cmd='dotnet run -p ../../../../../src/lvatool --runoperations --operationspath "./operations.json" --connectionstring "$AV_IOTHUB_CONNECTION_STRING" --device "$AV_EDGE_DEVICE"  --module lvaEdge --firstoperation GraphInstanceDeactivate'
-    echo $cmd
-    eval $cmd
+    cmd="dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --firstoperation GraphInstanceDeactivate"
+    echo "$cmd"
+    eval "$cmd"
 
     #jobs
     kill %1
