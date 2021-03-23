@@ -7,7 +7,7 @@
 #
 # executable
 ###########################################################################################################################################################################################
-set -eu
+set -u
 repoRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$repoRoot"
 #######################################################
@@ -601,18 +601,21 @@ if [[ "${action}" == "test" ]] ; then
     cmd="dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --lastoperation GraphInstanceActivate"
     echo "$cmd"
     eval "$cmd"
-    
+    checkError
+
     echo "Receiving the LVA events during 60 seconds"
     cmd="dotnet run -p ../../../../../src/lvatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
     echo "$cmd"
     eval "$cmd" 2>&1 | tee events.txt
+    checkError
 
     echo "Deactivating the LVA Graph"
     cmd="dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --firstoperation GraphInstanceDeactivate"
     echo "$cmd"
     eval "$cmd"
+    checkError
 
-    grep -i '"type": "motionf"' events.txt
+    grep -i '"type": "motion"' events.txt
     status=$?
     if [ $status -ne 0 ]; then
         echo "LVA Test Failed to detect motion events in the results file"
