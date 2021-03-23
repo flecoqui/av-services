@@ -201,6 +201,8 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get install -y apt-transport-https && \
     sudo apt-get update && \
     sudo apt-get install -y dotnet-sdk-5.0
+    dotnet restore ./src/lvatool
+    dotnet build ./src/lvatool
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
@@ -593,9 +595,16 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "Testing LVA..."
     echo ""
-    dotnet restore
-    dotnet build
-    dotnet run 
+    # write operations.json for sample code
+    sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json > ./operations.json 
+    echo "Activating the LVA Graph"
+    dotnet run -p ../../../../../src/lvatool --runoperations --operationspath "./operations.json" --connectionstring "$AV_IOTHUB_CONNECTION_STRING" --device "$AV_EDGE_DEVICE"  --module lvaEdge --firstoperation GraphInstanceActivate
+    
+    echo "Receiving the LVA events during 60 seconds"
+    dotnet run -p ../../../../../src/lvatool --readevents --connectionstring "$AV_IOTHUB_CONNECTION_STRING" --timeout 60000
+
+    echo "Deactivating the LVA Graph"
+    dotnet run -p ../../../../../src/lvatool --runoperations --operationspath "./operations.json" --connectionstring "$AV_IOTHUB_CONNECTION_STRING" --device "$AV_EDGE_DEVICE"  --module lvaEdge --firstoperation GraphInstanceDeactivate
     echo "Testing output LVA successful"
 
     #jobs
