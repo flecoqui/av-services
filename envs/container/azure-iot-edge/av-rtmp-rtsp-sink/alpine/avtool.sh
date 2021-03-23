@@ -605,12 +605,20 @@ if [[ "${action}" == "test" ]] ; then
     echo "Receiving the LVA events during 60 seconds"
     cmd="dotnet run -p ../../../../../src/lvatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
     echo "$cmd"
-    eval "$cmd"
+    eval "$cmd" 2>&1 | tee events.txt
 
     echo "Deactivating the LVA Graph"
     cmd="dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --firstoperation GraphInstanceDeactivate"
     echo "$cmd"
     eval "$cmd"
+
+    grep -i '"type": "motionf"' events.txt
+    status=$?
+    if [ $status -ne 0 ]; then
+        echo "LVA Test Failed to detect motion events in the results file"
+        kill %1
+        exit $status
+    fi
 
     #jobs
     kill %1
