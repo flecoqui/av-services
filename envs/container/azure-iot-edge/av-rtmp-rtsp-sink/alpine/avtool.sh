@@ -209,7 +209,7 @@ if [[ -z "${AV_TEMPDIR}" ]] ; then
 fi
 
 if [[ "${action}" == "install" ]] ; then
-    echo "Installing pre-requisite"
+    echo "${GREEN}Installing pre-requisite${NC}"
     echo "Installing azure cli"
     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
     az config set extension.use_dynamic_install=yes_without_prompt
@@ -237,15 +237,15 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get install -y apt-transport-https && \
     sudo apt-get update && \
     sudo apt-get install -y dotnet-sdk-5.0
-    dotnet restore ./src/lvatool
-    dotnet build ./src/lvatool
+    dotnet restore ../../../../../src/lvatool
+    dotnet build ../../../../../src/lvatool
+    echo "${GREEN}Installing pre-requisite done${NC}"
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
     echo "Login..."
     az login
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
+    checkLoginAndSubscription
     echo "Login done"
     exit 0
 fi
@@ -253,8 +253,6 @@ fi
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying services..."
     checkLoginAndSubscription
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     echo "Deploying IoT Hub and Azure Container Registry..."
     az group create -n ${AV_RESOURCE_GROUP}  -l ${AV_RESOURCE_REGION} 
     checkError
@@ -476,8 +474,6 @@ fi
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
     checkLoginAndSubscription
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     az group delete -n ${AV_RESOURCE_GROUP} --yes
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=" >> "$repoRoot"/"$configuration_file"
@@ -500,8 +496,6 @@ fi
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
     checkLoginAndSubscription
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     #az vm start -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
     #az iot hub invoke-module-method --method-name 'RestartModule' -n ${AV_IOTHUB}  -d ${AV_EDGE_DEVICE} -m '$edgeAgent' --method-payload '{"schemaVersion": "1.0","id": "rtmpsource"}'
     sed "s/{AV_CONTAINER_REGISTRY}/$AV_CONTAINER_REGISTRY/g" < ./deployment.rtmp.amd64.json >  ./deployment.template.json
@@ -535,8 +529,6 @@ fi
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
     checkLoginAndSubscription
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
 #    az vm stop -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
 #    az vm deallocate -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP}
     sed "s/{AV_CONTAINER_REGISTRY}/$AV_CONTAINER_REGISTRY/g" < ./deployment.rtmp.stopped.amd64.json >  ./deployment.template.json
@@ -569,8 +561,6 @@ fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
     checkLoginAndSubscription
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     # az vm get-instance-view -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
     az iot hub query -n ${AV_IOTHUB} -q "select * from devices.modules where devices.deviceId = '${AV_EDGE_DEVICE}' and devices.moduleId = '\$edgeAgent' " --query '[].properties.reported.modules.rtmpsource.status'  --output tsv
     echo "Status done"
@@ -582,8 +572,6 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
     echo "Testing service..."
     checkLoginAndSubscription
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     echo ""
     echo "Start RTMP Streaming..."
     echo ""
