@@ -36,6 +36,39 @@ checkError() {
         echo -e "\n${RED}An error occured exiting from the current bash${NC}"
         exit 1
     fi
+    if [ ]; then
+
+}
+checkLoginAndSubscription() {
+    az account show -o none
+    if [ $? -ne 0 ]; then
+        echo -e "\nYou seems disconnected from Azure, running 'az login'."
+        az login -o none
+    fi
+    CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
+    if [ -z $AV_SUBSCRIPTION_ID  || $AV_SUBSCRIPTION_ID != CURRENT_SUBSCRIPTION_ID ]; then
+        # query subscriptions
+        echo -e "\nYou have access to the following subscriptions:"
+        az account list --query '[].{name:name,"subscription Id":id}' --output table
+
+        echo -e "\nYour current subscription is:"
+        az account show --query '[name,id]'
+        echo -e "
+        You will need to use a subscription with permissions for creating service principals (owner role provides this).
+        If you want to change to a different subscription, enter the name or id.
+        Or just press enter to continue with the current subscription."
+        read -p ">> " SUBSCRIPTION_ID
+
+        if ! test -z "$SUBSCRIPTION_ID"
+        then 
+            az account set -s "$SUBSCRIPTION_ID"
+            echo -e "\nNow using:"
+            az account show --query '[name,id]'
+            AV_SUBSCRIPTION_ID=$SUBSCRIPTION_ID
+            sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
+
+        fi 
+    fi
 }
 test_output_files () {
     test_output_files_result="1"
@@ -165,6 +198,7 @@ export $(grep AV_CONTAINER_REGISTRY "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_DNS_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_USERNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_PASSWORD "$repoRoot"/"$configuration_file")
+export $(grep AV_SUBSCRIPTION_ID "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
@@ -216,6 +250,7 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying services..."
+    checkLoginAndSubscription
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     echo "Deploying IoT Hub and Azure Container Registry..."
@@ -438,6 +473,7 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
+    checkLoginAndSubscription
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     az group delete -n ${RESOURCE_GROUP} --yes
@@ -461,6 +497,7 @@ fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
+    checkLoginAndSubscription
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     #az vm start -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
@@ -496,6 +533,7 @@ fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
+    checkLoginAndSubscription
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
 #    az vm stop -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
@@ -529,6 +567,9 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
+    checkLoginAndSubscription
+    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
+    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     # az vm get-instance-view -n ${AV_VMNAME} -g ${RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
     az iot hub query -n ${AV_IOTHUB} -q "select * from devices.modules where devices.deviceId = '${AV_EDGE_DEVICE}' and devices.moduleId = '\$edgeAgent' " --query '[].properties.reported.modules.rtmpsource.status'  --output tsv
     echo "Status done"
@@ -539,6 +580,9 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testhls*.mp4
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
     echo "Testing service..."
+    checkLoginAndSubscription
+    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
+    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
     echo ""
     echo "Start RTMP Streaming..."
     echo ""
