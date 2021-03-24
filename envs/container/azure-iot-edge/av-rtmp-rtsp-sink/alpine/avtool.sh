@@ -44,7 +44,7 @@ checkLoginAndSubscription() {
         az login -o none
     fi
     CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
-    if [ -z $AV_SUBSCRIPTION_ID  || $AV_SUBSCRIPTION_ID != CURRENT_SUBSCRIPTION_ID ]; then
+    if [[ -z $AV_SUBSCRIPTION_ID  || $AV_SUBSCRIPTION_ID -ne CURRENT_SUBSCRIPTION_ID ]]; then
         # query subscriptions
         echo -e "\nYou have access to the following subscriptions:"
         az account list --query '[].{name:name,"subscription Id":id}' --output table
