@@ -166,13 +166,13 @@ Once the pre-requisites are installed and the Azure CLI connected to Azure, you 
 When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the virtual machine configuration. By default, the file contains these parameters:
 
 ```bash
-    RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
-    RESOURCE_REGION=eastus2
+    AV_RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
+    AV_RESOURCE_REGION=eastus2
     AV_RTMP_PORT=1935
     AV_RTMP_PATH=live/stream
     AV_PREFIXNAME=rtmprtsphls
     AV_VMNAME="$AV_PREFIXNAME"vm
-    AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
+    AV_HOSTNAME="$AV_VMNAME"."$AV_AV_RESOURCE_REGION".cloudapp.azure.com
     AV_CONTAINERNAME=avchunks
     AV_LOGIN=avvmadmin
     AV_PASSWORD={YourPassword}
@@ -182,8 +182,8 @@ Below further information about the parameters in the file .avtoolconfig:
 
 | Variables | Description |
 | ---------------------|:-------------|
-| RESOURCE_GROUP | The name of the Azure resource group where the virtual machine is deployed |
-| RESOURCE_REGION | The Azure region where the virtual machine is deployed  |
+| AV_RESOURCE_GROUP | The name of the Azure resource group where the virtual machine is deployed |
+| AV_RESOURCE_REGION | The Azure region where the virtual machine is deployed  |
 | AV_RTMP_PORT | The rtmp port used for the ingestion   |
 | AV_RTMP_PATH | The rtmp path the ingestion  |
 | AV_PREFIXNAME | The prefix of the virtual machine name   |

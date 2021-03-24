@@ -65,21 +65,21 @@ if [[ ! $action == login && ! $action == install && ! $action == start && ! $act
     usage
     exit 1
 fi
-RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
-RESOURCE_REGION=eastus2
+AV_RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
+AV_RESOURCE_REGION=eastus2
 AV_RTMP_PORT=1935
 AV_RTMP_PATH=live/stream
 AV_PREFIXNAME=rtmprtsphls
 AV_VMNAME="$AV_PREFIXNAME"vm
-AV_HOSTNAME="$AV_VMNAME"."$RESOURCE_REGION".cloudapp.azure.com
+AV_HOSTNAME="$AV_VMNAME"."$AV_AV_RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
 AV_LOGIN=avvmadmin
 AV_PASSWORD={YourPassword}
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
-RESOURCE_GROUP=${RESOURCE_GROUP}
-RESOURCE_REGION=${RESOURCE_REGION}
+AV_RESOURCE_GROUP=${AV_RESOURCE_GROUP}
+AV_RESOURCE_REGION=${AV_RESOURCE_REGION}
 AV_RTMP_PORT=${AV_RTMP_PORT}
 AV_RTMP_PATH=${AV_RTMP_PATH}
 AV_PREFIXNAME=${AV_PREFIXNAME}
@@ -94,8 +94,8 @@ AV_TEMPDIR=$(mktemp -d)
 EOF
 fi
 # Read variables in configuration file
-export $(grep RESOURCE_GROUP "$repoRoot"/"$configuration_file")
-export $(grep RESOURCE_REGION "$repoRoot"/"$configuration_file")
+export $(grep AV_RESOURCE_GROUP "$repoRoot"/"$configuration_file")
+export $(grep AV_RESOURCE_REGION "$repoRoot"/"$configuration_file")
 export $(grep AV_RTMP_PORT "$repoRoot"/"$configuration_file")
 export $(grep AV_RTMP_PATH "$repoRoot"/"$configuration_file")
 export $(grep AV_PREFIXNAME "$repoRoot"/"$configuration_file")
@@ -138,9 +138,9 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az group create -n ${RESOURCE_GROUP}  -l ${RESOURCE_REGION} 
-    az deployment group create -g ${RESOURCE_GROUP} -n "${RESOURCE_GROUP}dep" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
-    outputs=$(az deployment group show --name ${RESOURCE_GROUP}dep  -g ${RESOURCE_GROUP} --query properties.outputs)
+    az group create -n ${AV_RESOURCE_GROUP}  -l ${AV_RESOURCE_REGION} 
+    az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
+    outputs=$(az deployment group show --name ${AV_RESOURCE_GROUP}dep  -g ${AV_RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
     AV_SASTOKEN=$(jq -r .storageSasToken.value <<< $outputs)
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=$AV_STORAGENAME" >> "$repoRoot"/"$configuration_file" 
@@ -153,7 +153,7 @@ if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az group delete -n ${RESOURCE_GROUP} --yes
+    az group delete -n ${AV_RESOURCE_GROUP} --yes
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=" >> "$repoRoot"/"$configuration_file"
     echo "Undeployment done"
@@ -164,7 +164,7 @@ if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az vm start -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+    az vm start -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
     echo "Start done"
     exit 0
 fi
@@ -173,14 +173,14 @@ if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
     az ad signed-in-user show --output table --query "{login:userPrincipalName}"
     az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    az vm stop -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
-    az vm deallocate -n ${AV_VMNAME} -g ${RESOURCE_GROUP} 
+    az vm stop -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
+    az vm deallocate -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
     echo "Stop done"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
-    az vm get-instance-view -n ${AV_VMNAME} -g ${RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
+    az vm get-instance-view -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
     echo "Status done"
     exit 0
 fi
