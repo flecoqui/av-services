@@ -340,7 +340,7 @@ if [[ "${action}" == "deploy" ]] ; then
     RESOURCES=$(az resource list --resource-group "${AV_RESOURCE_GROUP}" --query '[].{name:name,"Resource Type":type}' -o table)
     echo "${RESOURCES}"
     VNET=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Network\/virtualNetworks$/ {print $1}')
-    CONTAINER_REGISTRY_DNS_NAME=$(az acr show -n "${AV_CONTAINER_REGISTRY}" --query loginServer --output tsv)
+    AV_CONTAINER_REGISTRY_DNS_NAME=$(az acr show -n "${AV_CONTAINER_REGISTRY}" --query loginServer --output tsv)
 
     echo "Building container image..."
     imageNameId=${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}':{{.Run.ID}}'
