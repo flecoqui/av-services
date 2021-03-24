@@ -301,13 +301,13 @@ if [[ "${action}" == "deploy" ]] ; then
 
     # capture config information
     re="AadTenantId:\s([0-9a-z\-]*)"
-    AAD_TENANT_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
+    AV_AAD_TENANT_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
 
     re="AadClientId:\s([0-9a-z\-]*)"
-    AAD_SERVICE_PRINCIPAL_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
+    AV_AAD_SERVICE_PRINCIPAL_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
 
     re="AadSecret:\s([0-9a-z\-]*)"
-    AAD_SERVICE_PRINCIPAL_SECRET=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
+    AV_AAD_SERVICE_PRINCIPAL_SECRET=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
 
     re="SubscriptionId:\s([0-9a-z\-]*)"
     SUBSCRIPTION_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
@@ -412,9 +412,9 @@ if [[ "${action}" == "deploy" ]] ; then
     sed -i "/AV_CONTAINER_REGISTRY_PASSWORD=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_PASSWORD=$AV_CONTAINER_REGISTRY_PASSWORD" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_AMS_ACCOUNT=/d" "$repoRoot"/"$configuration_file"; echo "AV_AMS_ACCOUNT=$AV_AMS_ACCOUNT" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_TENANT_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_TENANT_ID=$AAD_TENANT_ID" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_SERVICE_PRINCIPAL_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_ID=$AAD_SERVICE_PRINCIPAL_ID" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_SERVICE_PRINCIPAL_SECRET=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_SECRET=$AAD_SERVICE_PRINCIPAL_SECRET" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_AAD_TENANT_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_TENANT_ID=$AV_AAD_TENANT_ID" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_AAD_SERVICE_PRINCIPAL_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_ID=$AV_AAD_SERVICE_PRINCIPAL_ID" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_AAD_SERVICE_PRINCIPAL_SECRET=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_SECRET=$AV_AAD_SERVICE_PRINCIPAL_SECRET" >> "$repoRoot"/"$configuration_file" 
 
 
 
@@ -426,9 +426,9 @@ Content of the .env file which can be used with the Azure IoT Tools in Visual St
     echo "RESOURCE_GROUP=\"$AV_RESOURCE_GROUP\"" >> ./.env
     echo "AMS_ACCOUNT=\"$AV_AMS_ACCOUNT\""  >> ./.env
     echo "IOTHUB_CONNECTION_STRING=$AV_IOTHUB_CONNECTION_STRING" >> ./.env
-    echo "AAD_TENANT_ID=$AAD_TENANT_ID"  >> ./.env
-    echo "AAD_SERVICE_PRINCIPAL_ID=$AAD_SERVICE_PRINCIPAL_ID"  >> ./.env
-    echo "AAD_SERVICE_PRINCIPAL_SECRET=$AAD_SERVICE_PRINCIPAL_SECRET"  >> ./.env
+    echo "AAD_TENANT_ID=$AV_AAD_TENANT_ID"  >> ./.env
+    echo "AAD_SERVICE_PRINCIPAL_ID=$AV_AAD_SERVICE_PRINCIPAL_ID"  >> ./.env
+    echo "AAD_SERVICE_PRINCIPAL_SECRET=$AV_AAD_SERVICE_PRINCIPAL_SECRET"  >> ./.env
     echo "VIDEO_INPUT_FOLDER_ON_DEVICE=\"/home/lvaedgeuser/samples/input\""  >> ./.env
     echo "VIDEO_OUTPUT_FOLDER_ON_DEVICE=\"/var/media\""  >> ./.env
     echo "APPDATA_FOLDER_ON_DEVICE=\"/var/lib/azuremediaservices\""  >> ./.env
