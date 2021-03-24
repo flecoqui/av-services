@@ -196,10 +196,10 @@ export $(grep AV_CONTAINER_REGISTRY "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_DNS_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_USERNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_PASSWORD "$repoRoot"/"$configuration_file")
-export $(grep AMS_ACCOUNT "$repoRoot"/"$configuration_file")
-export $(grep AAD_TENANT_ID "$repoRoot"/"$configuration_file")
-export $(grep AAD_SERVICE_PRINCIPAL_ID "$repoRoot"/"$configuration_file")
-export $(grep AAD_SERVICE_PRINCIPAL_SECRET "$repoRoot"/"$configuration_file")
+export $(grep AV_AMS_ACCOUNT "$repoRoot"/"$configuration_file")
+export $(grep AV_AAD_TENANT_ID "$repoRoot"/"$configuration_file")
+export $(grep AV_AAD_SERVICE_PRINCIPAL_ID "$repoRoot"/"$configuration_file")
+export $(grep AV_AAD_SERVICE_PRINCIPAL_SECRET "$repoRoot"/"$configuration_file")
 export $(grep AV_SUBSCRIPTION_ID "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
@@ -387,10 +387,10 @@ if [[ "${action}" == "deploy" ]] ; then
     sed -i "s/{APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
     sed -i "s/{SUBSCRIPTION_ID}/$SUBSCRIPTION_ID/g" ./deployment.template.json
     sed -i "s/{RESOURCE_GROUP}/$RESOURCE_GROUP/g" ./deployment.template.json
-    sed -i "s/{AMS_ACCOUNT}/$AMS_ACCOUNT/g" ./deployment.template.json
-    sed -i "s/{AAD_TENANT_ID}/$AAD_TENANT_ID/g" ./deployment.template.json
-    sed -i "s/{AAD_SERVICE_PRINCIPAL_ID}/$AAD_SERVICE_PRINCIPAL_ID/g" ./deployment.template.json
-    sed -i "s/{AAD_SERVICE_PRINCIPAL_SECRET}/$AAD_SERVICE_PRINCIPAL_SECRET/g" ./deployment.template.json
+    sed -i "s/{AMS_ACCOUNT}/$AV_AMS_ACCOUNT/g" ./deployment.template.json
+    sed -i "s/{AAD_TENANT_ID}/$AV_AAD_TENANT_ID/g" ./deployment.template.json
+    sed -i "s/{AAD_SERVICE_PRINCIPAL_ID}/$AV_AAD_SERVICE_PRINCIPAL_ID/g" ./deployment.template.json
+    sed -i "s/{AAD_SERVICE_PRINCIPAL_SECRET}/$AV_AAD_SERVICE_PRINCIPAL_SECRET/g" ./deployment.template.json
     cat ./deployment.template.json
 
     echo
@@ -557,10 +557,10 @@ if [[ "${action}" == "stop" ]] ; then
     sed -i "s/{APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
     sed -i "s/{SUBSCRIPTION_ID}/${AV_SUBSCRIPTION_ID//\//\\/}/g" ./deployment.template.json
     sed -i "s/{RESOURCE_GROUP}/$RESOURCE_GROUP/g" ./deployment.template.json
-    sed -i "s/{AMS_ACCOUNT}/${AMS_ACCOUNT//\//\\/}/g" ./deployment.template.json
-    sed -i "s/{AAD_TENANT_ID}/${AAD_TENANT_ID//\//\\/}/g" ./deployment.template.json
-    sed -i "s/{AAD_SERVICE_PRINCIPAL_ID}/${AAD_SERVICE_PRINCIPAL_ID//\//\\/}/g" ./deployment.template.json
-    sed -i "s/{AAD_SERVICE_PRINCIPAL_SECRET}/${AAD_SERVICE_PRINCIPAL_SECRET//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AMS_ACCOUNT}/${AV_AMS_ACCOUNT//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AAD_TENANT_ID}/${AV_AAD_TENANT_ID//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AAD_SERVICE_PRINCIPAL_ID}/${AV_AAD_SERVICE_PRINCIPAL_ID//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AAD_SERVICE_PRINCIPAL_SECRET}/${AV_AAD_SERVICE_PRINCIPAL_SECRET//\//\\/}/g" ./deployment.template.json
     cat ./deployment.template.json
     az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json
 
