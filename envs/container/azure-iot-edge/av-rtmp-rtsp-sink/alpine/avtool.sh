@@ -367,7 +367,11 @@ if [[ "${action}" == "deploy" ]] ; then
         echo "Error while building the image"
         exit 1
     fi    
-    az acr repository  untag  -n "${AV_CONTAINER_REGISTRY}" --image ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:latest || true
+    az acr repository  show-tags --repository "${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}" --name "${AV_CONTAINER_REGISTRY}" | grep "latest"
+    status=$?
+    if [ $status -eq 0 ]; then
+        az acr repository  untag  -n "${AV_CONTAINER_REGISTRY}" --image ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:latest || true
+    fi
     az acr  import  -n "${AV_CONTAINER_REGISTRY}" --source ${AV_CONTAINER_REGISTRY_DNS_NAME}/${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:${tagID} --image ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}:latest
     
     echo
@@ -375,8 +379,8 @@ if [[ "${action}" == "deploy" ]] ; then
     echo
     sed "s/{AV_CONTAINER_REGISTRY}/$AV_CONTAINER_REGISTRY/g" < ./deployment.rtmp.amd64.json >  ./deployment.template.json
     sed -i "s/{AV_CONTAINER_REGISTRY_USERNAME}/$AV_CONTAINER_REGISTRY_USERNAME/" ./deployment.template.json
-    sed -i "s/{AV_CONTAINER_REGISTRY_PASSWORD}/${CONTAINER_REGISTRY_PASSWORD//\//\\/}/" ./deployment.template.json
-    sed -i "s/{AV_CONTAINER_REGISTRY_DNS_NAME}/${CONTAINER_REGISTRY_DNS_NAME//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AV_CONTAINER_REGISTRY_PASSWORD}/${AV_CONTAINER_REGISTRY_PASSWORD//\//\\/}/" ./deployment.template.json
+    sed -i "s/{AV_CONTAINER_REGISTRY_DNS_NAME}/${AV_CONTAINER_REGISTRY_DNS_NAME//\//\\/}/g" ./deployment.template.json
     sed -i "s/{AV_IMAGE_NAME}/${AV_IMAGE_NAME}/g" ./deployment.template.json
     sed -i "s/{AV_IMAGE_FOLDER}/${AV_IMAGE_FOLDER}/g" ./deployment.template.json
     sed -i "s/{AV_PORT_HTTP}/$AV_PORT_HTTP/g" ./deployment.template.json
