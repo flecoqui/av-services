@@ -20,7 +20,7 @@ NC='\033[0m' # No Color
 
 checkAVError() {
     if [ $? -ne 0 ]; then
-        echo -e "\n${RED}An error occured:${NC}
+        echo -e "\nAn error occured:
     The script will be stopped."
         exit 1
     fi

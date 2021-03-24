@@ -33,7 +33,7 @@ NC='\033[0m' # No Color
 
 checkError() {
     if [ $? -ne 0 ]; then
-        echo -e "\n${RED}An error occured exiting from the current bash${NC}"
+        echo -e "\nAn error occured exiting from the current bash"
         exit 1
     fi
 }
@@ -209,7 +209,7 @@ if [[ -z "${AV_TEMPDIR}" ]] ; then
 fi
 
 if [[ "${action}" == "install" ]] ; then
-    echo "${GREEN}Installing pre-requisite${NC}"
+    echo "Installing pre-requisite"
     echo "Installing azure cli"
     curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
     az config set extension.use_dynamic_install=yes_without_prompt
@@ -218,15 +218,15 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get -y install ffmpeg
     sudo apt-get -y install  jq
     # install the Azure IoT extension
-    echo -e "Checking ${BLUE}azure-iot${NC} extension."
+    echo -e "Checking azure-iot extension."
     az extension show -n azure-iot -o none &> /dev/null
     if [ $? -ne 0 ]; then
-        echo -e "${BLUE}azure-iot${NC} extension not found. Installing ${BLUE}azure-iot${NC}."
+        echo -e "azure-iot extension not found. Installing azure-iot."
         az extension add --name azure-iot &> /dev/null
-        echo -e "${BLUE}azure-iot${NC} extension is now installed."
+        echo -e "azure-iot extension is now installed."
     else
         az extension update --name azure-iot &> /dev/null
-        echo -e "${BLUE}azure-iot${NC} extension is up to date."														  
+        echo -e "azure-iot extension is up to date."														  
     fi
     echo "Downloading content"
     wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
@@ -239,7 +239,7 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get install -y dotnet-sdk-5.0
     dotnet restore ../../../../../src/lvatool
     dotnet build ../../../../../src/lvatool
-    echo "${GREEN}Installing pre-requisite done${NC}"
+    echo "Installing pre-requisite done"
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
@@ -313,7 +313,7 @@ if [[ "${action}" == "deploy" ]] ; then
     sleep 60
 
     echo -e "
-    Updating the Media Services account to use one ${YELLOW}Premium${NC} streaming endpoint."
+    Updating the Media Services account to use one Premium streaming endpoint."
     az ams streaming-endpoint scale --resource-group $AV_RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
 
     echo "Kicking off the async start of the Premium streaming endpoint."
