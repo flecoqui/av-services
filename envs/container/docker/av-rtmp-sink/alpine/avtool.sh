@@ -187,7 +187,7 @@ if [[ "${action}" == "test" ]] ; then
     # Wait 20 seconds before reading the RTMP stream
     sleep 20    
     echo "Capture 20s of RTMP stream on the host machine..."
-    ffmpeg   -hide_banner -loglevel error -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
+    ffmpeg   -hide_banner -loglevel error -re -rw_timeout 20000000 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
     sleep 40
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
@@ -197,7 +197,7 @@ if [[ "${action}" == "test" ]] ; then
         exit 1
     fi
     echo "Capture 20s of HLS stream on the host machine..."
-    ffmpeg   -hide_banner -loglevel error  -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 &
+    ffmpeg   -hide_banner -loglevel error -re -rw_timeout 20000000 -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 &
     sleep 40
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testhls0.mp4" || ! -f "${AV_TEMPDIR}/testhls1.mp4" ]] ; then

@@ -554,8 +554,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTMP..."
     echo ""
     echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP}"
-    echo "RTMP Command: ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  "
-    ffmpeg -nostats -loglevel 0 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  || true
+    echo "RTMP Command: ffmpeg -nostats -loglevel 0 -re -rw_timeout 20000000 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  "
+    ffmpeg -nostats -loglevel 0 -re -rw_timeout 20000000 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  || true
     test_output_files testrtmp || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTMP Test failed - check files testrtmpx.mp4"
@@ -568,8 +568,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output HLS..."
     echo ""
     echo "Output HLS:  http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"
-    echo "HLS Command: ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 "
-    ffmpeg -nostats -loglevel 0 -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
+    echo "HLS Command: ffmpeg -nostats -loglevel 0 -re -rw_timeout 20000000 -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 "
+    ffmpeg -nostats -loglevel 0 -re -rw_timeout 20000000 -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
     test_output_files testhls || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "HLS Test failed - check files testhlsx.mp4"
@@ -582,8 +582,8 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTSP..."
     echo ""
     echo "Output RTSP: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream"
-    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
-    ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
+    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -re -rw_timeout 20000000 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
+    ffmpeg -nostats -loglevel 0 -re -rw_timeout 20000000 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
     test_output_files testrtsp || true
     if [[ "$test_output_files_result" == "0" ]] ; then
         echo "RTSP Test failed - check files testrtsp.mp4"

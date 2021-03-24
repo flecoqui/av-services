@@ -96,47 +96,56 @@ namespace lvaconsole
                 // Read events from any partition of the Event Hub; once no events are read after a couple of seconds, stop reading.
                 LogMessage(LogLevel.Information,"Reading events...");
 
-                DateTime start = DateTime.Now;
-                bool firstRead = true;
-                if(all == true)
-                    firstRead = false;
+                DateTime start = DateTime.UtcNow;
                 await foreach (var partitionEvent in consumer.ReadEventsAsync(new ReadEventOptions { MaximumWaitTime = TimeSpan.FromMilliseconds(500) }))
                 {
                     if (partitionEvent.Data != null)
                     {
-                        if(firstRead == false)
+                        object device;
+                        object module;
+                        object eventTime;
+                        string deviceString = string.Empty;
+                        string moduleString = string.Empty;
+                        string eventTimeString = string.Empty;
+                        string PartitionId = partitionEvent.Partition.PartitionId;
+                        partitionEvent.Data.SystemProperties.TryGetValue("iothub-connection-device-id", out device);
+                        partitionEvent.Data.SystemProperties.TryGetValue("iothub-connection-module-id", out module);
+                        partitionEvent.Data.SystemProperties.TryGetValue("iothub-enqueuedtime", out eventTime);
+                        if (device != null)
+                            deviceString = device.ToString();
+                        if (module != null)
+                            moduleString = module.ToString();
+                        if (eventTime != null)
+                            eventTimeString = eventTime.ToString();
+
+                        bool displayEvent = true;
+                        if (all != true)
                         {
-                            object device;
-                            object module;
-                            string deviceString = string.Empty;
-                            string moduleString = string.Empty;
-                            partitionEvent.Data.SystemProperties.TryGetValue("iothub-connection-device-id", out device);
-                            partitionEvent.Data.SystemProperties.TryGetValue("iothub-connection-module-id", out module);
-                            if (device != null)
-                                deviceString = device.ToString();
-                            if (module != null)
-                                moduleString = module.ToString();
-
-
+                            displayEvent = false;
+                            DateTime eventDateTime = DateTime.UtcNow;
+                            bool dateValid = DateTime.TryParse(eventTimeString, out eventDateTime);
+                            if ((dateValid == true) && (eventDateTime > start))
+                                displayEvent = true;                                   
+                        }
+                        if (displayEvent == true)
+                        {
                             //Console.WriteLine($"\tRead an event from partition { partitionEvent.Partition.PartitionId }");                        
-                            using ( var stream = partitionEvent.Data.EventBody.ToStream())
+                            using (var stream = partitionEvent.Data.EventBody.ToStream())
                             {
                                 long Len = stream.Length;
                                 byte[] ArrayBuffer = new byte[Len];
 
-                                if( Len == stream.Read(ArrayBuffer,0,(int)Len ))
+                                if (Len == stream.Read(ArrayBuffer, 0, (int)Len))
                                 {
                                     string result = System.Text.Encoding.UTF8.GetString(ArrayBuffer);
-                                    LogMessage(LogLevel.Information,$"Device [{deviceString}] Module [{moduleString}] Event body: \r\n{result}");
+                                    LogMessage(LogLevel.Information, $"PartitionId [{PartitionId}] Device [{deviceString}] Module [{moduleString}]\r\nUTCTime [{eventTimeString}]  Event body: \r\n{result}");
                                 }
                             }
                         }
                     }
                     else
-                    {
-                        if(firstRead == true)
-                            firstRead = false;                         
-                        if(((DateTime.Now - start).TotalMilliseconds > timeOut) || (timeOut == 0))
+                    {                     
+                        if(((DateTime.UtcNow - start).TotalMilliseconds > timeOut) || (timeOut == 0))
                             break;
 
                         if( Console.KeyAvailable && ((Console.ReadKey(true).Key == ConsoleKey.Escape) || (Console.ReadKey(true).Key == ConsoleKey.Spacebar))) 
