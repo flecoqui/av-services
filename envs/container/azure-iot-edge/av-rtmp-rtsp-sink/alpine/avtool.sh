@@ -555,12 +555,12 @@ if [[ "${action}" == "stop" ]] ; then
     sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/g" ./deployment.template.json
     sed -i "s/{VIDEO_OUTPUT_FOLDER_ON_DEVICE}/\/var\/media/" ./deployment.template.json
     sed -i "s/{APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
-    sed -i "s/{SUBSCRIPTION_ID}/$AV_SUBSCRIPTION_ID/g" ./deployment.template.json
+    sed -i "s/{SUBSCRIPTION_ID}/${AV_SUBSCRIPTION_ID//\//\\/}/g" ./deployment.template.json
     sed -i "s/{RESOURCE_GROUP}/$RESOURCE_GROUP/g" ./deployment.template.json
-    sed -i "s/{AMS_ACCOUNT}/$AMS_ACCOUNT/g" ./deployment.template.json
-    sed -i "s/{AAD_TENANT_ID}/$AAD_TENANT_ID/g" ./deployment.template.json
-    sed -i "s/{AAD_SERVICE_PRINCIPAL_ID}/$AAD_SERVICE_PRINCIPAL_ID/g" ./deployment.template.json
-    sed -i "s/{AAD_SERVICE_PRINCIPAL_SECRET}/$AAD_SERVICE_PRINCIPAL_SECRET/g" ./deployment.template.json
+    sed -i "s/{AMS_ACCOUNT}/${AMS_ACCOUNT//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AAD_TENANT_ID}/${AAD_TENANT_ID//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AAD_SERVICE_PRINCIPAL_ID}/${AAD_SERVICE_PRINCIPAL_ID//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AAD_SERVICE_PRINCIPAL_SECRET}/${AAD_SERVICE_PRINCIPAL_SECRET//\//\\/}/g" ./deployment.template.json
     cat ./deployment.template.json
     az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json
 
