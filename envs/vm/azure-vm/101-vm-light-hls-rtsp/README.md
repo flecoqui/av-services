@@ -172,7 +172,7 @@ When you run avtool.sh for the first time, it creates a file called .avtoolconfi
     AV_RTMP_PATH=live/stream
     AV_PREFIXNAME=rtmprtsphls
     AV_VMNAME="$AV_PREFIXNAME"vm
-    AV_HOSTNAME="$AV_VMNAME"."$AV_AV_RESOURCE_REGION".cloudapp.azure.com
+    AV_HOSTNAME="$AV_VMNAME"."$AV_RESOURCE_REGION".cloudapp.azure.com
     AV_CONTAINERNAME=avchunks
     AV_LOGIN=avvmadmin
     AV_PASSWORD={YourPassword}
