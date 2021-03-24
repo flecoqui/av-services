@@ -65,7 +65,7 @@ checkLoginAndSubscription() {
             CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
         fi
         AV_SUBSCRIPTION_ID=$CURRENT_SUBSCRIPTION_ID
-        sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
+        sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
     fi
 }
 test_output_files () {
