@@ -57,8 +57,14 @@ namespace lvaconsole
             "                       [--lastoperation <OperationName> --waitforinput]\r\n" +
             "lvatool --readevents    --connectionstring <IoTHubConnectionString>\r\n" +
             "                       [--timeout <TimeOut in milliseconds> --all]\r\n" +
-            "lvatool --help"+
-            "Note:\r\nmoduleId default value: lvaEdge\r\nOperationPath default value: operations.json\r\nFirst Operation Name default value: null\r\nTimeOut default value: 0";
+            "lvatool --help" +
+            "Note:\r\nmoduleId default value: lvaEdge\r\nOperationPath default value: operations.json\r\nFirst Operation Name default value: null\r\nLast Operation Name default value: null\r\nTimeOut default value: 0\r\n" +
+            "\r\nRECEIVING EVENTS FROM IOT HUB:\r\n" +
+            "lvatool can be used to receive events from IoT Hub, you need to specify the IoT Hub connection string,\r\nthe timeout in milliseconds. By default, it will display the new events. If you want to display all the events,\r\n add the option --all\r\n" +
+            "\r\nLAUNCHING OPERATIONS ON LVAEDGE MODULE:\r\n" +
+            "lvatool can also be used to manage LVA Graph and launch operations, you need to specify the IoT Hub connection string,\r\nthe device Id, by default the module id is lvaEdge, the path to the operation file which contains the graph. \r\nYou can also define the name of the first step and the last step in the operation file. \r\nif the name of the first step is not present, it will start with the first operation in the file.\r\nIf the name of the last operation is not present, it will run till the end of the operation file\r\n"; 
+
+
 
         private static object _MessageLock= new object();
         private static void LogMessage(LogLevel level, string Message)
