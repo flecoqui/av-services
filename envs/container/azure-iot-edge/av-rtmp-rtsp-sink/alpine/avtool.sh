@@ -71,7 +71,7 @@ checkLoginAndSubscription() {
 test_output_files () {
     test_output_files_result="1"
     prefix="$1"
-    for i in 0 1 2 3
+    for i in 0 1 
     do
         echo "checking file: ${AV_TEMPDIR}/${prefix}${i}.mp4 size: $(wc -c ${AV_TEMPDIR}/${prefix}${i}.mp4 | awk '{print $1}')"
         if [[ ! -f "${AV_TEMPDIR}"/${prefix}${i}.mp4 || $(wc -c "${AV_TEMPDIR}"/${prefix}${i}.mp4 | awk '{print $1}') < 10000 ]]; then 
