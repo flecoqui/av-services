@@ -377,7 +377,7 @@ if [[ "${action}" == "deploy" ]] ; then
     sed -i "/AV_AAD_SERVICE_PRINCIPAL_SECRET=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_SECRET=$AAD_SERVICE_PRINCIPAL_SECRET" >> "$repoRoot"/"$configuration_file" 
 
 
-    SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
+
     echo -e "
 Content of the .env file which can be used with the Azure IoT Tools in Visual Studio Code:    
     "
@@ -480,7 +480,7 @@ if [[ "${action}" == "start" ]] ; then
     sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/g" ./deployment.template.json
     sed -i "s/{VIDEO_OUTPUT_FOLDER_ON_DEVICE}/\/var\/media/" ./deployment.template.json
     sed -i "s/{APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
-    sed -i "s/{SUBSCRIPTION_ID}/$SUBSCRIPTION_ID/g" ./deployment.template.json
+    sed -i "s/{SUBSCRIPTION_ID}/$AV_SUBSCRIPTION_ID/g" ./deployment.template.json
     sed -i "s/{RESOURCE_GROUP}/$RESOURCE_GROUP/g" ./deployment.template.json
     sed -i "s/{AMS_ACCOUNT}/$AMS_ACCOUNT/g" ./deployment.template.json
     sed -i "s/{AAD_TENANT_ID}/$AAD_TENANT_ID/g" ./deployment.template.json
@@ -515,7 +515,7 @@ if [[ "${action}" == "stop" ]] ; then
     sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/g" ./deployment.template.json
     sed -i "s/{VIDEO_OUTPUT_FOLDER_ON_DEVICE}/\/var\/media/" ./deployment.template.json
     sed -i "s/{APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
-    sed -i "s/{SUBSCRIPTION_ID}/$SUBSCRIPTION_ID/g" ./deployment.template.json
+    sed -i "s/{SUBSCRIPTION_ID}/$AV_SUBSCRIPTION_ID/g" ./deployment.template.json
     sed -i "s/{RESOURCE_GROUP}/$RESOURCE_GROUP/g" ./deployment.template.json
     sed -i "s/{AMS_ACCOUNT}/$AMS_ACCOUNT/g" ./deployment.template.json
     sed -i "s/{AAD_TENANT_ID}/$AAD_TENANT_ID/g" ./deployment.template.json
