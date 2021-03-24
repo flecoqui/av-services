@@ -44,7 +44,7 @@ checkLoginAndSubscription() {
         az login -o none
     fi
     CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
-    if [[ -z $AV_SUBSCRIPTION_ID  || $AV_SUBSCRIPTION_ID -ne $CURRENT_SUBSCRIPTION_ID ]]; then
+    if [[ -z "$AV_SUBSCRIPTION_ID"  || "$AV_SUBSCRIPTION_ID" -ne "$CURRENT_SUBSCRIPTION_ID" ]]; then
         # query subscriptions
         echo -e "\nYou have access to the following subscriptions:"
         az account list --query '[].{name:name,"subscription Id":id}' --output table
@@ -198,7 +198,6 @@ export $(grep AV_CONTAINER_REGISTRY_USERNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_PASSWORD "$repoRoot"/"$configuration_file")
 export $(grep AV_SUBSCRIPTION_ID "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
-echo "Subscription: $AV_SUBSCRIPTION_ID"
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
     AV_TEMPDIR=$(mktemp -d)
