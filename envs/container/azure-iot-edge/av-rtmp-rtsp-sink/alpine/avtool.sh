@@ -36,8 +36,6 @@ checkError() {
         echo -e "\n${RED}An error occured exiting from the current bash${NC}"
         exit 1
     fi
-    if [ ]; then
-
 }
 checkLoginAndSubscription() {
     az account show -o none
