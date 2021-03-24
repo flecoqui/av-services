@@ -62,10 +62,10 @@ checkLoginAndSubscription() {
             az account set -s "$SUBSCRIPTION_ID"
             echo -e "\nNow using:"
             az account show --query '[name,id]'
-            AV_SUBSCRIPTION_ID=$SUBSCRIPTION_ID
-            sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
-
-        fi 
+            CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
+        fi
+        AV_SUBSCRIPTION_ID=$CURRENT_SUBSCRIPTION_ID
+        sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
     fi
 }
 test_output_files () {
@@ -273,30 +273,30 @@ if [[ "${action}" == "deploy" ]] ; then
     sleep 20
     RESOURCES=$(az resource list --resource-group "${AV_RESOURCE_GROUP}" --query '[].{name:name,"Resource Type":type}' -o table)
     # capture resource configuration in variables
-    IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
-    IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${IOTHUB} --query='connectionString')
-    AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
-    CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
-    CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'username' | tr -d \")
-    CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
+    AV_IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
+    AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query='connectionString')
+    AV_AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
+    AV_CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
+    AV_CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'username' | tr -d \")
+    AV_CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
 
     # configure the hub for an edge device
     echo "Registering device..."
-    if test -z "$(az iot hub device-identity list -n $IOTHUB | grep "deviceId" | grep $AV_EDGE_DEVICE)"; then
-        az iot hub device-identity create --hub-name $IOTHUB --device-id $AV_EDGE_DEVICE --edge-enabled -o none
+    if test -z "$(az iot hub device-identity list -n $AV_IOTHUB | grep "deviceId" | grep $AV_EDGE_DEVICE)"; then
+        az iot hub device-identity create --hub-name $AV_IOTHUB --device-id $AV_EDGE_DEVICE --edge-enabled -o none
         checkError
     fi
-    DEVICE_CONNECTION_STRING=$(az iot hub device-identity connection-string show --device-id $AV_EDGE_DEVICE --hub-name $IOTHUB --query='connectionString')
-    DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING//\//\\/} 
+    AV_DEVICE_CONNECTION_STRING=$(az iot hub device-identity connection-string show --device-id $AV_EDGE_DEVICE --hub-name $AV_IOTHUB --query='connectionString')
+    AV_DEVICE_CONNECTION_STRING=${AV_DEVICE_CONNECTION_STRING//\//\\/} 
 
     # creating the AMS account creates a service principal, so we'll just reset it to get the credentials
     echo "setting up service principal..."
-    SPN="$AMS_ACCOUNT-access-sp" # this is the default naming convention used by `az ams account sp`
+    SPN="$AV_AMS_ACCOUNT-access-sp" # this is the default naming convention used by `az ams account sp`
 
     if test -z "$(az ad sp list --display-name $SPN --query="[].displayName" -o tsv)"; then
-        AMS_CONNECTION=$(az ams account sp create -o yaml --resource-group $AV_RESOURCE_GROUP --account-name $AMS_ACCOUNT)
+        AMS_CONNECTION=$(az ams account sp create -o yaml --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT)
     else
-        AMS_CONNECTION=$(az ams account sp reset-credentials -o yaml --resource-group $AV_RESOURCE_GROUP --account-name $AMS_ACCOUNT)
+        AMS_CONNECTION=$(az ams account sp reset-credentials -o yaml --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT)
     fi
 
     # capture config information
@@ -319,17 +319,17 @@ if [[ "${action}" == "deploy" ]] ; then
 
     echo -e "
     Updating the Media Services account to use one Premium streaming endpoint."
-    az ams streaming-endpoint scale --resource-group $AV_RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --scale-units 1
+    az ams streaming-endpoint scale --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT -n default --scale-units 1
 
     echo "Kicking off the async start of the Premium streaming endpoint."
     echo "  This is needed to run samples or tutorials involving video playback."
-    az ams streaming-endpoint start --resource-group $AV_RESOURCE_GROUP --account-name $AMS_ACCOUNT -n default --no-wait
+    az ams streaming-endpoint start --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT -n default --no-wait
 
     echo "Generating cloud-init.yml:"
-    CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" )
+    CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/$AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" )
     echo "$CUSTOM_STRING"
     echo "Generating cloud-init.yml base64:"
-    CUSTOM_STRING_BASE64=$(sed "s/{DEVICE_CONNECTION_STRING}/${DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" | base64)
+    CUSTOM_STRING_BASE64=$(sed "s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" | base64)
     echo "$CUSTOM_STRING_BASE64"
 
     echo "Deploying Virtual Machine..."
@@ -388,7 +388,7 @@ if [[ "${action}" == "deploy" ]] ; then
     sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/g" ./deployment.template.json
     sed -i "s/{AV_VIDEO_OUTPUT_FOLDER_ON_DEVICE}/\/var\/media/" ./deployment.template.json
     sed -i "s/{AV_APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
-    sed -i "s/{AV_SUBSCRIPTION_ID}/$SUBSCRIPTION_ID/g" ./deployment.template.json
+    sed -i "s/{AV_SUBSCRIPTION_ID}/$AV_SUBSCRIPTION_ID/g" ./deployment.template.json
     sed -i "s/{AV_RESOURCE_GROUP}/$AV_RESOURCE_GROUP/g" ./deployment.template.json
     sed -i "s/{AV_AMS_ACCOUNT}/$AV_AMS_ACCOUNT/g" ./deployment.template.json
     sed -i "s/{AV_AAD_TENANT_ID}/$AV_AAD_TENANT_ID/g" ./deployment.template.json
@@ -397,21 +397,21 @@ if [[ "${action}" == "deploy" ]] ; then
     cat ./deployment.template.json
 
     echo
-    echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${IOTHUB} " 
+    echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${AV_IOTHUB} " 
     echo
-    az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${IOTHUB} --content ./deployment.template.json
+    az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json
 
 
 
-    sed -i "/AV_IOTHUB=/d" "$repoRoot"/"$configuration_file"; echo "AV_IOTHUB=$IOTHUB" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_IOTHUB_CONNECTION_STRING=/d" "$repoRoot"/"$configuration_file"; echo "AV_IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_DEVICE_CONNECTION_STRING=/d" "$repoRoot"/"$configuration_file"; echo "AV_DEVICE_CONNECTION_STRING=$DEVICE_CONNECTION_STRING" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_IOTHUB=/d" "$repoRoot"/"$configuration_file"; echo "AV_IOTHUB=$AV_IOTHUB" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_IOTHUB_CONNECTION_STRING=/d" "$repoRoot"/"$configuration_file"; echo "AV_IOTHUB_CONNECTION_STRING=$AV_IOTHUB_CONNECTION_STRING" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_DEVICE_CONNECTION_STRING=/d" "$repoRoot"/"$configuration_file"; echo "AV_DEVICE_CONNECTION_STRING=$AV_DEVICE_CONNECTION_STRING" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_CONTAINER_REGISTRY=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY=$AV_CONTAINER_REGISTRY" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_CONTAINER_REGISTRY_DNS_NAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_DNS_NAME=$AV_CONTAINER_REGISTRY_DNS_NAME" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_CONTAINER_REGISTRY_USERNAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_USERNAME=$AV_CONTAINER_REGISTRY_USERNAME" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_CONTAINER_REGISTRY_PASSWORD=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_PASSWORD=$AV_CONTAINER_REGISTRY_PASSWORD" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AMS_ACCOUNT=/d" "$repoRoot"/"$configuration_file"; echo "AV_AMS_ACCOUNT=$AMS_ACCOUNT" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_AMS_ACCOUNT=/d" "$repoRoot"/"$configuration_file"; echo "AV_AMS_ACCOUNT=$AV_AMS_ACCOUNT" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_AAD_TENANT_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_TENANT_ID=$AAD_TENANT_ID" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_AAD_SERVICE_PRINCIPAL_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_ID=$AAD_SERVICE_PRINCIPAL_ID" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_AAD_SERVICE_PRINCIPAL_SECRET=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_SECRET=$AAD_SERVICE_PRINCIPAL_SECRET" >> "$repoRoot"/"$configuration_file" 
@@ -422,10 +422,10 @@ if [[ "${action}" == "deploy" ]] ; then
 Content of the .env file which can be used with the Azure IoT Tools in Visual Studio Code:    
     "
     # write .env file for edge deployment
-    echo "SUBSCRIPTION_ID=\"$SUBSCRIPTION_ID\"" > ./.env
+    echo "SUBSCRIPTION_ID=\"$AV_SUBSCRIPTION_ID\"" > ./.env
     echo "RESOURCE_GROUP=\"$AV_RESOURCE_GROUP\"" >> ./.env
-    echo "AMS_ACCOUNT=\"$AMS_ACCOUNT\""  >> ./.env
-    echo "IOTHUB_CONNECTION_STRING=$IOTHUB_CONNECTION_STRING" >> ./.env
+    echo "AMS_ACCOUNT=\"$AV_AMS_ACCOUNT\""  >> ./.env
+    echo "IOTHUB_CONNECTION_STRING=$AV_IOTHUB_CONNECTION_STRING" >> ./.env
     echo "AAD_TENANT_ID=$AAD_TENANT_ID"  >> ./.env
     echo "AAD_SERVICE_PRINCIPAL_ID=$AAD_SERVICE_PRINCIPAL_ID"  >> ./.env
     echo "AAD_SERVICE_PRINCIPAL_SECRET=$AAD_SERVICE_PRINCIPAL_SECRET"  >> ./.env
@@ -441,7 +441,7 @@ Content of the appsettings.json file which can be used with the Azure IoT Tools 
     "
     # write appsettings for sample code
     echo "{" > ./appsettings.json
-    echo "    \"IoThubConnectionString\" : $IOTHUB_CONNECTION_STRING," >>  ./appsettings.json
+    echo "    \"IoThubConnectionString\" : $AV_IOTHUB_CONNECTION_STRING," >>  ./appsettings.json
     echo "    \"deviceId\" : \"$AV_EDGE_DEVICE\"," >>  ./appsettings.json
     echo "    \"moduleId\" : \"lvaEdge\"" >>  ./appsettings.json
     echo -n "}" >>  ./appsettings.json
@@ -456,9 +456,9 @@ Content of operations.json file which can be used with the Azure Cloud To Device
     echo -e "
 Deployment parameters:    
     "
-    echo "IOTHUB=${IOTHUB}"
-    echo "IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}"
-    echo "DEVICE_CONNECTION_STRING=${DEVICE_CONNECTION_STRING}"
+    echo "IOTHUB=${AV_IOTHUB}"
+    echo "IOTHUB_CONNECTION_STRING=${AV_IOTHUB_CONNECTION_STRING}"
+    echo "DEVICE_CONNECTION_STRING=${AV_DEVICE_CONNECTION_STRING}"
     echo "CONTAINER_REGISTRY=${AV_CONTAINER_REGISTRY}"
     echo "CONTAINER_REGISTRY_DNS_NAME=${AV_CONTAINER_REGISTRY_DNS_NAME}"
     echo "CONTAINER_REGISTRY_USERNAME=${AV_CONTAINER_REGISTRY_USERNAME}"
