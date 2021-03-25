@@ -109,7 +109,7 @@ setContainerState () {
     sed -i "s/{AV_AAD_TENANT_ID}/${AV_AAD_TENANT_ID//\//\\/}/g" ./deployment.template.json
     sed -i "s/{AV_AAD_SERVICE_PRINCIPAL_ID}/${AV_AAD_SERVICE_PRINCIPAL_ID//\//\\/}/g" ./deployment.template.json
     sed -i "s/{AV_AAD_SERVICE_PRINCIPAL_SECRET}/${AV_AAD_SERVICE_PRINCIPAL_SECRET//\//\\/}/g" ./deployment.template.json
-    az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json
+    az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json > /dev/null
     checkError
 }
 getContainerState () {
