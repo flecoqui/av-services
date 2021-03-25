@@ -33,7 +33,7 @@ NC='\033[0m' # No Color
 
 checkError() {
     if [ $? -ne 0 ]; then
-        echo -e "\nAn error occured exiting from the current bash"
+        echo -e "${RED}\nAn error occured exiting from the current bash${NC}"
         exit 1
     fi
 }
@@ -122,21 +122,33 @@ getContainerState () {
 stopContainer() {
     setContainerState "stopped"
     echo "Stop command sent"
+    x=1
     while : ; do 
+        if [ $x -gt 10 ] ; then
+            echo -e "${RED}\nAn error occured exiting from the current bash: Timeout while stopping the container${NC}"
+            exit 1
+        fi 
         getContainerState 
         if [[ $getContainerStateResult == "stopped" ]]; then echo "Container is stopped"; break; fi; 
         echo "Waiting for container in stopped state, currently it is $getContainerStateResult"; 
         sleep 10; 
+        x=$(( $x + 1 ))
     done; 
 }
 startContainer() {
     setContainerState "running"
     echo "Start command sent"
-    while : ; do 
+    x=1
+    while : ; do
+        if [ $x -gt 10 ] ; then
+            echo -e "${RED}\nAn error occured exiting from the current bash: Timeout while starting the container${NC}"
+            exit 1
+        fi 
         getContainerState 
         if [[ $getContainerStateResult == "running" ]]; then echo "Container is running"; break; fi; 
         echo "Waiting for container in running state, currently it is $getContainerStateResult"; 
         sleep 10; 
+        x=$(( $x + 1 ))
     done; 
 }
 fillConfigurationFile() {
@@ -335,14 +347,14 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get install -y dotnet-sdk-5.0
     dotnet restore ../../../../../src/lvatool
     dotnet build ../../../../../src/lvatool
-    echo "Installing pre-requisite done"
+    echo -e "${GREEN}Installing pre-requisites done${NC}"
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
     echo "Login..."
     az login
     checkLoginAndSubscription
-    echo "Login done"
+    echo -e "${GREEN}Login done${NC}"
     exit 0
 fi
 
@@ -524,8 +536,7 @@ Deployment parameters:
     echo "HLS  URL: http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"
     echo "HTTP URL: http://${AV_HOSTNAME}:${AV_PORT_HTTP}/player.html"
     echo "SSL  URL: https://${AV_HOSTNAME}:${AV_PORT_SSL}/player.html"
-    echo "Deployment done"
-
+    echo -e "${GREEN}Deployment done${NC}"
     exit 0
 fi
 
@@ -534,7 +545,7 @@ if [[ "${action}" == "undeploy" ]] ; then
     checkLoginAndSubscription
     az group delete -n ${AV_RESOURCE_GROUP} --yes
     initializeConfigurationFile
-    echo "Undeployment done"
+    echo -e "${GREEN}Undeployment done${NC}"
     exit 0
 fi
 
@@ -542,6 +553,7 @@ if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
     checkLoginAndSubscription
     startContainer
+    echo -e "${GREEN}Container started${NC}"
     exit 0
 fi
 
@@ -549,6 +561,7 @@ if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
     checkLoginAndSubscription
     stopContainer
+    echo -e "${GREEN}Container stopped${NC}"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
@@ -653,6 +666,6 @@ if [[ "${action}" == "test" ]] ; then
 
     #jobs
     kill %1
-    echo "TESTS SUCCESSFUL"
+    echo -e "${GREEN}TESTS SUCCESSFUL${NC}"
     exit 0
 fi
