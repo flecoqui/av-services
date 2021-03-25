@@ -85,7 +85,7 @@
           "rtmpsource": {
             "version": "1.0",
             "type": "docker",
-            "status": "running",
+            "status": "{AV_STATE}",
             "restartPolicy": "always",
             "settings": {
               "image": "{AV_CONTAINER_REGISTRY_DNS_NAME}/{AV_IMAGE_FOLDER}/{AV_IMAGE_NAME}:latest",
