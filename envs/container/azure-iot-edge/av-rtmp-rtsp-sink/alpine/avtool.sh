@@ -564,6 +564,8 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testhls*.mp4
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
     echo "Testing service..."
+    stopContainer
+    startContainer
     checkLoginAndSubscription
     echo ""
     echo "Start RTMP Streaming..."
