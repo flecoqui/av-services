@@ -53,31 +53,25 @@ namespace lvatool
                                                                                TimeSpan? timeout = default)
         {
             timeout ??= TimeSpan.FromMinutes(1);
-    Console.WriteLine("Test1");
             if (string.IsNullOrEmpty(iotHubConnectionString))
             {
                 throw new ArgumentException("The IoT Hub connection string must be provided.", nameof(iotHubConnectionString));
             }
-            Console.WriteLine("Test2");
 
             // Parse the connection string into the necessary components, and ensure the information is available.
 
             var parsedConnectionString = IotHubConnectionStringBuilder.Create(iotHubConnectionString);
-            Console.WriteLine("Test4");
             var iotHubName = parsedConnectionString.HostName?.Substring(0, parsedConnectionString.HostName.IndexOf('.'));
-            Console.WriteLine("Test3");
 
             if ((string.IsNullOrEmpty(parsedConnectionString.HostName)) || (string.IsNullOrEmpty(parsedConnectionString.SharedAccessKeyName)) || (string.IsNullOrEmpty(parsedConnectionString.SharedAccessKey)))
             {
                 throw new ArgumentException("The IoT Hub connection string is not valid; it must contain the host, shared access key, and shared access key name.", nameof(iotHubConnectionString));
             }
-            Console.WriteLine("TestEnd6");
 
             if (string.IsNullOrEmpty(iotHubName))
             {
                 throw new ArgumentException("Unable to parse the IoT Hub name from the connection string.", nameof(iotHubConnectionString));
             }
-            Console.WriteLine("TestEnd5");
 
             // Establish the IoT Hub connection via link to the necessary endpoint, which will trigger a redirect exception
             // from which the Event Hubs connection string can be built.
@@ -88,18 +82,13 @@ namespace lvatool
             var link = default(AmqpLink);
             var eventHubsHost = default(string);
             var eventHubName = default(string);
-            Console.WriteLine("TestEnd4");
 
             try
             {
                 connection = await CreateAndOpenConnectionAsync(serviceEndpoint, iotHubName, parsedConnectionString.SharedAccessKeyName, parsedConnectionString.SharedAccessKey, timeout.Value).ConfigureAwait(false);
-                Console.WriteLine("TestEnd41");
                 link = await CreateRedirectLinkAsync(connection, serviceEndpoint, timeout.Value.Subtract(stopWatch.Elapsed)).ConfigureAwait(false);
-                Console.WriteLine("TestEnd42");
 
                 await link.OpenAsync(timeout.Value.Subtract(stopWatch.Elapsed)).ConfigureAwait(false);
-                Console.WriteLine("TestEnd43");
-
             }
             catch (AmqpException ex)
                 when ((ex?.Error?.Condition.Value == AmqpErrorCode.LinkRedirect.Value) && (ex?.Error?.Info != null))
@@ -129,19 +118,16 @@ namespace lvatool
             }
 
             // Attempt to assemble the Event Hubs connection string using the IoT Hub components.
-            Console.WriteLine("TestEnd3");
 
             if (string.IsNullOrEmpty(eventHubsHost))
             {
                 throw new InvalidOperationException("The Event Hubs host was not returned by the IoT Hub service.");
             }
 
-            Console.WriteLine("TestEnd2");
             if (string.IsNullOrEmpty(eventHubName))
             {
                 throw new InvalidOperationException("The Event Hub name was not returned by the IoT Hub service.");
             }
-            Console.WriteLine("TestEnd1");
             return $"Endpoint=sb://{ eventHubsHost }/;EntityPath={ eventHubName };SharedAccessKeyName={ parsedConnectionString.SharedAccessKeyName };SharedAccessKey={ parsedConnectionString.SharedAccessKey }";
         }
 
@@ -170,6 +156,7 @@ namespace lvatool
             var userName = $"{ sharedAccessKeyName }@sas.root.{ iotHubName }";
             var signature = BuildSignature($"{ hostName }{ serviceEndpoint.AbsolutePath }", sharedAccessKeyName, sharedAccessKey, TimeSpan.FromMinutes(5));
             var port = 5671;
+            Console.WriteLine("Test1");
 
             // Create the layers of settings needed to establish the connection.
 
@@ -196,16 +183,20 @@ namespace lvatool
                 HostName = hostName
             };
 
+            Console.WriteLine("Test2");
             var saslProvider = new SaslTransportProvider();
             saslProvider.Versions.Add(new AmqpVersion(amqpVersion));
             saslProvider.AddHandler(new SaslPlainHandler { AuthenticationIdentity = userName, Password = signature });
+            Console.WriteLine("Test3");
 
             var amqpProvider = new AmqpTransportProvider();
             amqpProvider.Versions.Add(new AmqpVersion(amqpVersion));
+            Console.WriteLine("Test4");
 
             var amqpSettings = new AmqpSettings();
             amqpSettings.TransportProviders.Add(saslProvider);
             amqpSettings.TransportProviders.Add(amqpProvider);
+            Console.WriteLine("Test5");
 
             // Create and open the connection, respecting the timeout constraint
             // that was received.
@@ -213,11 +204,14 @@ namespace lvatool
             var stopWatch = Stopwatch.StartNew();
             var initiator = new AmqpTransportInitiator(amqpSettings, transportSettings);
             var transport = await initiator.ConnectTaskAsync(timeout).ConfigureAwait(false);
+            Console.WriteLine("Test6");
 
             try
             {
                 var connection = new AmqpConnection(transport, amqpSettings, connectionSettings);
+                Console.WriteLine("Test7");
                 await connection.OpenAsync(timeout.Subtract(stopWatch.Elapsed)).ConfigureAwait(false);
+                Console.WriteLine("Test8");
 
                 return connection;
             }
