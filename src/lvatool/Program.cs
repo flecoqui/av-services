@@ -93,7 +93,6 @@ namespace lvaconsole
 
 
                 // Translate the connection string.
-
                 LogMessage(LogLevel.Information,"Requesting Event Hubs connection string...");
                 var eventHubsConnectionString = await lvatool.IotHubConnection.RequestEventHubsConnectionStringAsync(connectionString);
 

@@ -86,8 +86,9 @@ namespace lvatool
             try
             {
                 connection = await CreateAndOpenConnectionAsync(serviceEndpoint, iotHubName, parsedConnectionString.SharedAccessKeyName, parsedConnectionString.SharedAccessKey, timeout.Value).ConfigureAwait(false);
+                
                 link = await CreateRedirectLinkAsync(connection, serviceEndpoint, timeout.Value.Subtract(stopWatch.Elapsed)).ConfigureAwait(false);
-
+                
                 await link.OpenAsync(timeout.Value.Subtract(stopWatch.Elapsed)).ConfigureAwait(false);
             }
             catch (AmqpException ex)
