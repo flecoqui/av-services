@@ -1,0 +1,367 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Service name prefix must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 50 characters in length."
+      }
+    },
+    "vmAdminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "User name for the Virtual Machine."
+      }
+    },
+    "vmAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "customData": {
+      "type": "string",
+      "metadata": {
+        "description": "Base64 Custom data to initialize the virtual machine."
+      }
+    },    
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS3_v2",
+      "metadata": {
+        "description": "Virtual Machine Size: Standard_DS3_v2"
+      }
+    },
+    "portHTTP": {
+      "type": "string",
+      "defaultValue": "80",
+      "metadata": {
+        "description": "http port"
+      }
+    },
+    "portSSL": {
+      "type": "string",
+      "defaultValue": "443",
+      "metadata": {
+        "description": "ssl port"
+      }
+    },
+    "portRTMP": {
+      "type": "string",
+      "defaultValue": "1935",
+      "metadata": {
+        "description": "rtmp port"
+      }
+    },
+    "portRTSP": {
+      "type": "string",
+      "defaultValue": "8554",
+      "metadata": {
+        "description": "rtsp port"
+      }
+    },
+    "portHLS": {
+      "type": "string",
+      "defaultValue": "8080",
+      "metadata": {
+        "description": "hls port"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "rtmprtsplvasto",
+      "metadata": {
+        "description": "Storage Account Name to be used ith the virtual machine"
+      }
+    },
+    "expiryDate": {
+      "type": "string",
+      "defaultValue": "2030-01-01T00:00:01Z",
+      "metadata": {
+        "description": "Expiry date of the SAS token"
+      }
+    }
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "vmName": "[concat(parameters('namePrefix'), 'vm')]",
+    "vmDataDiskSize": "512",
+    "replicaCount": "1",
+    "partitionCount": "1",
+    "hostingMode": "default",
+    "apiVersion": "2015-06-15",
+    "networkSecurityGroupName": "[concat(parameters('namePrefix'), 'nsg')]",
+    "serviceSasFunctionValues": {
+      "signedServices": "b",
+      "signedResourceTypes": "sco",
+      "signedPermission": "rwdlac",
+      "signedStart": "2020-01-01T00:00:01Z",
+      "signedExpiry": "2030-01-01T00:00:01Z",
+      "signedProtocol": "https",
+      "keyToSign": "key1"
+    },
+    "nicName": "[concat(parameters('namePrefix'), 'nic')]",
+    "addressPrefix": "10.0.0.0/16",
+    "subnetName": "[concat(parameters('namePrefix'), 'subnet')]",
+    "subnetPrefix": "10.0.0.0/24",
+    "publicIPAddressName": "[concat(parameters('namePrefix'), 'ip')]",
+    "publicIPAddressType": "Dynamic",
+    "virtualNetworkName": "[concat(parameters('namePrefix'), 'vnet')]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('networkSecurityGroupName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "ssh",
+            "properties": {
+              "description": "SSH port",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "rtmp",
+            "properties": {
+              "description": "rtmp port",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[parameters('portRTMP')]",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 102,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "hls",
+            "properties": {
+              "description": "hls server port",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[parameters('portHLS')]",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 103,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "http",
+            "properties": {
+              "description": "http server port",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[parameters('portHTTP')]",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 104,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "ssl",
+            "properties": {
+              "description": "ssl server port",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[parameters('portSSL')]",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 105,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "rtsp",
+            "properties": {
+              "description": "rtsp server port",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[parameters('portRTSP')]",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 106,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "rtspudp1",
+            "properties": {
+              "description": "rtsp server udp port",
+              "protocol": "Udp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "[parameters('portRTSP')]",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 107,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('vmName')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/virtualNetworks",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]"
+      ],
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('nicName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+              },
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2020-06-01",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('vmAdminUsername')]",
+          "adminPassword": "[parameters('vmAdminPassword')]",
+          "customData": "[parameters('customData')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "18.04-LTS",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          },
+          "dataDisks": [
+            {
+              "diskSizeGB": 1023,
+              "lun": 0,
+              "createOption": "Empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": "true",
+            "storageUri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+      }
+    }    
+  ],
+  "outputs": {
+    "httpPlayerCmd": {
+      "type": "string",
+      "value": "[concat('http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com/player.html')]"
+    },
+    "rtmpUrl": {
+      "type": "string",
+      "value": "[concat('http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com:1935/live/stream')]"
+    },
+    "hlsUrl": {
+      "type": "string",
+      "value": "[concat('http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com:8080/live/stream.m3u8')]"
+    },
+    "rtspUrl": {
+      "type": "string",
+      "value": "[concat('http://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com:8554/rtsp/stream')]"
+    },
+    "ffmpegCmd": {
+      "type": "string",
+      "value": "[concat('ffmpeg.exe -v verbose -f dshow -i video=\"Integrated Webcam\":audio=\"Microphone (Realtek(R) Audio)\"  -video_size 1280x720 -strict -2 -c:a aac -b:a 192k -ar 44100 -r 30 -g 60 -keyint_min 60 -b:v 2000000 -c:v libx264 -preset veryfast  -profile main -level 3.0 -pix_fmt yuv420p -bufsize 1800k -maxrate 400k  -f flv rtmp://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com:1935/live/stream')]"
+    }
+  }
+}
