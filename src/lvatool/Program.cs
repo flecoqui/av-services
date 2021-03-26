@@ -557,13 +557,14 @@ namespace lvaconsole
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
             }
-            
-            if(verbose)
+
+            if (verbose)
+            {
                 Console.WriteLine($"\n---------------  Response: {methodName} - Status: {response.Status}  ---------------\n");
+                Console.ResetColor();
+            }
             else
                 Console.WriteLine($"Response: {methodName} - Status: {response.Status}\n");
-
-            Console.ResetColor();
 
             if(verbose)
             {

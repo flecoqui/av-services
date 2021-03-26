@@ -53,16 +53,19 @@ namespace lvatool
                                                                                TimeSpan? timeout = default)
         {
             timeout ??= TimeSpan.FromMinutes(1);
-
+    Console.WriteLine("Test1");
             if (string.IsNullOrEmpty(iotHubConnectionString))
             {
                 throw new ArgumentException("The IoT Hub connection string must be provided.", nameof(iotHubConnectionString));
             }
+            Console.WriteLine("Test2");
 
             // Parse the connection string into the necessary components, and ensure the information is available.
 
             var parsedConnectionString = IotHubConnectionStringBuilder.Create(iotHubConnectionString);
+            Console.WriteLine("Test4");
             var iotHubName = parsedConnectionString.HostName?.Substring(0, parsedConnectionString.HostName.IndexOf('.'));
+            Console.WriteLine("Test3");
 
             if ((string.IsNullOrEmpty(parsedConnectionString.HostName)) || (string.IsNullOrEmpty(parsedConnectionString.SharedAccessKeyName)) || (string.IsNullOrEmpty(parsedConnectionString.SharedAccessKey)))
             {
