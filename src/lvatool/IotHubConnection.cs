@@ -192,24 +192,18 @@ namespace lvatool
             var amqpSettings = new AmqpSettings();
             amqpSettings.TransportProviders.Add(saslProvider);
             amqpSettings.TransportProviders.Add(amqpProvider);
-            Console.WriteLine("Test5");
 
             // Create and open the connection, respecting the timeout constraint
             // that was received.
 
             var stopWatch = Stopwatch.StartNew();
-            Console.WriteLine("Test51");
             var initiator = new AmqpTransportInitiator(amqpSettings, transportSettings);
-            Console.WriteLine("Test52");
             var transport = await initiator.ConnectTaskAsync(timeout).ConfigureAwait(false);
-            Console.WriteLine("Test6");
 
             try
             {
                 var connection = new AmqpConnection(transport, amqpSettings, connectionSettings);
-                Console.WriteLine("Test7");
                 await connection.OpenAsync(timeout.Subtract(stopWatch.Elapsed)).ConfigureAwait(false);
-                Console.WriteLine("Test8");
 
                 return connection;
             }

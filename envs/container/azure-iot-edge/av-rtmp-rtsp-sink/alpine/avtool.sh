@@ -345,7 +345,7 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get install -y apt-transport-https && \
     sudo apt-get update && \
     #sudo apt-get install -y dotnet-sdk-5.0
-    sudo apt-get install -y dotnet-sdk-3.1
+    sudo apt-get install -y dotnet-sdk-5.0
     dotnet restore ../../../../../src/lvatool
     dotnet build ../../../../../src/lvatool
     echo -e "${GREEN}Installing pre-requisites done${NC}"
@@ -379,6 +379,16 @@ if [[ "${action}" == "deploy" ]] ; then
     # capture resource configuration in variables
     AV_IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
     AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query='connectionString')
+
+    SUB="/"
+    while  [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB"* ]]; do
+        echo "Renewing IoT Hub connection string."
+        az iot hub policy renew-key --hub-name ${AV_IOTHUB}  --name iothubowner --rk Primary > /dev/null
+        checkError
+        AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query "connectionString" )
+        checkError
+    done
+
     AV_AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
     AV_CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
     AV_CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'username' | tr -d \")
