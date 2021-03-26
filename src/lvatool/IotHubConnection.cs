@@ -71,11 +71,13 @@ namespace lvatool
             {
                 throw new ArgumentException("The IoT Hub connection string is not valid; it must contain the host, shared access key, and shared access key name.", nameof(iotHubConnectionString));
             }
+            Console.WriteLine("TestEnd6");
 
             if (string.IsNullOrEmpty(iotHubName))
             {
                 throw new ArgumentException("Unable to parse the IoT Hub name from the connection string.", nameof(iotHubConnectionString));
             }
+            Console.WriteLine("TestEnd5");
 
             // Establish the IoT Hub connection via link to the necessary endpoint, which will trigger a redirect exception
             // from which the Event Hubs connection string can be built.
@@ -86,6 +88,7 @@ namespace lvatool
             var link = default(AmqpLink);
             var eventHubsHost = default(string);
             var eventHubName = default(string);
+            Console.WriteLine("TestEnd4");
 
             try
             {
@@ -122,17 +125,19 @@ namespace lvatool
             }
 
             // Attempt to assemble the Event Hubs connection string using the IoT Hub components.
+            Console.WriteLine("TestEnd3");
 
             if (string.IsNullOrEmpty(eventHubsHost))
             {
                 throw new InvalidOperationException("The Event Hubs host was not returned by the IoT Hub service.");
             }
 
+            Console.WriteLine("TestEnd2");
             if (string.IsNullOrEmpty(eventHubName))
             {
                 throw new InvalidOperationException("The Event Hub name was not returned by the IoT Hub service.");
             }
-
+            Console.WriteLine("TestEnd1");
             return $"Endpoint=sb://{ eventHubsHost }/;EntityPath={ eventHubName };SharedAccessKeyName={ parsedConnectionString.SharedAccessKeyName };SharedAccessKey={ parsedConnectionString.SharedAccessKey }";
         }
 
