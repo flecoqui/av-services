@@ -156,7 +156,6 @@ namespace lvatool
             var userName = $"{ sharedAccessKeyName }@sas.root.{ iotHubName }";
             var signature = BuildSignature($"{ hostName }{ serviceEndpoint.AbsolutePath }", sharedAccessKeyName, sharedAccessKey, TimeSpan.FromMinutes(5));
             var port = 5671;
-            Console.WriteLine("Test1");
 
             // Create the layers of settings needed to establish the connection.
 
@@ -183,15 +182,12 @@ namespace lvatool
                 HostName = hostName
             };
 
-            Console.WriteLine("Test2");
             var saslProvider = new SaslTransportProvider();
             saslProvider.Versions.Add(new AmqpVersion(amqpVersion));
             saslProvider.AddHandler(new SaslPlainHandler { AuthenticationIdentity = userName, Password = signature });
-            Console.WriteLine("Test3");
 
             var amqpProvider = new AmqpTransportProvider();
             amqpProvider.Versions.Add(new AmqpVersion(amqpVersion));
-            Console.WriteLine("Test4");
 
             var amqpSettings = new AmqpSettings();
             amqpSettings.TransportProviders.Add(saslProvider);
@@ -202,7 +198,9 @@ namespace lvatool
             // that was received.
 
             var stopWatch = Stopwatch.StartNew();
+            Console.WriteLine("Test51");
             var initiator = new AmqpTransportInitiator(amqpSettings, transportSettings);
+            Console.WriteLine("Test52");
             var transport = await initiator.ConnectTaskAsync(timeout).ConfigureAwait(false);
             Console.WriteLine("Test6");
 
