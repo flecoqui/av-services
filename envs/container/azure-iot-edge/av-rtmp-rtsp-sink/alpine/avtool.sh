@@ -239,6 +239,7 @@ if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
 AV_RESOURCE_GROUP=${AV_RESOURCE_GROUP}
 AV_RESOURCE_REGION=${AV_RESOURCE_REGION}
+AV_SERVICE=${AV_SERVICE}
 AV_IMAGE_NAME=${AV_IMAGE_NAME}
 AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
 AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
@@ -253,7 +254,6 @@ AV_SASTOKEN=
 AV_LOGIN=${AV_LOGIN}
 AV_PASSWORD=${AV_PASSWORD}
 AV_COMPANYNAME=${AV_COMPANYNAME}
-AV_HOSTNAME=${AV_HOSTNAME}
 AV_PORT_HLS=${AV_PORT_HLS}
 AV_PORT_HTTP=${AV_PORT_HTTP}
 AV_PORT_SSL=${AV_PORT_SSL}
@@ -576,6 +576,8 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testrtmp*.mp4
     rm -f "${AV_TEMPDIR}"/testhls*.mp4
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
+    echo "Downloading content"
+    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     echo "Testing service..."
     stopContainer
     startContainer
@@ -583,7 +585,7 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "Start RTMP Streaming..."
     echo ""
-    echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP}"
+    echo "RTMP Streaming command: ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i "${AV_TEMPDIR}"/camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP}"
     ffmpeg -nostats -loglevel 0 -re -stream_loop -1 -i ./camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} &
     #jobs
     echo ""
