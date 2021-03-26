@@ -211,7 +211,7 @@ namespace lvaconsole
                     //LogMessage(LogLevel.Information,$"Current Operation: {operationName}-{firstOperationReached}-{lastOperationReached}");
                     if((firstOperationReached == true)&&(lastOperationReached == false))
                     {
-                        PrintMessage("\n--------------------------------------------------------------------------\n", ConsoleColor.Cyan);
+                        if (verbose) PrintMessage("\n--------------------------------------------------------------------------\n", ConsoleColor.Cyan);
                         Console.WriteLine("Executing operation " + operationName);
                         switch(operationName)
                         {
@@ -544,7 +544,7 @@ namespace lvaconsole
                 Console.WriteLine(JToken.Parse(payload).ToString());            
             }
             else
-                Console.WriteLine($"\nRequest: {methodName}\n");
+                Console.WriteLine($"Request: {methodName}");
 
             var response = await serviceClient.InvokeDeviceMethodAsync(deviceId, moduleId, methodInvocation);
             var responseString = response.GetPayloadAsJson();
@@ -564,8 +564,10 @@ namespace lvaconsole
                 Console.ResetColor();
             }
             else
-                Console.WriteLine($"Response: {methodName} - Status: {response.Status}\n");
-
+            {
+                Console.WriteLine($"Response: {methodName} - Status: {response.Status}");
+                Console.ResetColor();
+            }
             if(verbose)
             {
                 if (responseString != null)
