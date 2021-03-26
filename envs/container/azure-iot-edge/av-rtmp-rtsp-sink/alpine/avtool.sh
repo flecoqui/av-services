@@ -344,7 +344,8 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get update; \
     sudo apt-get install -y apt-transport-https && \
     sudo apt-get update && \
-    sudo apt-get install -y dotnet-sdk-5.0
+    #sudo apt-get install -y dotnet-sdk-5.0
+    sudo apt-get install -y dotnet-sdk-3.1
     dotnet restore ../../../../../src/lvatool
     dotnet build ../../../../../src/lvatool
     echo -e "${GREEN}Installing pre-requisites done${NC}"

@@ -48,13 +48,14 @@ namespace lvaconsole
         static string errorMessage; 
         static int timeOut;
         static bool all;
+        static bool verbose;
         static Action action;
         private const string lvaVersion = "1.0";
         private static string ErrorMessagePrefix = "Error message: {0}";
         private static string InformationMessagePrefix = "lvatool:\r\n" + "Version: {0} \r\n" + "Syntax:\r\n" +
             "lvatool --runoperations --connectionstring <IoTHubConnectionString> --device <deviceId> \r\n" +
             "                       [--module <moduleId> --operationspath <OperationsPath> --firstoperation <OperationName>]\r\n" +
-            "                       [--lastoperation <OperationName> --waitforinput]\r\n" +
+            "                       [--lastoperation <OperationName> --waitforinput --verbose]\r\n" +
             "lvatool --readevents    --connectionstring <IoTHubConnectionString>\r\n" +
             "                       [--timeout <TimeOut in milliseconds> --all]\r\n" +
             "lvatool --help" +
@@ -170,7 +171,7 @@ namespace lvaconsole
             }
             return 0;
         }
-        public static async Task<int> RunOperations(string connectionString, string operationsPath, string deviceId, string moduleId, string firstOperation, string lastOperation, bool waitforinput)
+        public static async Task<int> RunOperations(string connectionString, string operationsPath, string deviceId, string moduleId, string firstOperation, string lastOperation, bool waitforinput, bool verbose)
         {
             try
             {
@@ -215,7 +216,7 @@ namespace lvaconsole
                         switch(operationName)
                         {
                             case "GraphTopologySet" :      
-                                await ExecuteGraphTopologySetOperationAsync(operationParams, apiVersionProperty);
+                                await ExecuteGraphTopologySetOperationAsync(operationParams, apiVersionProperty,verbose);
                                 break;
 
                             case "GraphTopologyList" :
@@ -227,7 +228,7 @@ namespace lvaconsole
                             case "GraphInstanceSet" :
                             case "GraphTopologyDelete" :
                             case "GraphTopologyGet" :
-                                await ExecuteGraphOperationAsync(operationParams, operationName, apiVersionProperty);
+                                await ExecuteGraphOperationAsync(operationParams, operationName, apiVersionProperty,verbose);
                                 break;
 
                             case "WaitForInput" :   
@@ -277,6 +278,7 @@ namespace lvaconsole
                 errorMessage = string.Empty;
                 timeOut = 0;
                 all = false;
+                verbose = false;
                 moduleId = "lvaEdge";
                 deviceId = string.Empty;
                 connectionString = string.Empty;
@@ -322,7 +324,10 @@ namespace lvaconsole
                         break;                        
                         case "--all":
                             all = true;
-                        break;                        
+                        break; 
+                        case "--verbose":
+                            verbose = true;
+                        break;                                               
                         case "--operationspath":
                             if ((i < args.Length) && (!string.IsNullOrEmpty(args[i])))
                                 operationsPath = args[i++];
@@ -412,7 +417,7 @@ namespace lvaconsole
                         action = Action.Help;
                     }
                     else
-                        return await RunOperations(connectionString, operationsPath, deviceId, moduleId, firstOperation, lastOperation, waitforinput);                    
+                        return await RunOperations(connectionString, operationsPath, deviceId, moduleId, firstOperation, lastOperation, waitforinput,verbose);                    
                 }
                 if(action == Action.Help)
                 {
@@ -433,7 +438,7 @@ namespace lvaconsole
             Console.ResetColor();
         }
 
-        static async Task ExecuteGraphTopologySetOperationAsync(JObject operationParams, JProperty apiVersionProperty)
+        static async Task ExecuteGraphTopologySetOperationAsync(JObject operationParams, JProperty apiVersionProperty, bool verbose)
         {
             try
             {
@@ -449,13 +454,13 @@ namespace lvaconsole
                     {
                         // Download the MediaGraph topology JSON and invoke GraphTopologySet
                         string topologyJson = await DownloadFromUrlAsync((string)operationParams["topologyUrl"]);                        
-                        await InvokeMethodWithPayloadAsync("GraphTopologySet", topologyJson);
+                        await InvokeMethodWithPayloadAsync("GraphTopologySet", topologyJson,verbose);
                     }
                     else if (operationParams["topologyFile"] != null)
                     {
                         // Read the topology JSON from the file and invoke GraphTopologySet
                         string topologyJson = File.ReadAllText((string)operationParams["topologyFile"]);                        
-                        await InvokeMethodWithPayloadAsync("GraphTopologySet", topologyJson);
+                        await InvokeMethodWithPayloadAsync("GraphTopologySet", topologyJson,verbose);
                     }
                     else
                     {
@@ -471,7 +476,7 @@ namespace lvaconsole
             }
         }
 
-        static async Task ExecuteGraphOperationAsync(JObject operationParams, string operationName, JProperty apiVersionProperty)
+        static async Task ExecuteGraphOperationAsync(JObject operationParams, string operationName, JProperty apiVersionProperty, bool verbose)
         {
             try
             {
@@ -485,7 +490,7 @@ namespace lvaconsole
                 {                
                     JObject lvaGraphObject = operationParams;
                     lvaGraphObject.AddFirst(apiVersionProperty);                                
-                    await InvokeMethodWithPayloadAsync(operationName, lvaGraphObject.ToString());
+                    await InvokeMethodWithPayloadAsync(operationName, lvaGraphObject.ToString(),verbose);
                 }
             }
             catch(Exception ex)
@@ -521,7 +526,7 @@ namespace lvaconsole
             return fileText;
         }
 
-        static async Task InvokeMethodWithPayloadAsync(string methodName, string payload)
+        static async Task InvokeMethodWithPayloadAsync(string methodName, string payload, bool verbose)
         {
             // Create a direct method call
             var methodInvocation = new CloudToDeviceMethod(methodName)
@@ -531,10 +536,15 @@ namespace lvaconsole
             .SetPayloadJson(payload);
 
             // Invoke the direct method asynchronously and get the response from the device.
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine($"\n-----------------------  Request: {methodName}  --------------------------------------------------\n");
-            Console.ResetColor();
-            Console.WriteLine(JToken.Parse(payload).ToString());            
+            if(verbose)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine($"\n-----------------------  Request: {methodName}  --------------------------------------------------\n");
+                Console.ResetColor();
+                Console.WriteLine(JToken.Parse(payload).ToString());            
+            }
+            else
+                Console.WriteLine($"\nRequest: {methodName}\n");
 
             var response = await serviceClient.InvokeDeviceMethodAsync(deviceId, moduleId, methodInvocation);
             var responseString = response.GetPayloadAsJson();
@@ -548,16 +558,23 @@ namespace lvaconsole
                 Console.ForegroundColor = ConsoleColor.Cyan;
             }
             
-            Console.WriteLine($"\n---------------  Response: {methodName} - Status: {response.Status}  ---------------\n");
+            if(verbose)
+                Console.WriteLine($"\n---------------  Response: {methodName} - Status: {response.Status}  ---------------\n");
+            else
+                Console.WriteLine($"Response: {methodName} - Status: {response.Status}\n");
+
             Console.ResetColor();
 
-            if (responseString != null)
+            if(verbose)
             {
-                Console.WriteLine(JToken.Parse(responseString).ToString());
-            }
-            else
-            {
-                Console.WriteLine(responseString);
+                if (responseString != null)
+                {
+                    Console.WriteLine(JToken.Parse(responseString).ToString());
+                }
+                else
+                {
+                    Console.WriteLine(responseString);
+                }
             }
         }
 
