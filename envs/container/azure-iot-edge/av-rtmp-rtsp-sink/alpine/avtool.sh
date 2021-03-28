@@ -344,8 +344,8 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get update
     sudo apt-get install -y apt-transport-https 
     sudo apt-get install -y dotnet-sdk-5.0
-    dotnet restore ../../../../../src/lvatool
-    dotnet build ../../../../../src/lvatool
+    sudo dotnet restore ../../../../../src/lvatool
+    sudo dotnet build ../../../../../src/lvatool
     echo -e "${GREEN}Installing pre-requisites done${NC}"
     exit 0
 fi
@@ -651,19 +651,19 @@ if [[ "${action}" == "test" ]] ; then
     # write operations.json for sample code
     sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json > ./operations.json 
     echo "Activating the LVA Graph"
-    cmd="dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --lastoperation GraphInstanceActivate"
+    cmd="sudo dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --lastoperation GraphInstanceActivate"
     echo "$cmd"
     eval "$cmd"
     checkError
 
     echo "Receiving the LVA events during 60 seconds"
-    cmd="dotnet run -p ../../../../../src/lvatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
+    cmd="sudo dotnet run -p ../../../../../src/lvatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
     echo "$cmd"
     eval "$cmd" 2>&1 | tee events.txt
     checkError
 
     echo "Deactivating the LVA Graph"
-    cmd="dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --firstoperation GraphInstanceDeactivate"
+    cmd="sudo dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --firstoperation GraphInstanceDeactivate"
     echo "$cmd"
     eval "$cmd"
     checkError
