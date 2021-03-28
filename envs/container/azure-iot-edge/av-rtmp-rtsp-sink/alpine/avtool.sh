@@ -337,10 +337,10 @@ if [[ "${action}" == "install" ]] ; then
         echo -e "azure-iot extension is up to date."														  
     fi
     echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
+    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     echo "Installing .Net 5.0 SDK "
-    wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-    sudo dpkg -i packages-microsoft-prod.deb
+    wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O "${AV_TEMPDIR}"/packages-microsoft-prod.deb
+    sudo dpkg -i "${AV_TEMPDIR}"/packages-microsoft-prod.deb
     sudo apt-get update
     sudo apt-get install -y apt-transport-https 
     sudo apt-get install -y dotnet-sdk-5.0

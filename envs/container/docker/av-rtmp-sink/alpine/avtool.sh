@@ -102,7 +102,7 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get -y update
     sudo apt-get -y install ffmpeg
     echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
+    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     echo "Installing docker"
     # removing old version
     sudo apt-get remove docker docker-engine docker.io containerd runc

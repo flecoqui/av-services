@@ -111,7 +111,7 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get -y install ffmpeg
     checkAVError
     echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv
+    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     checkAVError
     echo "Installing docker"
     # removing old version
