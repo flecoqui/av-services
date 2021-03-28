@@ -463,7 +463,7 @@ if [[ "${action}" == "deploy" ]] ; then
     az acr task create  --image "$imageNameId"   -n "${AV_CONTAINER_NAME}" -r "${AV_CONTAINER_REGISTRY}" \
     --arg AV_PORT_RTSP=${AV_PORT_RTSP} --arg  AV_PORT_RTMP=${AV_PORT_RTMP} --arg  AV_PORT_SSL=${AV_PORT_SSL}  \
      --arg  AV_PORT_HTTP=${AV_PORT_HTTP} --arg  AV_PORT_HLS=${AV_PORT_HLS} --arg  AV_HOSTNAME=${AV_HOSTNAME} --arg  AV_COMPANYNAME=${AV_COMPANYNAME} \
-         -c "https://github.com/flecoqui/av-services.git#lva:envs/container/docker/av-rtmp-rtsp-sink/ubuntu" -f "Dockerfile" \
+         -c "https://github.com/flecoqui/av-services.git#main:envs/container/docker/av-rtmp-rtsp-sink/ubuntu" -f "Dockerfile" \
          --commit-trigger-enabled false --base-image-trigger-enabled false 
     echo
     echo "Launching the task to build service: ${AV_CONTAINER_NAME}" 
