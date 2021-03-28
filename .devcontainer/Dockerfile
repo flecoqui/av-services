@@ -31,7 +31,7 @@ RUN apt-get update \
 RUN pip3 install iotedge-compose 
 
 # install .Net 5.0 SDK
-RUN wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 RUN dpkg -i packages-microsoft-prod.deb
 RUN apt-get update \
     && apt-get install -y apt-transport-https \
