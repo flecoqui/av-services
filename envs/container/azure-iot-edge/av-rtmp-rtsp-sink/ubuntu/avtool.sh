@@ -380,15 +380,15 @@ if [[ "${action}" == "deploy" ]] ; then
     AV_IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
     AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query='connectionString')
 
-    SUB1="/"
-    SUB2="+"
-    while  [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB1"* ]] || [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB2"* ]]; do
-        echo "Renewing IoT Hub connection string."
-        az iot hub policy renew-key --hub-name ${AV_IOTHUB}  --name iothubowner --rk Primary > /dev/null
-        checkError
-        AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query "connectionString" )
-        checkError
-    done
+    # SUB1="/"
+    # SUB2="+"
+    # while  [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB1"* ]] || [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB2"* ]]; do
+    #     echo "Renewing IoT Hub connection string."
+    #     az iot hub policy renew-key --hub-name ${AV_IOTHUB}  --name iothubowner --rk Primary > /dev/null
+    #     checkError
+    #     AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query "connectionString" )
+    #     checkError
+    # done
 
     AV_AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
     AV_CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
