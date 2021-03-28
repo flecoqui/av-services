@@ -7,7 +7,7 @@ This av-service av-rtmp-sink for ubuntu is a container running nginx RTMP server
 It's recommended to use and manage the av-rtmp-sink ubuntu service with the avtool.sh command line tool.
 
 ### Installing the pre-requisites on the host machine
-As avtool.sh is a Linux bash file, you could run this tool from a machine or virtual machine running Ubuntu 20.04 LTS.
+As avtool.sh is a Linux bash file, you could run this tool from a machine or virtual machine running Ubuntu 18.04 LTS.
 
 1. Ensure git is installed running the following command
 
