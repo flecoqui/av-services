@@ -339,7 +339,7 @@ if [[ "${action}" == "install" ]] ; then
     echo "Downloading content"
     wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     echo "Installing .Net 5.0 SDK "
-    wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O "${AV_TEMPDIR}"/packages-microsoft-prod.deb
+    wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O "${AV_TEMPDIR}"/packages-microsoft-prod.deb
     sudo dpkg -i "${AV_TEMPDIR}"/packages-microsoft-prod.deb
     sudo apt-get update
     sudo apt-get install -y apt-transport-https 
@@ -372,7 +372,7 @@ if [[ "${action}" == "deploy" ]] ; then
     sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=$AV_SASTOKEN" >> "$repoRoot"/"$configuration_file"
 
     # tempo waiting 
-    sleep 20
+    sleep 60
     RESOURCES=$(az resource list --resource-group "${AV_RESOURCE_GROUP}" --query '[].{name:name,"Resource Type":type}' -o table)
     # capture resource configuration in variables
     AV_IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
@@ -439,7 +439,9 @@ if [[ "${action}" == "deploy" ]] ; then
     az ams streaming-endpoint start --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT -n default --no-wait
 
     echo "Generating cloud-init.yml:"
-    CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/$AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" )
+    echo "sed s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g < ./cloud-init.yml | sed s/{AV_ADMIN}/${AV_LOGIN//\"/}/g | sed s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g | sed s/{AV_PORT_SSL}/${AV_PORT_SSL}/g | sed s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g | sed s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g | sed s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" 
+
+    CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" )
     echo "$CUSTOM_STRING"
     echo "Generating cloud-init.yml base64:"
     CUSTOM_STRING_BASE64=$(sed "s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" | base64)
