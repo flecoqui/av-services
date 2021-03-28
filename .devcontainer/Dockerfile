@@ -1,4 +1,4 @@
-FROM ubuntu:18.04 
+FROM ubuntu:20.04 
 
 ARG USERNAME=avuser
 ARG USER_UID=1000
@@ -27,9 +27,16 @@ RUN apt-get update \
 RUN apt-get update \
     && apt-get install -y python3-pip 
 
-# install tox, pre-commit and detect-secrets
+# install iotedge-compose 
 RUN pip3 install iotedge-compose 
 
+# install .Net 5.0 SDK
+RUN wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+RUN dpkg -i packages-microsoft-prod.deb
+RUN apt-get update \
+    && apt-get install -y apt-transport-https \
+    && apt-get install -y dotnet-sdk-5.0
+    
 # copy sample mkv video 
 RUN wget https://github.com/flecoqui/av-services/blob/main/content/camera-300s.mkv?raw=true -O  /camera-300s.mkv
 
