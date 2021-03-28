@@ -176,7 +176,7 @@ In order to easily test those Audio/Video components, each component is delivere
 - get the status of the component (running, exited, ...)
 - test the component
 
-In order to use this bash file astool.sh you need an Ubuntu 18.04 LTS machine, sub-system or virtual machine.
+In order to use this bash file astool.sh you need an Ubuntu 20.04 LTS machine, sub-system or virtual machine.
 The subsequent paragraphs will describe how to use astool.sh.
 
 ## Installing the pre-requisites on the host machine
