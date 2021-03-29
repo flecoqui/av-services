@@ -10,8 +10,9 @@
   "extensions": [
     "yzhang.markdown-all-in-one",
     "tomoyukim.vscode-mermaid-editor",
+    "ms-vsliveshare.vsliveshare-pack",
     "eamodio.gitlens",
     "DavidAnson.vscode-markdownlint"
   ],
-  "postAttachCommand": "mkdir -p /home/$(id -un)/.ssh && touch /home/$(id -un)/.ssh/config "
+  "postAttachCommand": "mkdir -p /home/$(id -un)/.ssh && touch /home/$(id -un)/.ssh/config && sudo chown -R avuser:avuser /var/run/docker.sock"
 }
