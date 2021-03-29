@@ -11,7 +11,7 @@ When you will test this component with avtool.sh, it will test automatically the
 - RTMP to RTSP adaptor
 - LVA Motion Detection
 
-At least, when the rtmpsource will be fed with a Live RTMP stream, you could consume the following streams with VLC:
+At least, when the rtmpsource will be fed with a Live RTMP stream, you could consume the following streams with VLC:  
 RTMP URL: rtmp://\<IoTEdgeVMName\>.\<REGION\>.cloudapp.azure.com:1935/live/stream  
 RTSP URL: rtsp://\<IoTEdgeVMName\>.\<REGION\>.cloudapp.azure.com:8554/rtsp/stream  
 HLS  URL: http://\<IoTEdgeVMName\>.\<REGION\>.cloudapp.azure.com:8080/live/stream.m3u8  
