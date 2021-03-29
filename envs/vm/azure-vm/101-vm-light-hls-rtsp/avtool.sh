@@ -24,6 +24,50 @@ function usage() {
     echo -e "\tbash avtool.sh -a start -c avtool.env"
     
 }
+# colors for formatting the ouput
+YELLOW='\033[1;33m'
+GREEN='\033[1;32m'
+RED='\033[0;31m'
+BLUE='\033[1;34m'
+NC='\033[0m' # No Color
+checkError() {
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}\nAn error occured exiting from the current bash${NC}"
+        exit 1
+    fi
+}
+checkLoginAndSubscription() {
+    az account show -o none
+    if [ $? -ne 0 ]; then
+        echo -e "\nYou seems disconnected from Azure, running 'az login'."
+        az login -o none
+    fi
+    CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
+    if [[ -z "$AV_SUBSCRIPTION_ID"  || "$AV_SUBSCRIPTION_ID" != "$CURRENT_SUBSCRIPTION_ID" ]]; then
+        # query subscriptions
+        echo -e "\nYou have access to the following subscriptions:"
+        az account list --query '[].{name:name,"subscription Id":id}' --output table
+
+        echo -e "\nYour current subscription is:"
+        az account show --query '[name,id]'
+        echo -e "
+        You will need to use a subscription with permissions for creating service principals (owner role provides this).
+        If you want to change to a different subscription, enter the name or id.
+        Or just press enter to continue with the current subscription."
+        read -p ">> " SUBSCRIPTION_ID
+
+        if ! test -z "$SUBSCRIPTION_ID"
+        then 
+            az account set -s "$SUBSCRIPTION_ID"
+            echo -e "\nNow using:"
+            az account show --query '[name,id]'
+            CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
+        fi
+        AV_SUBSCRIPTION_ID=$CURRENT_SUBSCRIPTION_ID
+        sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
+    fi
+}
+
 test_output_files () {
     test_output_files_result="1"
     prefix="$1"
@@ -90,6 +134,7 @@ AV_LOGIN=${AV_LOGIN}
 AV_PASSWORD=${AV_PASSWORD}
 AV_SASTOKEN=
 AV_STORAGENAME=
+AV_SUBSCRIPTION_ID=
 AV_TEMPDIR=$(mktemp -d)
 EOF
 fi
@@ -106,6 +151,7 @@ export $(grep AV_STORAGENAME "$repoRoot"/"$configuration_file")
 export $(grep AV_SASTOKEN "$repoRoot"/"$configuration_file")
 export $(grep AV_LOGIN "$repoRoot"/"$configuration_file"  )
 export $(grep AV_PASSWORD "$repoRoot"/"$configuration_file" )
+export $(grep AV_SUBSCRIPTION_ID "$repoRoot"/"$configuration_file" )
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
@@ -121,23 +167,24 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get -y update
     sudo apt-get -y install ffmpeg
     sudo apt-get -y install  jq
-    echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
+        echo "Downloading content"
+        wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    fi
+    echo -e "${GREEN}Installing pre-requisites done${NC}"
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
     echo "Login..."
     az login
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
-    echo "Login done"
+    checkLoginAndSubscription
+    echo -e "${GREEN}Login done${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
+    checkLoginAndSubscription
     az group create -n ${AV_RESOURCE_GROUP}  -l ${AV_RESOURCE_REGION} 
     az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
     outputs=$(az deployment group show --name ${AV_RESOURCE_GROUP}dep  -g ${AV_RESOURCE_GROUP} --query properties.outputs)
@@ -145,46 +192,45 @@ if [[ "${action}" == "deploy" ]] ; then
     AV_SASTOKEN=$(jq -r .storageSasToken.value <<< $outputs)
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=$AV_STORAGENAME" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=$AV_SASTOKEN" >> "$repoRoot"/"$configuration_file"
-    echo "Deployment done"
+    echo -e "${GREEN}Deployment done${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
+    checkLoginAndSubscription
     az group delete -n ${AV_RESOURCE_GROUP} --yes
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=" >> "$repoRoot"/"$configuration_file"
-    echo "Undeployment done"
+    echo -e "${GREEN}Undeployment done${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
+    checkLoginAndSubscription
     az vm start -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
-    echo "Start done"
+    echo -e "${GREEN}Virtual Machine started${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
-    az ad signed-in-user show --output table --query "{login:userPrincipalName}"
-    az account show --output table --query  "{subscriptionId:id,tenantId:tenantId}"
+    checkLoginAndSubscription
     az vm stop -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
     az vm deallocate -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
-    echo "Stop done"
+    echo -e "${GREEN}Virtual Machine stopped${NC}"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
+    checkLoginAndSubscription
     az vm get-instance-view -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
-    echo "Status done"
+    echo -e "${GREEN}Virtual Machine status done${NC}"
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
+    checkLoginAndSubscription
     rm -f "${AV_TEMPDIR}"/testrtmp*.mp4
     rm -f "${AV_TEMPDIR}"/testhls*.mp4
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
@@ -269,6 +315,6 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output on Azure Storage successful"
     #jobs
     kill %1
-    echo "TESTS SUCCESSFUL"
+    echo -e "${GREEN}TESTS SUCCESSFUL${NC}"
     exit 0
 fi

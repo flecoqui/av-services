@@ -336,8 +336,10 @@ if [[ "${action}" == "install" ]] ; then
         az extension update --name azure-iot &> /dev/null
         echo -e "azure-iot extension is up to date."														  
     fi
-    echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
+        echo "Downloading content"
+        wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    fi
     echo "Installing .Net 5.0 SDK "
     wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O "${AV_TEMPDIR}"/packages-microsoft-prod.deb
     sudo dpkg -i "${AV_TEMPDIR}"/packages-microsoft-prod.deb
@@ -581,6 +583,7 @@ if [[ "${action}" == "status" ]] ; then
     checkLoginAndSubscription
     getContainerState 
     echo "$getContainerStateResult"
+    echo -e "${GREEN}Container status done${NC}"
     exit 0
 fi
 
@@ -588,8 +591,10 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testrtmp*.mp4
     rm -f "${AV_TEMPDIR}"/testhls*.mp4
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
-    echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
+        echo "Downloading content"
+        wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    fi
     echo "Testing service..."
     stopContainer
     startContainer
