@@ -7,7 +7,7 @@
 #
 # executable
 ###########################################################################################################################################################################################
-set -eu
+set -u
 repoRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$repoRoot"
 #######################################################
@@ -64,7 +64,15 @@ checkError() {
         exit 1
     fi
 }
-
+checkDevContainerMode () {
+    checkDevContainerModeResult="0"
+    VOLNAME=$(docker volume inspect av-services_devcontainer_tempvol --format {{.Name}} 2> /dev/null) || true    
+    # if running in devcontainer connect container to dev container network av-services_devcontainer_default
+    if [[ $VOLNAME == 'av-services_devcontainer_tempvol' ]] ; then
+        checkDevContainerModeResult="1"
+    fi
+    return
+}
 AV_SERVICE=av-rtmp-rtsp-sink
 AV_FLAVOR=ubuntu
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
@@ -113,38 +121,45 @@ fi
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
-    echo "Installing azure cli"
-    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-    echo "Installing ffmpeg"
-    sudo apt-get -y update
-    sudo apt-get -y install ffmpeg
-    if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
-        echo "Downloading content"
-        wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    checkDevContainerMode  || true
+    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+        echo "As running in devcontainer av-services_devcontainer installation not required"
+        echo -e "${GREEN}Installing pre-requisites done${NC}"
+        exit 0
+    else
+        echo "Installing azure cli"
+        curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+        echo "Installing ffmpeg"
+        sudo apt-get -y update
+        sudo apt-get -y install ffmpeg
+        if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
+            echo "Downloading content"
+            wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+        fi
+        echo "Installing docker"
+        # removing old version
+        sudo apt-get remove docker docker-engine docker.io containerd runc
+        sudo apt-get -y update
+        sudo apt-get -y install \
+            apt-transport-https \
+            ca-certificates \
+            curl \
+            gnupg-agent \
+            software-properties-common
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+        sudo apt-key fingerprint 0EBFCD88
+        sudo add-apt-repository \
+            "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+            $(lsb_release -cs) \
+            stable"
+        sudo apt-get -y update
+        sudo apt-get -y install  jq
+        sudo apt-get -y install docker.io    
+        sudo groupadd docker || true
+        sudo usermod -aG docker ${USER} || true
+        echo -e "${GREEN}Installing pre-requisites done${NC}"
+        exit 0
     fi
-    echo "Installing docker"
-    # removing old version
-    sudo apt-get remove docker docker-engine docker.io containerd runc
-    sudo apt-get -y update
-    sudo apt-get -y install \
-        apt-transport-https \
-        ca-certificates \
-        curl \
-        gnupg-agent \
-        software-properties-common
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo apt-key fingerprint 0EBFCD88
-    sudo add-apt-repository \
-        "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-        $(lsb_release -cs) \
-        stable"
-    sudo apt-get -y update
-    sudo apt-get -y install  jq
-    sudo apt-get -y install docker.io    
-    sudo groupadd docker || true
-    sudo usermod -aG docker ${USER} || true
-    echo -e "${GREEN}Installing pre-requisites done${NC}"
-    exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
     echo "Login..."
@@ -194,7 +209,6 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/*.mp4
-    rm -f "${AV_TEMPDIR}"/*.mkv
     if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
         echo "Downloading content"
         wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
@@ -206,41 +220,77 @@ if [[ "${action}" == "test" ]] ; then
     # Wait 10 seconds before starting  the RTMP stream
     sleep 10   
     echo "Start ffmpeg RTMP streamer on the host machine..."
-    ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i "${AV_TEMPDIR}"/camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream &
+    checkDevContainerMode  || true
+    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+        sudo docker network connect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+        CONTAINER_IP=$(sudo docker container inspect "${AV_CONTAINER_NAME}" | jq -r '.[].NetworkSettings.Networks."av-services_devcontainer_default".IPAddress')
+    else
+        CONTAINER_IP=${AV_HOSTNAME}
+    fi
+    cmd="ffmpeg -hide_banner -loglevel error  -re -stream_loop -1 -i "${AV_TEMPDIR}"/camera-300s.mkv -codec copy -bsf:v h264_mp4toannexb   -f flv rtmp://${CONTAINER_IP}:${AV_PORT_RTMP}/live/stream &"
+    echo "$cmd"
+    eval "$cmd"
     # Wait 20 seconds before reading the RTMP stream
     sleep 20
     echo "Capture 20s of RTMP stream on the host machine..."
-    ffmpeg   -hide_banner -loglevel error  -re -rw_timeout 20000000 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream -c copy  -t 00:00:20 -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &
+    cmd="ffmpeg   -hide_banner -loglevel error -re -rw_timeout 20000000 -i rtmp://${CONTAINER_IP}:${AV_PORT_RTMP}/live/stream  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4 &"
+    echo "$cmd"
+    eval "$cmd"
     sleep 40
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
         kill %1
         sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
+
+        # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
+        checkDevContainerMode  || true
+        if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+            sudo docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+        fi
         exit 1
     fi
     echo "Capture 20s of HLS stream on the host machine..."
-    ffmpeg   -hide_banner -loglevel error  -re  -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 &
+    cmd="ffmpeg   -hide_banner -loglevel error  -i http://${CONTAINER_IP}:${AV_PORT_HLS}/live/stream.m3u8  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 &"
+    echo "$cmd"
+    eval "$cmd"
     sleep 40
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testhls0.mp4" || ! -f "${AV_TEMPDIR}/testhls1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testhls0.mp4"
         kill %1
+        # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
+        checkDevContainerMode  || true
+        if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+            sudo docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+        fi
         sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
         exit 1
     fi  
     echo "Capture 20s of RTSP stream on the host machine..."
-    ffmpeg   -hide_banner -loglevel error  -re  -rtsp_transport tcp -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 &
+    cmd="ffmpeg   -hide_banner -loglevel error  -rtsp_transport tcp -i rtsp://${CONTAINER_IP}:${AV_PORT_RTSP}/rtsp/stream  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 &"
+    echo "$cmd"
+    eval "$cmd"
     sleep 40
     echo "Check mp4 captured streams in directory : ${AV_TEMPDIR}"
     if [[ ! -f "${AV_TEMPDIR}/testrtsp0.mp4" || ! -f "${AV_TEMPDIR}/testrtsp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtsp0.mp4"
         kill %1
+        # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
+        checkDevContainerMode  || true
+        if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+            sudo docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+        fi
         sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
         exit 1
     fi        
     echo "Testing ${AV_CONTAINER_NAME} successful"
     kill %1
+    # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
+    checkDevContainerMode  || true
+    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+        sudo docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+    fi
     sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
     echo -e "${GREEN}TESTS SUCCESSFUL${NC}"
     exit 0
