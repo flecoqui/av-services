@@ -126,7 +126,7 @@ if [[ "${action}" == "install" ]] ; then
         fi
         echo "Installing docker"
         # removing old version
-        sudo apt-get remove docker docker-engine docker.io containerd runc
+        sudo apt-get -y remove docker docker-engine docker.io containerd runc
         sudo apt-get -y update
         sudo apt-get -y install \
             apt-transport-https \
