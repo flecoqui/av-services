@@ -170,12 +170,12 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker build  --build-arg  AV_PORT_RTSP=${AV_PORT_RTSP} --build-arg  AV_PORT_RTMP=${AV_PORT_RTMP} --build-arg  AV_PORT_SSL=${AV_PORT_SSL} --build-arg  AV_PORT_HTTP=${AV_PORT_HTTP} --build-arg  AV_PORT_HLS=${AV_PORT_HLS}  --build-arg  AV_HOSTNAME=${AV_HOSTNAME} --build-arg  AV_COMPANYNAME=${AV_COMPANYNAME} -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} . 
+    docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
+    docker build  --build-arg  AV_PORT_RTSP=${AV_PORT_RTSP} --build-arg  AV_PORT_RTMP=${AV_PORT_RTMP} --build-arg  AV_PORT_SSL=${AV_PORT_SSL} --build-arg  AV_PORT_HTTP=${AV_PORT_HTTP} --build-arg  AV_PORT_HLS=${AV_PORT_HLS}  --build-arg  AV_HOSTNAME=${AV_HOSTNAME} --build-arg  AV_COMPANYNAME=${AV_COMPANYNAME} -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} . 
     checkError
-    sudo docker run  -d -it -p ${AV_PORT_HTTP}:${AV_PORT_HTTP}/tcp  -p ${AV_PORT_HLS}:${AV_PORT_HLS}/tcp    -p ${AV_PORT_RTMP}:${AV_PORT_RTMP}/tcp -p ${AV_PORT_RTSP}:${AV_PORT_RTSP}/tcp  -p ${AV_PORT_SSL}:${AV_PORT_SSL}/tcp -e PORT_RTSP=${AV_PORT_RTSP} -e PORT_RTMP=${AV_PORT_RTMP} -e PORT_SSL=${AV_PORT_SSL} -e PORT_HTTP=${AV_PORT_HTTP} -e PORT_HLS=${AV_PORT_HLS}  -e HOSTNAME=${AV_HOSTNAME} -e COMPANYNAME=${AV_COMPANYNAME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
+    docker run  -d -it -p ${AV_PORT_HTTP}:${AV_PORT_HTTP}/tcp  -p ${AV_PORT_HLS}:${AV_PORT_HLS}/tcp    -p ${AV_PORT_RTMP}:${AV_PORT_RTMP}/tcp -p ${AV_PORT_RTSP}:${AV_PORT_RTSP}/tcp  -p ${AV_PORT_SSL}:${AV_PORT_SSL}/tcp -e PORT_RTSP=${AV_PORT_RTSP} -e PORT_RTMP=${AV_PORT_RTMP} -e PORT_SSL=${AV_PORT_SSL} -e PORT_HTTP=${AV_PORT_HTTP} -e PORT_HLS=${AV_PORT_HLS}  -e HOSTNAME=${AV_HOSTNAME} -e COMPANYNAME=${AV_COMPANYNAME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     checkError
     echo -e "${GREEN}Deployment done${NC}"
     exit 0
@@ -183,29 +183,29 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
+    docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     echo -e "${GREEN}Undeployment done${NC}"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
-    sudo docker container inspect ${AV_CONTAINER_NAME} --format '{{json .State.Status}}'
+    docker container inspect ${AV_CONTAINER_NAME} --format '{{json .State.Status}}'
     echo -e "${GREEN}Container status done${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
-    sudo docker container start ${AV_CONTAINER_NAME}
+    docker container start ${AV_CONTAINER_NAME}
     echo -e "${GREEN}Container started${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
-    sudo docker container stop ${AV_CONTAINER_NAME}
+    docker container stop ${AV_CONTAINER_NAME}
     echo -e "${GREEN}Container stopped${NC}"
     exit 0
 fi
@@ -216,16 +216,16 @@ if [[ "${action}" == "test" ]] ; then
         wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     fi
     echo "Start ${AV_CONTAINER_NAME} container..."
-    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker container start ${AV_CONTAINER_NAME} 
+    docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker container start ${AV_CONTAINER_NAME} 
 
     # Wait 10 seconds before starting  the RTMP stream
     sleep 10   
     echo "Start ffmpeg RTMP streamer on the host machine..."
     checkDevContainerMode  || true
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-        sudo docker network connect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
-        CONTAINER_IP=$(sudo docker container inspect "${AV_CONTAINER_NAME}" | jq -r '.[].NetworkSettings.Networks."av-services_devcontainer_default".IPAddress')
+        docker network connect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+        CONTAINER_IP=$(docker container inspect "${AV_CONTAINER_NAME}" | jq -r '.[].NetworkSettings.Networks."av-services_devcontainer_default".IPAddress')
     else
         CONTAINER_IP=${AV_HOSTNAME}
     fi
@@ -243,12 +243,12 @@ if [[ "${action}" == "test" ]] ; then
     if [[ ! -f "${AV_TEMPDIR}/testrtmp0.mp4" || ! -f "${AV_TEMPDIR}/testrtmp1.mp4" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
         kill %1
-        sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
+        docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
 
         # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
         checkDevContainerMode  || true
         if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-            sudo docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+            docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
         fi
         exit 1
     fi
@@ -264,9 +264,9 @@ if [[ "${action}" == "test" ]] ; then
         # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
         checkDevContainerMode  || true
         if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-            sudo docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+            docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
         fi
-        sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
+        docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
         exit 1
     fi  
     echo "Capture 20s of RTSP stream on the host machine..."
@@ -281,9 +281,9 @@ if [[ "${action}" == "test" ]] ; then
         # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
         checkDevContainerMode  || true
         if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-            sudo docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+            docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
         fi
-        sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
+        docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
         exit 1
     fi        
     echo "Testing ${AV_CONTAINER_NAME} successful"
@@ -291,9 +291,9 @@ if [[ "${action}" == "test" ]] ; then
     # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
     checkDevContainerMode  || true
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-        sudo docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
+        docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
     fi
-    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
+    docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true    
     echo -e "${GREEN}TESTS SUCCESSFUL${NC}"
     exit 0
 fi

@@ -158,12 +158,12 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
+    docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
+    docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     checkError
-    sudo docker run  -d -it -e RTMP_URL=${AV_RTMP_URL} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
+    docker run  -d -it -e RTMP_URL=${AV_RTMP_URL} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     checkError
     echo -e "${GREEN}Deployment done${NC}"
     exit 0
@@ -171,29 +171,29 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
+    docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     echo -e "${GREEN}Undeployment done${NC}"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
-    sudo docker container inspect ${AV_CONTAINER_NAME} --format '{{json .State.Status}}'
+    docker container inspect ${AV_CONTAINER_NAME} --format '{{json .State.Status}}'
     echo -e "${GREEN}Container status done${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
-    sudo docker container start ${AV_CONTAINER_NAME}
+    docker container start ${AV_CONTAINER_NAME}
     echo -e "${GREEN}Container started${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
-    sudo docker container stop ${AV_CONTAINER_NAME}
+    docker container stop ${AV_CONTAINER_NAME}
     echo -e "${GREEN}Container stopped${NC}"
     exit 0
 fi
@@ -205,22 +205,22 @@ if [[ "${action}" == "test" ]] ; then
     fi
     echo "Starting RTMP sink ${AV_FLAVOR} container"
 
-    sudo docker container start "av-rtmp-sink-${AV_FLAVOR}-container"  
-    containerId=$(sudo docker ps -a --format "{{.ID}}" -f "name=av-rtmp-sink-${AV_FLAVOR}-container")
+    docker container start "av-rtmp-sink-${AV_FLAVOR}-container"  
+    containerId=$(docker ps -a --format "{{.ID}}" -f "name=av-rtmp-sink-${AV_FLAVOR}-container")
     checkDevContainerMode  || true
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-        sudo docker network connect av-services_devcontainer_default av-rtmp-sink-${AV_FLAVOR}-container 
-        CONTAINER_IP=$(sudo docker container inspect "$containerId" | jq -r '.[].NetworkSettings.Networks."av-services_devcontainer_default".IPAddress')
+        docker network connect av-services_devcontainer_default av-rtmp-sink-${AV_FLAVOR}-container 
+        CONTAINER_IP=$(docker container inspect "$containerId" | jq -r '.[].NetworkSettings.Networks."av-services_devcontainer_default".IPAddress')
     else
-        CONTAINER_IP=$(sudo docker container inspect "$containerId"  --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+        CONTAINER_IP=$(docker container inspect "$containerId"  --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
     fi  
     echo "RTMP sink private IP address: ${CONTAINER_IP}"
     echo "Starting test-${AV_CONTAINER_NAME} container..."
     sudo  docker container stop "test-${AV_CONTAINER_NAME}" &> /dev/null || true
     sudo  docker container rm "test-${AV_CONTAINER_NAME}" &> /dev/null  || true
-    sudo docker run  -d -it -e RTMP_URL=rtmp://${CONTAINER_IP}:${AV_RTMP_PORT}/live/stream  --name "test-${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
+    docker run  -d -it -e RTMP_URL=rtmp://${CONTAINER_IP}:${AV_RTMP_PORT}/live/stream  --name "test-${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-        sudo docker network connect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
+        docker network connect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
     fi  
 
     echo "Capture 20s of RTMP stream on the host machine..."
@@ -232,13 +232,13 @@ if [[ "${action}" == "test" ]] ; then
         # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
         checkDevContainerMode  || true
         if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-            sudo docker network disconnect av-services_devcontainer_default av-rtmp-sink-${AV_FLAVOR}-container 
-            sudo docker network disconnect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
+            docker network disconnect av-services_devcontainer_default av-rtmp-sink-${AV_FLAVOR}-container 
+            docker network disconnect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
         fi    
         echo "Stopping RTMP sink ${AV_FLAVOR} container"
-        sudo docker container "stop av-rtmp-sink-${AV_FLAVOR}-container"
+        docker container "stop av-rtmp-sink-${AV_FLAVOR}-container"
         echo "Stopping test-${AV_CONTAINER_NAME} container..."
-        sudo docker container stop "test-${AV_CONTAINER_NAME}"  
+        docker container stop "test-${AV_CONTAINER_NAME}"  
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
          
         kill %1
@@ -248,12 +248,12 @@ if [[ "${action}" == "test" ]] ; then
     # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
     checkDevContainerMode  || true
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-        sudo docker network disconnect av-services_devcontainer_default av-rtmp-sink-${AV_FLAVOR}-container 
-        sudo docker network disconnect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
+        docker network disconnect av-services_devcontainer_default av-rtmp-sink-${AV_FLAVOR}-container 
+        docker network disconnect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
     fi       
-    sudo docker container stop "av-rtmp-sink-${AV_FLAVOR}-container"  
+    docker container stop "av-rtmp-sink-${AV_FLAVOR}-container"  
     echo "Stopping test-${AV_CONTAINER_NAME} container..."
-    sudo docker container stop "test-${AV_CONTAINER_NAME}"  
+    docker container stop "test-${AV_CONTAINER_NAME}"  
     echo "Testing ${AV_CONTAINER_NAME} successful"
     kill %1
     echo -e "${GREEN}TESTS SUCCESSFUL${NC}"

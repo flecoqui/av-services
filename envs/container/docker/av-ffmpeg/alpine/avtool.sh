@@ -159,9 +159,9 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
-    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
+    docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
+    docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     checkError
     checkDevContainerMode  || true
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
@@ -169,7 +169,7 @@ if [[ "${action}" == "deploy" ]] ; then
     else
         TEMPVOL=${AV_TEMPDIR}
     fi
-    sudo docker run  -d -it -v ${TEMPVOL}:/${AV_VOLUME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} ${AV_FFMPEG_COMMAND}
+    docker run  -d -it -v ${TEMPVOL}:/${AV_VOLUME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} ${AV_FFMPEG_COMMAND}
     checkError
     echo -e "${GREEN}Deployment done${NC}"
     exit 0
@@ -177,28 +177,28 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
-    sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
-    sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
+    docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     echo -e "${GREEN}Undeployment done${NC}"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Checking status..."
-    sudo docker container inspect ${AV_CONTAINER_NAME} --format '{{json .State.Status}}'
+    docker container inspect ${AV_CONTAINER_NAME} --format '{{json .State.Status}}'
     echo -e "${GREEN}Container status done${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
-    sudo docker container start ${AV_CONTAINER_NAME}
+    docker container start ${AV_CONTAINER_NAME}
     echo -e "${GREEN}Container started${NC}"
     exit 0
 fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
-    sudo docker container stop ${AV_CONTAINER_NAME}
+    docker container stop ${AV_CONTAINER_NAME}
     echo -e "${GREEN}Container stopped${NC}"
     exit 0
 fi
@@ -219,16 +219,16 @@ if [[ "${action}" == "test" ]] ; then
         echo "Deploy the container before running the tests"
         exit 1
     fi
-    sudo docker container start -i ${AV_CONTAINER_NAME}
+    docker container start -i ${AV_CONTAINER_NAME}
     echo "Output directory : ${TEMPVOL}"
     if [[ ! -f "${TEMPVOL}/camera-300s.mp4" ]] ; then
         echo "ffmpeg Test failed - check file ${TEMPVOL}/camera-300s.mp4"
-        sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+        docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
         exit 1
     fi
     echo "File ${TEMPVOL}/camera-300s.mp4 exists"
     echo "Testing ffmpeg successful"
-    sudo docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
+    docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
     echo -e "${GREEN}TESTS SUCCESSFUL${NC}"
     exit 0
 fi
