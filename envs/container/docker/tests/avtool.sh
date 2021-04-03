@@ -257,6 +257,9 @@ if [[ "${action}" == "integration" ]] ; then
         echo "***********************************************************"
         cd $line 
         alias exit=return
+        if [[ -f ./.avtoolconfig ]]; then
+            rm ./.avtoolconfig 
+        fi
         ./avtool.sh -a deploy
         STATUS=$?  
         echo "***********************************************************"
