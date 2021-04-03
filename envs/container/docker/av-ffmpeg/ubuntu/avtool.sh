@@ -219,6 +219,7 @@ if [[ "${action}" == "test" ]] ; then
         echo "Deploy the container before running the tests"
         exit 1
     fi
+    docker container stop  ${AV_CONTAINER_NAME}
     docker container start -i ${AV_CONTAINER_NAME}
     echo "Output directory : ${TEMPVOL}"
     if [[ ! -f "${TEMPVOL}/camera-300s.mp4" ]] ; then
