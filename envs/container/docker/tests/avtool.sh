@@ -265,6 +265,7 @@ if [[ "${action}" == "integration" ]] ; then
         else 
             echo  -e "${RED}Deployment for $line failed${NC}" 
         fi
+        cat ./.avtoolconfig
         ./avtool.sh -a stop
         STATUS=$?  
         echo "***********************************************************"
