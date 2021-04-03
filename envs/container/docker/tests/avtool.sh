@@ -7,7 +7,7 @@
 #
 # executable
 ###########################################################################################################################################################################################
-set -eu
+set -u
 repoRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$repoRoot"
 #######################################################
@@ -52,6 +52,13 @@ if [[ ! $action == login && ! $action == install && ! $action == start && ! $act
     usage
     exit 1
 fi
+# colors for formatting the ouput
+YELLOW='\033[1;33m'
+GREEN='\033[1;32m'
+RED='\033[0;31m'
+BLUE='\033[1;34m'
+NC='\033[0m' # No Color
+
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing all av-services..."
@@ -60,24 +67,43 @@ if [[ "${action}" == "install" ]] ; then
         echo "Installing for $line"
         echo "***********************************************************"
         cd $line 
-        bash ./avtool.sh -a install
+        alias exit=return
+        ./avtool.sh -a install
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "Install for $line ran successfully" 
+            echo -e "${GREEN}Install for $line ran successfully${NC}" 
         else 
-            echo "Install for $line failed" 
+            echo -e "${RED}Install for $line failed${NC}" 
         fi
+        unalias exit
         echo "***********************************************************"
         cd ../../tests
     done
-    echo "Installing all the av-services done"
+    echo -e "${GREEN}Installing all the av-services done${NC}"
     exit 0
 fi
 if [[ "${action}" == "login" ]] ; then
-    echo "Login..."
-    docker login
-    echo "Login done"
+    echo "Login all av-services..."
+    for line in $(cat ./listtests.txt) ; do
+        echo "***********************************************************"
+        echo "Login for $line"
+        echo "***********************************************************"
+        cd $line 
+        alias exit=return
+        ./avtool.sh -a login
+        STATUS=$?  
+        echo "***********************************************************"
+        if [ $STATUS -eq 0 ]; then 
+            echo -e "${GREEN}Login for $line ran successfully${NC}" 
+        else 
+            echo -e "${RED}ogin for $line failed${NC}" 
+        fi
+        unalias exit
+        echo "***********************************************************"
+        cd ../../tests
+    done
+    echo -e "${GREEN}Login all the av-services done${NC}"
     exit 0
 fi
 
@@ -88,19 +114,21 @@ if [[ "${action}" == "deploy" ]] ; then
         echo "Deploying for $line"
         echo "***********************************************************"
         cd $line 
-        bash ./avtool.sh -a deploy
-        bash ./avtool.sh -a stop
+        alias exit=return
+        ./avtool.sh -a deploy
+        ./avtool.sh -a stop
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "Deploy for $line ran successfully" 
+            echo -e "${GREEN}Deploy for $line ran successfully${NC}" 
         else 
-            echo "Deploy for $line failed" 
+            echo -e "${RED}Deploy for $line failed${NC}" 
         fi
+        unalias exit
         echo "***********************************************************"
         cd ../../tests
     done
-    echo "Deploying all the av-services done"
+    echo -e "${GREEN}Deploying all the av-services done${NC}"
     exit 0
 fi
 
@@ -111,18 +139,20 @@ if [[ "${action}" == "undeploy" ]] ; then
         echo "Undeploying for $line"
         echo "***********************************************************"
         cd $line 
-        bash ./avtool.sh -a undeploy
+        alias exit=return
+        ./avtool.sh -a undeploy
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "Undeploy for $line ran successfully" 
+            echo -e "${GREEN}Undeploy for $line ran successfully${NC}" 
         else 
-            echo "Undeploy for $line failed" 
+            echo -e "${RED}Undeploy for $line failed${NC}" 
         fi
+        unalias exit
         echo "***********************************************************"
         cd ../../tests
     done
-    echo "Undeploying all the av-services done"
+    echo -e "${GREEN}Undeploying all the av-services done${NC}"
     exit 0
 fi
 if [[ "${action}" == "status" ]] ; then
@@ -132,18 +162,20 @@ if [[ "${action}" == "status" ]] ; then
         echo "Getting status for $line"
         echo "***********************************************************"
         cd $line 
-        bash ./avtool.sh -a start
+        alias exit=return
+        ./avtool.sh -a start
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "Getting status for $line ran successfully" 
+            echo -e "${GREEN}Getting status for $line ran successfully${NC}" 
         else 
-            echo "Getting status for $line failed" 
+            echo -e "${RED}Getting status for $line failed${NC}" 
         fi
+        unalias exit
         echo "***********************************************************"
         cd ../../tests
     done
-    echo "Getting status for all av-services done"
+    echo -e "${GREEN}Getting status for all av-services done${NC}"
     exit 0
 fi
 
@@ -154,18 +186,20 @@ if [[ "${action}" == "start" ]] ; then
         echo "Starting for $line"
         echo "***********************************************************"
         cd $line 
-        bash ./avtool.sh -a start
+        alias exit=return
+        ./avtool.sh -a start
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "Start for $line ran successfully" 
+            echo -e "${GREEN}Start for $line ran successfully${NC}" 
         else 
-            echo "Start for $line failed" 
+            echo -e "${RED}Start for $line failed${NC}" 
         fi
+        unalias exit
         echo "***********************************************************"
         cd ../../tests
     done
-    echo "Starting all the av-services done"
+    echo -e "${GREEN}Starting all the av-services done${NC}"
     exit 0
 fi
 
@@ -176,18 +210,20 @@ if [[ "${action}" == "stop" ]] ; then
         echo "Stopping for $line"
         echo "***********************************************************"
         cd $line 
-        bash ./avtool.sh -a stop
+        alias exit=return
+        ./avtool.sh -a stop
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "Stop for $line ran successfully" 
+            echo -e "${GREEN}Stop for $line ran successfully${NC}" 
         else 
-            echo "Stop for $line failed" 
+            echo  -e "${RED}Stop for $line failed${NC}" 
         fi
+        unalias exit
         echo "***********************************************************"
         cd ../../tests
     done
-    echo "Stopping all the av-services done"
+    echo  -e "${GREEN}Stopping all the av-services done${NC}"
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
@@ -197,17 +233,19 @@ if [[ "${action}" == "test" ]] ; then
         echo "Running tests for $line"
         echo "***********************************************************"
         cd $line 
-        bash ./avtool.sh -a test
+        alias exit=return
+        ./avtool.sh -a test
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
-            echo "\e[32mTests for $line ran successfully" 
+            echo  -e "${GREEN}Tests for $line ran successfully${NC}" 
         else 
-            echo "\e[91mTests for $line failed" 
+            echo  -e "${RED}Tests for $line failed${NC}" 
         fi
+        unalias exit
         echo "***********************************************************"
         cd ../../tests
     done
-    echo "Testing all the av-services SUCCESSFUL"
+    echo  -e "${GREEN}Testing all the av-services SUCCESSFUL${NC}"
     exit 0
 fi

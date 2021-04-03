@@ -162,6 +162,7 @@ if [[ "${action}" == "deploy" ]] ; then
     sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
     sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     sudo docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
+    checkError
     checkDevContainerMode  || true
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
         TEMPVOL=${VOLNAME}
@@ -169,6 +170,7 @@ if [[ "${action}" == "deploy" ]] ; then
         TEMPVOL=${AV_TEMPDIR}
     fi
     sudo docker run  -d -it -v ${TEMPVOL}:/${AV_VOLUME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} ${AV_FFMPEG_COMMAND}
+    checkError
     echo -e "${GREEN}Deployment done${NC}"
     exit 0
 fi

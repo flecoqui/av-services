@@ -174,7 +174,9 @@ if [[ "${action}" == "deploy" ]] ; then
     sudo docker container rm ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
     sudo docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     sudo docker build  --build-arg  AV_PORT_RTSP=${AV_PORT_RTSP} --build-arg  AV_PORT_RTMP=${AV_PORT_RTMP} --build-arg  AV_PORT_SSL=${AV_PORT_SSL} --build-arg  AV_PORT_HTTP=${AV_PORT_HTTP} --build-arg  AV_PORT_HLS=${AV_PORT_HLS}  --build-arg  AV_HOSTNAME=${AV_HOSTNAME} --build-arg  AV_COMPANYNAME=${AV_COMPANYNAME} -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} . 
+    checkError
     sudo docker run  -d -it -p ${AV_PORT_HTTP}:${AV_PORT_HTTP}/tcp  -p ${AV_PORT_HLS}:${AV_PORT_HLS}/tcp    -p ${AV_PORT_RTMP}:${AV_PORT_RTMP}/tcp -p ${AV_PORT_RTSP}:${AV_PORT_RTSP}/tcp  -p ${AV_PORT_SSL}:${AV_PORT_SSL}/tcp -e PORT_RTSP=${AV_PORT_RTSP} -e PORT_RTMP=${AV_PORT_RTMP} -e PORT_SSL=${AV_PORT_SSL} -e PORT_HTTP=${AV_PORT_HTTP} -e PORT_HLS=${AV_PORT_HLS}  -e HOSTNAME=${AV_HOSTNAME} -e COMPANYNAME=${AV_COMPANYNAME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
+    checkError
     echo -e "${GREEN}Deployment done${NC}"
     exit 0
 fi
