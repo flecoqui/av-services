@@ -47,8 +47,8 @@ if [[ $# -eq 0 || -z $action || -z $configuration_file ]]; then
     usage
     exit 1
 fi
-if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == status && ! $action == deploy && ! $action == undeploy && ! $action == test ]]; then
-    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, status, test"
+if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == status && ! $action == deploy && ! $action == undeploy && ! $action == test && ! $action == inegration ]]; then
+    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, status, test, integration"
     usage
     exit 1
 fi
@@ -241,6 +241,69 @@ if [[ "${action}" == "test" ]] ; then
             echo  -e "${GREEN}Tests for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Tests for $line failed${NC}" 
+        fi
+        unalias exit
+        echo "***********************************************************"
+        cd ../../tests
+    done
+    echo  -e "${GREEN}Testing all the av-services SUCCESSFUL${NC}"
+    exit 0
+fi
+if [[ "${action}" == "integration" ]] ; then
+    echo "Testing all the av-services..."
+    for line in $(cat ./listtests.txt) ; do
+        echo "***********************************************************"
+        echo "Running tests for $line"
+        echo "***********************************************************"
+        cd $line 
+        alias exit=return
+        ./avtool.sh -a deploy
+        STATUS=$?  
+        echo "***********************************************************"
+        if [ $STATUS -eq 0 ]; then 
+            echo  -e "${GREEN}Deployment for $line ran successfully${NC}" 
+        else 
+            echo  -e "${RED}Deployment for $line failed${NC}" 
+        fi
+        ./avtool.sh -a stop
+        STATUS=$?  
+        echo "***********************************************************"
+        if [ $STATUS -eq 0 ]; then 
+            echo  -e "${GREEN}Stop for $line ran successfully${NC}" 
+        else 
+            echo  -e "${RED}Stop for $line failed${NC}" 
+        fi
+        ./avtool.sh -a start
+        STATUS=$?  
+        echo "***********************************************************"
+        if [ $STATUS -eq 0 ]; then 
+            echo  -e "${GREEN}Start for $line ran successfully${NC}" 
+        else 
+            echo  -e "${RED}Start for $line failed${NC}" 
+        fi
+        ./avtool.sh -a status
+        STATUS=$?  
+        echo "***********************************************************"
+        if [ $STATUS -eq 0 ]; then 
+            echo  -e "${GREEN}Status for $line ran successfully${NC}" 
+        else 
+            echo  -e "${RED}Status for $line failed${NC}" 
+        fi
+        ./avtool.sh -a test
+        STATUS=$?  
+        echo "***********************************************************"
+        if [ $STATUS -eq 0 ]; then 
+            echo  -e "${GREEN}Test for $line ran successfully${NC}" 
+        else 
+            echo  -e "${RED}Test for $line failed${NC}" 
+        fi
+        ./avtool.sh -a undeploy
+        STATUS=$?  
+        echo "***********************************************************"
+        if [ $STATUS -eq 0 ]; then 
+            echo  -e "${GREEN}Undeployment for $line ran successfully${NC}" 
+        else 
+            echo  -e "${RED}Undeployment for $line failed${NC}" 
         fi
         unalias exit
         echo "***********************************************************"
