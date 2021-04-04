@@ -79,7 +79,7 @@ if [[ "${action}" == "install" ]] ; then
             echo -e "${GREEN}Install for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Install for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
         fi
@@ -105,7 +105,7 @@ if [[ "${action}" == "login" ]] ; then
             echo -e "${GREEN}Login for $line ran successfully${NC}" 
         else 
             echo -e "${RED}ogin for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
 
@@ -134,7 +134,7 @@ if [[ "${action}" == "deploy" ]] ; then
             echo -e "${GREEN}Deploy for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Deploy for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
 
@@ -162,7 +162,7 @@ if [[ "${action}" == "undeploy" ]] ; then
             echo -e "${GREEN}Undeploy for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Undeploy for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
 
@@ -189,7 +189,7 @@ if [[ "${action}" == "status" ]] ; then
             echo -e "${GREEN}Getting status for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Getting status for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
 
@@ -217,7 +217,7 @@ if [[ "${action}" == "start" ]] ; then
             echo -e "${GREEN}Start for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Start for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
 
@@ -245,7 +245,7 @@ if [[ "${action}" == "stop" ]] ; then
             echo -e "${GREEN}Stop for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Stop for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
         fi
@@ -271,7 +271,7 @@ if [[ "${action}" == "test" ]] ; then
             echo  -e "${GREEN}Tests for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Tests for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
 
@@ -301,7 +301,7 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Deployment for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Deployment for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
         fi
@@ -313,7 +313,7 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Stop for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Stop for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
         fi
@@ -324,7 +324,7 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Start for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Start for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
         fi
@@ -335,7 +335,7 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Status for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Status for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
         fi
@@ -346,7 +346,7 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Test for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Test for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
         fi
@@ -357,7 +357,7 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Undeployment for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Undeployment for $line failed${NC}" 
-            if [[ stoperror == true ]]; then
+            if [[ ${stoperror} == true ]]; then
                 exit 1
             fi
         fi
