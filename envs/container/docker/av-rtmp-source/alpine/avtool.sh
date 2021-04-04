@@ -204,6 +204,12 @@ if [[ "${action}" == "test" ]] ; then
         wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     fi
     echo "Starting RTMP sink ${AV_FLAVOR} container"
+    sinkContainerId=$(docker container list --format "{{.ID}}" -f "name=av-rtmp-sink-${AV_FLAVOR}-container")
+    if [[ -z ${sinkContainerId} ]] ; then
+        echo "Creating RTMP sink ${AV_FLAVOR} container"
+        docker build  --build-arg  AV_PORT_RTMP=${AV_PORT_RTMP} --build-arg  AV_PORT_SSL=8443 --build-arg  AV_PORT_HTTP=80 --build-arg  AV_PORT_HLS=8080  --build-arg  AV_HOSTNAME=localhost --build-arg  AV_COMPANYNAME=contoso -t ${AV_IMAGE_FOLDER}/av-rtmp-sink-${AV_FLAVOR} . 
+        docker run  -d -it -p 80:80/tcp  -p 8080:8080/tcp    -p ${AV_PORT_RTMP}:${AV_PORT_RTMP}/tcp   -p 8443:8443/tcp  -e PORT_RTMP=${AV_PORT_RTMP} -e PORT_SSL=8443 -e PORT_HTTP=80 -e PORT_HLS=8080  -e HOSTNAME=localhost -e COMPANYNAME=contoso --name av-rtmp-sink-${AV_FLAVOR}-container ${AV_IMAGE_FOLDER}/av-rtmp-sink-${AV_FLAVOR} 
+    fi
 
     docker container start "av-rtmp-sink-${AV_FLAVOR}-container"  
     containerId=$(docker ps -a --format "{{.ID}}" -f "name=av-rtmp-sink-${AV_FLAVOR}-container")
@@ -236,11 +242,15 @@ if [[ "${action}" == "test" ]] ; then
             docker network disconnect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
         fi    
         echo "Stopping RTMP sink ${AV_FLAVOR} container"
-        docker container "stop av-rtmp-sink-${AV_FLAVOR}-container"
+        docker container stop "av-rtmp-sink-${AV_FLAVOR}-container"
         echo "Stopping test-${AV_CONTAINER_NAME} container..."
         docker container stop "test-${AV_CONTAINER_NAME}"  
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
-         
+        if [[ -z ${sinkContainerId} ]] ; then
+            echo "Deleting RTMP sink ${AV_FLAVOR} container"
+            docker container rm av-rtmp-sink-${AV_FLAVOR}-container > /dev/null 2> /dev/null  || true
+            docker image rm ${AV_IMAGE_FOLDER}/av-rtmp-sink-${AV_FLAVOR} > /dev/null 2> /dev/null  || true
+        fi
         kill %1
         exit 1
     fi
@@ -254,6 +264,11 @@ if [[ "${action}" == "test" ]] ; then
     docker container stop "av-rtmp-sink-${AV_FLAVOR}-container"  
     echo "Stopping test-${AV_CONTAINER_NAME} container..."
     docker container stop "test-${AV_CONTAINER_NAME}"  
+    if [[ -z ${sinkContainerId} ]] ; then
+        echo "Deleting RTMP sink ${AV_FLAVOR} container"
+        docker container rm av-rtmp-sink-${AV_FLAVOR}-container > /dev/null 2> /dev/null  || true
+        docker image rm ${AV_IMAGE_FOLDER}/av-rtmp-sink-${AV_FLAVOR} > /dev/null 2> /dev/null  || true
+    fi    
     echo "Testing ${AV_CONTAINER_NAME} successful"
     kill %1
     echo -e "${GREEN}TESTS SUCCESSFUL${NC}"
