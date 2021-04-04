@@ -221,12 +221,12 @@ if [[ "${action}" == "test" ]] ; then
         CONTAINER_IP=$(docker container inspect "$containerId"  --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
     fi  
     echo "RTMP sink private IP address: ${CONTAINER_IP}"
-    echo "Starting test-${AV_CONTAINER_NAME} container..."
-    docker container stop "test-${AV_CONTAINER_NAME}" &> /dev/null || true
-    docker container rm "test-${AV_CONTAINER_NAME}" &> /dev/null  || true
-    docker run  -d -it -e RTMP_URL=rtmp://${CONTAINER_IP}:${AV_RTMP_PORT}/live/stream  --name "test-${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
+    echo "Starting ${AV_CONTAINER_NAME} container..."
+    docker container stop "${AV_CONTAINER_NAME}" &> /dev/null || true
+    docker container rm "${AV_CONTAINER_NAME}" &> /dev/null  || true
+    docker run  -d -it -e RTMP_URL=rtmp://${CONTAINER_IP}:${AV_RTMP_PORT}/live/stream  --name "${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
-        docker network connect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
+        docker network connect av-services_devcontainer_default "${AV_CONTAINER_NAME}"
     fi  
 
     echo "Capture 20s of RTMP stream on the host machine..."
@@ -239,12 +239,12 @@ if [[ "${action}" == "test" ]] ; then
         checkDevContainerMode  || true
         if [[ "$checkDevContainerModeResult" == "1" ]] ; then
             docker network disconnect av-services_devcontainer_default av-rtmp-sink-${AV_FLAVOR}-container 
-            docker network disconnect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
+            docker network disconnect av-services_devcontainer_default "${AV_CONTAINER_NAME}"
         fi    
         echo "Stopping RTMP sink ${AV_FLAVOR} container"
         docker container stop "av-rtmp-sink-${AV_FLAVOR}-container"
-        echo "Stopping test-${AV_CONTAINER_NAME} container..."
-        docker container stop "test-${AV_CONTAINER_NAME}"  
+        echo "Stopping ${AV_CONTAINER_NAME} container..."
+        docker container stop "${AV_CONTAINER_NAME}"  
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
         if [[ -z ${sinkContainerId} ]] ; then
             echo "Deleting RTMP sink ${AV_FLAVOR} container"
@@ -259,11 +259,11 @@ if [[ "${action}" == "test" ]] ; then
     checkDevContainerMode  || true
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
         docker network disconnect av-services_devcontainer_default av-rtmp-sink-${AV_FLAVOR}-container 
-        docker network disconnect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
+        docker network disconnect av-services_devcontainer_default "${AV_CONTAINER_NAME}"
     fi       
     docker container stop "av-rtmp-sink-${AV_FLAVOR}-container"  
-    echo "Stopping test-${AV_CONTAINER_NAME} container..."
-    docker container stop "test-${AV_CONTAINER_NAME}"  
+    echo "Stopping ${AV_CONTAINER_NAME} container..."
+    docker container stop "${AV_CONTAINER_NAME}"  
     if [[ -z ${sinkContainerId} ]] ; then
         echo "Deleting RTMP sink ${AV_FLAVOR} container"
         docker container rm av-rtmp-sink-${AV_FLAVOR}-container > /dev/null 2> /dev/null  || true
