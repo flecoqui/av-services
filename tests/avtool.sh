@@ -70,7 +70,7 @@ if [[ "${action}" == "install" ]] ; then
         echo "***********************************************************"
         echo "Installing for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         ./avtool.sh -a install
         STATUS=$?  
@@ -85,7 +85,7 @@ if [[ "${action}" == "install" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo -e "${GREEN}Installing all the av-services done${NC}"
     exit 0
@@ -96,7 +96,7 @@ if [[ "${action}" == "login" ]] ; then
         echo "***********************************************************"
         echo "Login for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         ./avtool.sh -a login
         STATUS=$?  
@@ -112,7 +112,7 @@ if [[ "${action}" == "login" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo -e "${GREEN}Login all the av-services done${NC}"
     exit 0
@@ -124,7 +124,7 @@ if [[ "${action}" == "deploy" ]] ; then
         echo "***********************************************************"
         echo "Deploying for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         ./avtool.sh -a deploy
         ./avtool.sh -a stop
@@ -141,7 +141,7 @@ if [[ "${action}" == "deploy" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo -e "${GREEN}Deploying all the av-services done${NC}"
     exit 0
@@ -153,7 +153,7 @@ if [[ "${action}" == "undeploy" ]] ; then
         echo "***********************************************************"
         echo "Undeploying for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         ./avtool.sh -a undeploy
         STATUS=$?  
@@ -169,7 +169,7 @@ if [[ "${action}" == "undeploy" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo -e "${GREEN}Undeploying all the av-services done${NC}"
     exit 0
@@ -180,7 +180,7 @@ if [[ "${action}" == "status" ]] ; then
         echo "***********************************************************"
         echo "Getting status for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         ./avtool.sh -a start
         STATUS=$?  
@@ -196,7 +196,7 @@ if [[ "${action}" == "status" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo -e "${GREEN}Getting status for all av-services done${NC}"
     exit 0
@@ -208,7 +208,7 @@ if [[ "${action}" == "start" ]] ; then
         echo "***********************************************************"
         echo "Starting for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         ./avtool.sh -a start
         STATUS=$?  
@@ -224,7 +224,7 @@ if [[ "${action}" == "start" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo -e "${GREEN}Starting all the av-services done${NC}"
     exit 0
@@ -236,7 +236,7 @@ if [[ "${action}" == "stop" ]] ; then
         echo "***********************************************************"
         echo "Stopping for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         ./avtool.sh -a stop
         STATUS=$?  
@@ -251,7 +251,7 @@ if [[ "${action}" == "stop" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo  -e "${GREEN}Stopping all the av-services done${NC}"
     exit 0
@@ -262,7 +262,7 @@ if [[ "${action}" == "test" ]] ; then
         echo "***********************************************************"
         echo "Running tests for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         ./avtool.sh -a test
         STATUS=$?  
@@ -278,7 +278,7 @@ if [[ "${action}" == "test" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo  -e "${GREEN}Testing all the av-services SUCCESSFUL${NC}"
     exit 0
@@ -289,7 +289,7 @@ if [[ "${action}" == "integration" ]] ; then
         echo "***********************************************************"
         echo "Running tests for $line"
         echo "***********************************************************"
-        cd $line 
+        pushd $line 
         alias exit=return
         if [[ -f ./.avtoolconfig ]]; then
             rm ./.avtoolconfig 
@@ -363,7 +363,7 @@ if [[ "${action}" == "integration" ]] ; then
         fi
         unalias exit
         echo "***********************************************************"
-        cd ../../tests
+        popd 
     done
     echo  -e "${GREEN}Testing all the av-services SUCCESSFUL${NC}"
     exit 0
