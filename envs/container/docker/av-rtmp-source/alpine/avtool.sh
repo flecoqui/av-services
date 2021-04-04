@@ -208,7 +208,7 @@ if [[ "${action}" == "test" ]] ; then
     if [[ -z ${sinkContainerId} ]] ; then
         echo "Creating RTMP sink ${AV_FLAVOR} container"
         docker build  --build-arg  AV_PORT_RTMP=${AV_RTMP_PORT} --build-arg  AV_PORT_SSL=8443 --build-arg  AV_PORT_HTTP=80 --build-arg  AV_PORT_HLS=8080  --build-arg  AV_HOSTNAME=localhost --build-arg  AV_COMPANYNAME=contoso -t ${AV_IMAGE_FOLDER}/av-rtmp-sink-${AV_FLAVOR} . 
-        docker run  -d -it -p 80:80/tcp  -p 8080:8080/tcp    -p ${AV_RTMP_PORT}:${AV_RTMP_PORT}/tcp   -p 8443:8443/tcp  -e PORT_RTMP=${AV_RTMP_PORT} -e PORT_SSL=8443 -e PORT_HTTP=80 -e PORT_HLS=8080  -e HOSTNAME=localhost -e COMPANYNAME=contoso --name av-rtmp-sink-${AV_FLAVOR}-container ${AV_IMAGE_FOLDER}/av-rtmp-sink-${AV_FLAVOR} 
+        docker run  -d -it -p 80:80/tcp  -p 8080:8080/tcp    -p ${AV_RTMP_PORT}:${AV_RTMP_PORT}/tcp   -p 8443:8443/tcp  -e AV_PORT_RTMP=${AV_RTMP_PORT} -e AV_PORT_SSL=8443 -e AV_PORT_HTTP=80 -e AV_PORT_HLS=8080  -e AV_HOSTNAME=localhost -e AV_COMPANYNAME=contoso --name av-rtmp-sink-${AV_FLAVOR}-container ${AV_IMAGE_FOLDER}/av-rtmp-sink-${AV_FLAVOR} 
     fi
 
     docker container start "av-rtmp-sink-${AV_FLAVOR}-container"  
