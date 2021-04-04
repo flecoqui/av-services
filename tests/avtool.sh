@@ -33,7 +33,7 @@ while getopts "a:c:e:hq" opt; do
     case $opt in
     a) action=$OPTARG ;;
     c) configuration_file=$OPTARG ;;
-    e) stoperror=true
+    e) stoperror=true ;;
     :)
         echo "Error: -${OPTARG} requires a value"
         exit 1
