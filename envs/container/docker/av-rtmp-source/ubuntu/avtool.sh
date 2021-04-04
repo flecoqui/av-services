@@ -216,8 +216,8 @@ if [[ "${action}" == "test" ]] ; then
     fi  
     echo "RTMP sink private IP address: ${CONTAINER_IP}"
     echo "Starting test-${AV_CONTAINER_NAME} container..."
-    sudo  docker container stop "test-${AV_CONTAINER_NAME}" &> /dev/null || true
-    sudo  docker container rm "test-${AV_CONTAINER_NAME}" &> /dev/null  || true
+    docker container stop "test-${AV_CONTAINER_NAME}" &> /dev/null || true
+    docker container rm "test-${AV_CONTAINER_NAME}" &> /dev/null  || true
     docker run  -d -it -e RTMP_URL=rtmp://${CONTAINER_IP}:${AV_RTMP_PORT}/live/stream  --name "test-${AV_CONTAINER_NAME}" ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} 
     if [[ "$checkDevContainerModeResult" == "1" ]] ; then
         docker network connect av-services_devcontainer_default "test-${AV_CONTAINER_NAME}"
