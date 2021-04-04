@@ -3,7 +3,8 @@
 #- Purpose: Script used to install pre-requisites, deploy/undeploy service, start/stop service, test service
 #- Parameters are:
 #- [-a] action - value: login, install, deploy, undeploy, start, stop, status, test
-#- [-c] configuration file - by default avtool.env
+#- [-e] Stop on Error - by default false
+#- [-c] configuration file - which contains the list of path of each avtool.sh to call (avtool.env by default)
 #
 # executable
 ###########################################################################################################################################################################################
@@ -17,19 +18,22 @@ function usage() {
     echo
     echo "Arguments:"
     echo -e "/t-a/t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
-    echo -e "/t-c /t Sets the AV Tool configuration file"
+    echo -e "/t-c/t Sets the AV Tool configuration file"
+    echo -e "/t-e/t Sets the stop on error"
     echo
     echo "Example:"
     echo -e "/tbash ./avtool.sh -a install "
-    echo -e "/tbash ./avtool.sh -a start -c avtool.env"
+    echo -e "/tbash ./avtool.sh -a start -c avtool.env -e"
     
 }
 action=
-configuration_file=.avtoolconfig
-while getopts "a:c:hq" opt; do
+configuration_file=./avtool.env
+stoperror=false
+while getopts "a:c:e:hq" opt; do
     case $opt in
     a) action=$OPTARG ;;
     c) configuration_file=$OPTARG ;;
+    e) stoperror=true
     :)
         echo "Error: -${OPTARG} requires a value"
         exit 1
@@ -62,7 +66,7 @@ NC='\033[0m' # No Color
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing all av-services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Installing for $line"
         echo "***********************************************************"
@@ -75,6 +79,9 @@ if [[ "${action}" == "install" ]] ; then
             echo -e "${GREEN}Install for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Install for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
         fi
         unalias exit
         echo "***********************************************************"
@@ -85,7 +92,7 @@ if [[ "${action}" == "install" ]] ; then
 fi
 if [[ "${action}" == "login" ]] ; then
     echo "Login all av-services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Login for $line"
         echo "***********************************************************"
@@ -98,6 +105,10 @@ if [[ "${action}" == "login" ]] ; then
             echo -e "${GREEN}Login for $line ran successfully${NC}" 
         else 
             echo -e "${RED}ogin for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
+
         fi
         unalias exit
         echo "***********************************************************"
@@ -109,7 +120,7 @@ fi
 
 if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying all av-services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Deploying for $line"
         echo "***********************************************************"
@@ -123,6 +134,10 @@ if [[ "${action}" == "deploy" ]] ; then
             echo -e "${GREEN}Deploy for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Deploy for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
+
         fi
         unalias exit
         echo "***********************************************************"
@@ -134,7 +149,7 @@ fi
 
 if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying all av-services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Undeploying for $line"
         echo "***********************************************************"
@@ -147,6 +162,10 @@ if [[ "${action}" == "undeploy" ]] ; then
             echo -e "${GREEN}Undeploy for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Undeploy for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
+
         fi
         unalias exit
         echo "***********************************************************"
@@ -157,7 +176,7 @@ if [[ "${action}" == "undeploy" ]] ; then
 fi
 if [[ "${action}" == "status" ]] ; then
     echo "Getting status for all av-services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Getting status for $line"
         echo "***********************************************************"
@@ -170,6 +189,10 @@ if [[ "${action}" == "status" ]] ; then
             echo -e "${GREEN}Getting status for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Getting status for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
+
         fi
         unalias exit
         echo "***********************************************************"
@@ -181,7 +204,7 @@ fi
 
 if [[ "${action}" == "start" ]] ; then
     echo "Starting all services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Starting for $line"
         echo "***********************************************************"
@@ -194,6 +217,10 @@ if [[ "${action}" == "start" ]] ; then
             echo -e "${GREEN}Start for $line ran successfully${NC}" 
         else 
             echo -e "${RED}Start for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
+
         fi
         unalias exit
         echo "***********************************************************"
@@ -205,7 +232,7 @@ fi
 
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping all services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Stopping for $line"
         echo "***********************************************************"
@@ -218,6 +245,9 @@ if [[ "${action}" == "stop" ]] ; then
             echo -e "${GREEN}Stop for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Stop for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
         fi
         unalias exit
         echo "***********************************************************"
@@ -228,7 +258,7 @@ if [[ "${action}" == "stop" ]] ; then
 fi
 if [[ "${action}" == "test" ]] ; then
     echo "Testing all the av-services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Running tests for $line"
         echo "***********************************************************"
@@ -241,6 +271,10 @@ if [[ "${action}" == "test" ]] ; then
             echo  -e "${GREEN}Tests for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Tests for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
+
         fi
         unalias exit
         echo "***********************************************************"
@@ -251,7 +285,7 @@ if [[ "${action}" == "test" ]] ; then
 fi
 if [[ "${action}" == "integration" ]] ; then
     echo "Testing all the av-services..."
-    for line in $(cat ./listtests.txt) ; do
+    for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
         echo "Running tests for $line"
         echo "***********************************************************"
@@ -267,6 +301,9 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Deployment for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Deployment for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
         fi
         cat ./.avtoolconfig
         ./avtool.sh -a stop
@@ -276,6 +313,9 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Stop for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Stop for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
         fi
         ./avtool.sh -a start
         STATUS=$?  
@@ -284,6 +324,9 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Start for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Start for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
         fi
         ./avtool.sh -a status
         STATUS=$?  
@@ -292,6 +335,9 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Status for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Status for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
         fi
         ./avtool.sh -a test
         STATUS=$?  
@@ -300,6 +346,9 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Test for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Test for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
         fi
         ./avtool.sh -a undeploy
         STATUS=$?  
@@ -308,6 +357,9 @@ if [[ "${action}" == "integration" ]] ; then
             echo  -e "${GREEN}Undeployment for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Undeployment for $line failed${NC}" 
+            if [[ stoperror == true ]]; then
+                exit 1
+            fi
         fi
         unalias exit
         echo "***********************************************************"
