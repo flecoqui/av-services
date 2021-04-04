@@ -19,11 +19,11 @@ function usage() {
     echo "Arguments:"
     echo -e "/t-a/t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
     echo -e "/t-c/t Sets the AV Tool configuration file"
-    echo -e "/t-e/t Sets the stop on error"
+    echo -e "/t-e/t Sets the stop on error (false by defaut)"
     echo
     echo "Example:"
     echo -e "/tbash ./avtool.sh -a install "
-    echo -e "/tbash ./avtool.sh -a start -c avtool.env -e"
+    echo -e "/tbash ./avtool.sh -a start -c avtool.env -e true"
     
 }
 action=
@@ -33,7 +33,7 @@ while getopts "a:c:e:hq" opt; do
     case $opt in
     a) action=$OPTARG ;;
     c) configuration_file=$OPTARG ;;
-    e) stoperror=true ;;
+    e) stoperror=$OPTARG ;;
     :)
         echo "Error: -${OPTARG} requires a value"
         exit 1
