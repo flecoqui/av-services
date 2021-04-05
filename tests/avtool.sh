@@ -287,16 +287,17 @@ if [[ "${action}" == "integration" ]] ; then
     echo "Testing all the av-services..."
     for line in $(cat "${configuration_file}") ; do
         echo "***********************************************************"
-        echo "Running tests for $line"
+        echo "Running integration tests for $line"
         echo "***********************************************************"
         pushd $line 
         alias exit=return
         if [[ -f ./.avtoolconfig ]]; then
             rm ./.avtoolconfig 
         fi
+        echo "***********************************************************"
+        echo "Deploy for $line " 
         ./avtool.sh -a deploy
         STATUS=$?  
-        echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Deployment for $line ran successfully${NC}" 
         else 
@@ -306,9 +307,10 @@ if [[ "${action}" == "integration" ]] ; then
             fi
         fi
         cat ./.avtoolconfig
+        echo "***********************************************************"
+        echo "Stop for $line " 
         ./avtool.sh -a stop
         STATUS=$?  
-        echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Stop for $line ran successfully${NC}" 
         else 
@@ -317,9 +319,10 @@ if [[ "${action}" == "integration" ]] ; then
                 exit 1
             fi
         fi
+        echo "***********************************************************"
+        echo "Start for $line " 
         ./avtool.sh -a start
         STATUS=$?  
-        echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Start for $line ran successfully${NC}" 
         else 
@@ -328,9 +331,10 @@ if [[ "${action}" == "integration" ]] ; then
                 exit 1
             fi
         fi
+        echo "***********************************************************"
+        echo "Status for $line " 
         ./avtool.sh -a status
         STATUS=$?  
-        echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Status for $line ran successfully${NC}" 
         else 
@@ -339,9 +343,10 @@ if [[ "${action}" == "integration" ]] ; then
                 exit 1
             fi
         fi
+        echo "***********************************************************"
+        echo "Tests for $line " 
         ./avtool.sh -a test
         STATUS=$?  
-        echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Test for $line ran successfully${NC}" 
         else 
@@ -350,9 +355,10 @@ if [[ "${action}" == "integration" ]] ; then
                 exit 1
             fi
         fi
+        echo "***********************************************************"
+        echo "Undeploy for $line " 
         ./avtool.sh -a undeploy
         STATUS=$?  
-        echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Undeployment for $line ran successfully${NC}" 
         else 
