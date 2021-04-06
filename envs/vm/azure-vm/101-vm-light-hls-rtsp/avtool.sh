@@ -113,12 +113,18 @@ AV_RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
 AV_RESOURCE_REGION=eastus2
 AV_RTMP_PORT=1935
 AV_RTMP_PATH=live/stream
-AV_PREFIXNAME=rtmprtsphls
+AV_PREFIXNAME="rtmprtsphls$(shuf -i 1000-9999 -n 1)"
 AV_VMNAME="$AV_PREFIXNAME"vm
 AV_HOSTNAME="$AV_VMNAME"."$AV_RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
 AV_LOGIN=avvmadmin
 AV_PASSWORD={YourPassword}
+AV_TEMPDIR=$(mktemp -d)
+ssh-keygen -t rsa -b 2048 -f ${AV_TEMPDIR}/outkey -q -P ""
+AV_AUTHENTICATION_TYPE="sshPublicKey"
+AV_SSH_PUBLIC_KEY="\"$(cat ${AV_TEMPDIR}/outkey.pub)\""
+AV_SSH_PRIVATE_KEY="\"$(cat ${AV_TEMPDIR}/outkey)\""
+
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
@@ -135,7 +141,10 @@ AV_PASSWORD=${AV_PASSWORD}
 AV_SASTOKEN=
 AV_STORAGENAME=
 AV_SUBSCRIPTION_ID=
-AV_TEMPDIR=$(mktemp -d)
+AV_TEMPDIR=${AV_TEMPDIR}
+AV_AUTHENTICATION_TYPE=${AV_AUTHENTICATION_TYPE}
+AV_SSH_PUBLIC_KEY=${AV_SSH_PUBLIC_KEY}
+AV_SSH_PRIVATE_KEY=${AV_SSH_PRIVATE_KEY}
 EOF
 fi
 # Read variables in configuration file
@@ -153,6 +162,9 @@ export $(grep AV_LOGIN "$repoRoot"/"$configuration_file"  )
 export $(grep AV_PASSWORD "$repoRoot"/"$configuration_file" )
 export $(grep AV_SUBSCRIPTION_ID "$repoRoot"/"$configuration_file" )
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
+export $(grep AV_AUTHENTICATION_TYPE "$repoRoot"/"$configuration_file")
+export "$(grep AV_SSH_PUBLIC_KEY $repoRoot/$configuration_file)"
+export "$(grep AV_SSH_PRIVATE_KEY $repoRoot/$configuration_file)"
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
     AV_TEMPDIR=$(mktemp -d)
@@ -186,7 +198,10 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
     checkLoginAndSubscription
     az group create -n ${AV_RESOURCE_GROUP}  -l ${AV_RESOURCE_REGION} 
-    az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json
+    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json"
+    echo "${cmd}"
+    eval "${cmd}"
+
     outputs=$(az deployment group show --name ${AV_RESOURCE_GROUP}dep  -g ${AV_RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
     AV_SASTOKEN=$(jq -r .storageSasToken.value <<< $outputs)
