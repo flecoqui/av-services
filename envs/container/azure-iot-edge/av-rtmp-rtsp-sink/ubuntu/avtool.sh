@@ -239,8 +239,8 @@ AV_PORT_RTSP=8554
 AV_TEMPDIR=$(mktemp -d)
 ssh-keygen -t rsa -b 2048 -f ${AV_TEMPDIR}/outkey -q -P ""
 AV_AUTHENTICATION_TYPE="sshPublicKey"
-AV_SSH_PUBLIC_KEY=$(cat ${AV_TEMPDIR}/outkey.pub)
-AV_SSH_PRIVATE_KEY=$(cat ${AV_TEMPDIR}/outkey)
+AV_SSH_PUBLIC_KEY="\"$(cat ${AV_TEMPDIR}/outkey.pub)\""
+AV_SSH_PRIVATE_KEY="\"$(cat ${AV_TEMPDIR}/outkey)\""
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
