@@ -321,8 +321,8 @@ export $(grep AV_AAD_SERVICE_PRINCIPAL_SECRET "$repoRoot"/"$configuration_file")
 export $(grep AV_SUBSCRIPTION_ID "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 export $(grep AV_AUTHENTICATION_TYPE "$repoRoot"/"$configuration_file")
-export $(grep AV_SSH_PUBLIC_KEY "$repoRoot"/"$configuration_file")
-export $(grep AV_SSH_PRIVATE_KEY "$repoRoot"/"$configuration_file")
+export "$(grep AV_SSH_PUBLIC_KEY $repoRoot/$configuration_file)"
+export "$(grep AV_SSH_PRIVATE_KEY $repoRoot/$configuration_file)"
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
     AV_TEMPDIR=$(mktemp -d)
