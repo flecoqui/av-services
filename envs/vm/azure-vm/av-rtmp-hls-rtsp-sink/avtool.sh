@@ -67,7 +67,6 @@ checkLoginAndSubscription() {
         sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
     fi
 }
-
 test_output_files () {
     test_output_files_result="1"
     prefix="$1"
