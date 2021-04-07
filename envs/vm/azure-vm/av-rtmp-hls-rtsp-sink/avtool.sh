@@ -200,7 +200,7 @@ if [[ "${action}" == "deploy" ]] ; then
     cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json"
     echo "${cmd}"
     eval "${cmd}"
-
+    checkError
     outputs=$(az deployment group show --name ${AV_RESOURCE_GROUP}dep  -g ${AV_RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
     AV_SASTOKEN=$(jq -r .storageSasToken.value <<< $outputs)
@@ -214,6 +214,7 @@ if [[ "${action}" == "undeploy" ]] ; then
     echo "Undeploying service..."
     checkLoginAndSubscription
     az group delete -n ${AV_RESOURCE_GROUP} --yes
+    checkError
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=" >> "$repoRoot"/"$configuration_file"
     echo -e "${GREEN}Undeployment done${NC}"
@@ -223,7 +224,8 @@ fi
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
     checkLoginAndSubscription
-    az vm start -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
+    az vm start -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} > /dev/null
+    checkError 
     echo -e "${GREEN}Virtual Machine started${NC}"
     exit 0
 fi
@@ -231,8 +233,10 @@ fi
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
     checkLoginAndSubscription
-    az vm stop -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
-    az vm deallocate -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} 
+    az vm stop -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} > /dev/null
+    checkError
+    az vm deallocate -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} > /dev/null
+    checkError 
     echo -e "${GREEN}Virtual Machine stopped${NC}"
     exit 0
 fi
