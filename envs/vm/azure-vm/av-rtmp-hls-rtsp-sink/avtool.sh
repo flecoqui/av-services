@@ -257,6 +257,9 @@ if [[ "${action}" == "test" ]] ; then
         echo "Downloading content"
         wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     fi
+    echo "Stop and start virtual machine ${AV_VMNAME}"
+    az vm stop -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} >  /dev/null 2> /dev/null  || true
+    az vm start -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} >  /dev/null 2> /dev/null  || true
     cmd="az storage blob delete-batch -s ${AV_CONTAINERNAME} --account-name ${AV_STORAGENAME} --pattern *.mp4 --sas-token \"${AV_SASTOKEN}\""
     eval "$cmd"
     echo "Testing service..."
