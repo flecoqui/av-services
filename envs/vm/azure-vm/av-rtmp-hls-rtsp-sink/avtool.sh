@@ -326,7 +326,10 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     echo "Azure Storage URL: https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
     # wait 120 seconds to be sure the first chunks are copied on Azure Storage
-    sleep 120
+    echo ""
+    echo " Wait 180 seconds  to be sure the first chunks are copied on Azure Storage..."
+    echo ""    
+    sleep 180
     wget --quiet -O "${AV_TEMPDIR}"/testazure.xml "https://${AV_STORAGENAME}.blob.core.windows.net/${AV_CONTAINERNAME}?${AV_SASTOKEN}&comp=list&restype=container"
     blobs=($(grep -oP '(?<=Name>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
     bloblens=($(grep -oP '(?<=Content-Length>)[^<]+' "${AV_TEMPDIR}/testazure.xml"))
