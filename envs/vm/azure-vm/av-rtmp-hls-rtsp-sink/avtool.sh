@@ -224,7 +224,7 @@ fi
 if [[ "${action}" == "start" ]] ; then
     echo "Starting service..."
     checkLoginAndSubscription
-    az vm start -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} > /dev/null
+    az vm start -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} >  /dev/null 2> /dev/null  || true
     checkError 
     echo -e "${GREEN}Virtual Machine started${NC}"
     exit 0
@@ -233,9 +233,9 @@ fi
 if [[ "${action}" == "stop" ]] ; then
     echo "Stopping service..."
     checkLoginAndSubscription
-    az vm stop -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} > /dev/null
+    az vm stop -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} >  /dev/null 2> /dev/null  || true
     checkError
-    az vm deallocate -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} > /dev/null
+    az vm deallocate -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} >  /dev/null 2> /dev/null  || true
     checkError 
     echo -e "${GREEN}Virtual Machine stopped${NC}"
     exit 0
