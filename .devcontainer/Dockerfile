@@ -9,14 +9,14 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
 
 RUN apt-get update \
-    && apt-get install -y ffmpeg wget 
+    && apt-get install -y gnupg software-properties-common ffmpeg wget 
 
 # apt stuff
 RUN apt-get update \
     && export DEBIAN_FRONTEND=noninteractive \
     # install missing packages
     && mkdir -p /usr/share/man/man1 \
-    && apt-get install -y sudo git curl \
+    && apt-get install -y sudo git curl make procps lsb-release vim jq\
     # add sudo support
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
@@ -37,14 +37,31 @@ RUN apt-get update \
     && apt-get install -y apt-transport-https \
     && apt-get install -y dotnet-sdk-5.0
     
+# Install Docker CLI
+RUN apt-get update \
+    && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+RUN echo \
+  "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+RUN  apt-get update \
+      && apt-get install -y docker-ce-cli
+
 # copy sample mkv video 
 RUN wget https://github.com/flecoqui/av-services/blob/main/content/camera-300s.mkv?raw=true -O  /camera-300s.mkv
 
 # now everything from here uses the normal user
 USER $USERNAME
 
+# configure az cli to automatically install extension
+RUN az config set extension.use_dynamic_install=yes_without_prompt
 
-    
 # back to default shell
 SHELL ["/bin/sh", "-c"]
 

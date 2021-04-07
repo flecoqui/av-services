@@ -221,12 +221,14 @@ AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
 AV_EDGE_DEVICE=rtmp-rtsp-lva-device
 AV_PATH_RTMP=live/stream
-AV_PREFIXNAME=rtmprtsplva
+AV_PREFIXNAME="rtmprtsplva$(shuf -i 1000-9999 -n 1)"
 AV_VMNAME="$AV_PREFIXNAME"vm
 AV_HOSTNAME="$AV_VMNAME"."$AV_RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
 AV_LOGIN=avvmadmin
 AV_PASSWORD={YourPassword}
+AV_SSH_KEY_PUBLIC=
+AV_SSH_KEY_PRIVATE=
 AV_COMPANYNAME=contoso
 AV_PORT_HLS=8080
 AV_PORT_HTTP=80
@@ -234,6 +236,11 @@ AV_PORT_HTTP=80
 AV_PORT_SSL=8443
 AV_PORT_RTMP=1935
 AV_PORT_RTSP=8554
+AV_TEMPDIR=$(mktemp -d)
+ssh-keygen -t rsa -b 2048 -f ${AV_TEMPDIR}/outkey -q -P ""
+AV_AUTHENTICATION_TYPE="sshPublicKey"
+AV_SSH_PUBLIC_KEY="\"$(cat ${AV_TEMPDIR}/outkey.pub)\""
+AV_SSH_PRIVATE_KEY="\"$(cat ${AV_TEMPDIR}/outkey)\""
 # Check if configuration file exists
 if [[ ! -f "$repoRoot"/"$configuration_file" ]]; then
     cat > "$repoRoot"/"$configuration_file" << EOF
@@ -271,7 +278,10 @@ AV_AAD_TENANT_ID=
 AV_AAD_SERVICE_PRINCIPAL_ID=
 AV_AAD_SERVICE_PRINCIPAL_SECRET=
 AV_SUBSCRIPTION_ID=
-AV_TEMPDIR=$(mktemp -d)
+AV_TEMPDIR=${AV_TEMPDIR}
+AV_AUTHENTICATION_TYPE=${AV_AUTHENTICATION_TYPE}
+AV_SSH_PUBLIC_KEY=${AV_SSH_PUBLIC_KEY}
+AV_SSH_PRIVATE_KEY=${AV_SSH_PRIVATE_KEY}
 EOF
 fi
 # Read variables in configuration file
@@ -310,6 +320,9 @@ export $(grep AV_AAD_SERVICE_PRINCIPAL_ID "$repoRoot"/"$configuration_file")
 export $(grep AV_AAD_SERVICE_PRINCIPAL_SECRET "$repoRoot"/"$configuration_file")
 export $(grep AV_SUBSCRIPTION_ID "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
+export $(grep AV_AUTHENTICATION_TYPE "$repoRoot"/"$configuration_file")
+export "$(grep AV_SSH_PUBLIC_KEY $repoRoot/$configuration_file)"
+export "$(grep AV_SSH_PRIVATE_KEY $repoRoot/$configuration_file)"
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
     AV_TEMPDIR=$(mktemp -d)
@@ -336,12 +349,14 @@ if [[ "${action}" == "install" ]] ; then
         az extension update --name azure-iot &> /dev/null
         echo -e "azure-iot extension is up to date."														  
     fi
-    echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
+        echo "Downloading content"
+        wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    fi
     echo "Installing .Net 5.0 SDK "
-    wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O "${AV_TEMPDIR}"/packages-microsoft-prod.deb
+    wget https://packages.microsoft.com/config/alpine/20.04/packages-microsoft-prod.deb -O "${AV_TEMPDIR}"/packages-microsoft-prod.deb
     sudo dpkg -i "${AV_TEMPDIR}"/packages-microsoft-prod.deb
-    sudo apt-get update
+    sudo apt-get update 
     sudo apt-get install -y apt-transport-https 
     sudo apt-get install -y dotnet-sdk-5.0
     sudo dotnet restore ../../../../../src/lvatool
@@ -439,8 +454,6 @@ if [[ "${action}" == "deploy" ]] ; then
     az ams streaming-endpoint start --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT -n default --no-wait
 
     echo "Generating cloud-init.yml:"
-    echo "sed s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g < ./cloud-init.yml | sed s/{AV_ADMIN}/${AV_LOGIN//\"/}/g | sed s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g | sed s/{AV_PORT_SSL}/${AV_PORT_SSL}/g | sed s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g | sed s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g | sed s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" 
-
     CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_HTTP}/${AV_PORT_HTTP}/g" | sed "s/{AV_PORT_SSL}/${AV_PORT_SSL}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | sed "s/{AV_PORT_HLS}/${AV_PORT_HLS}/g" )
     echo "$CUSTOM_STRING"
     echo "Generating cloud-init.yml base64:"
@@ -448,7 +461,10 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "$CUSTOM_STRING_BASE64"
 
     echo "Deploying Virtual Machine..."
-    az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} vmAdminPassword=${AV_PASSWORD}  storageAccountName=${AV_STORAGENAME} customData="${CUSTOM_STRING_BASE64}" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json
+    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY}  storageAccountName=${AV_STORAGENAME} customData=\"${CUSTOM_STRING_BASE64}\" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json"
+    echo "${cmd}"
+    eval "${cmd}"
+    #az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY}  storageAccountName=${AV_STORAGENAME} customData="${CUSTOM_STRING_BASE64}" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json
     checkError
     
     echo -e "\nResource group now contains these resources:"
@@ -581,6 +597,7 @@ if [[ "${action}" == "status" ]] ; then
     checkLoginAndSubscription
     getContainerState 
     echo "$getContainerStateResult"
+    echo -e "${GREEN}Container status done${NC}"
     exit 0
 fi
 
@@ -588,8 +605,10 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testrtmp*.mp4
     rm -f "${AV_TEMPDIR}"/testhls*.mp4
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
-    echo "Downloading content"
-    wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
+        echo "Downloading content"
+        wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+    fi
     echo "Testing service..."
     stopContainer
     startContainer

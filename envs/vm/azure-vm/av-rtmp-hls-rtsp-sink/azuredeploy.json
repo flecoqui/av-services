@@ -16,10 +16,21 @@
         "description": "User name for the Virtual Machine."
       }
     },
-    "vmAdminPassword": {
+    "authenticationType": {
+      "type": "string",
+      "defaultValue": "password",
+      "allowedValues": [
+        "sshPublicKey",
+        "password"
+      ],
+      "metadata": {
+        "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+      }
+    },
+    "vmAdminPasswordOrKey": {
       "type": "securestring",
       "metadata": {
-        "description": "Password for the Virtual Machine."
+        "description": "SSH Key or password for the Virtual Machine. SSH key is recommended. Use \"ssh-keygen -t rsa -b 2048\" to generate your SSH key pairs."
       }
     },
     "vmOS": {
@@ -100,7 +111,7 @@
         "offer": "Debian",
         "sku": "9",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/101-vm-light-hls-rtsp/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/av-rtmp-hls-rtsp-sink/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -115,7 +126,7 @@
         "offer": "UbuntuServer",
         "sku": "18.04-LTS",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/101-vm-light-hls-rtsp/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/av-rtmp-hls-rtsp-sink/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -130,7 +141,7 @@
         "offer": "centos",
         "sku": "7.5",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/101-vm-light-hls-rtsp/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/av-rtmp-hls-rtsp-sink/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -145,7 +156,7 @@
         "offer": "RHEL",
         "sku": "7.2",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/vm/azure-vm/101-vm-light-hls-rtsp/install-software.sh",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/vm/azure-vm/av-rtmp-hls-rtsp-sink/install-software.sh",
         "installScriptFileName": "install-software.sh",
         "commandToExecute": "[concat('sh install-software.sh \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"')]",
         "extensionPublisher": "Microsoft.Azure.Extensions",
@@ -160,7 +171,7 @@
         "offer": "WindowsServer",
         "sku": "2016-Datacenter",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/101-vm-light-hls-rtsp/install-software-windows.ps1",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/av-rtmp-hls-rtsp-sink/install-software-windows.ps1",
         "installScriptFileName": "install-software-windows.ps1",
         "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File install-software-windows.ps1 \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"' )]",
         "extensionPublisher": "Microsoft.Compute",
@@ -175,7 +186,7 @@
         "offer": "WindowsServer",
         "sku": "2016-Nano-Server",
         "version": "latest",
-        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/101-vm-light-hls-rtsp/install-software-windows.ps1",
+        "installScriptUrl": "https://raw.githubusercontent.com/flecoqui/av-services/master/envs/vm/azure-vm/av-rtmp-hls-rtsp-sink/install-software-windows.ps1",
         "installScriptFileName": "install-software-windows.ps1",
         "commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File install-software-windows.ps1 \"',  variables('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com','\"' )]",
         "extensionPublisher": "Microsoft.Compute",
@@ -213,7 +224,18 @@
     "publicIPAddressType": "Dynamic",
     "virtualNetworkName": "[concat(parameters('namePrefix'), 'vnet')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": true,
+      "ssh": {
+        "publicKeys": [
+          {
+            "path": "[concat('/home/', parameters('vmAdminUsername'), '/.ssh/authorized_keys')]",
+            "keyData": "[parameters('vmAdminPasswordOrKey')]"
+          }
+        ]
+      }
+    }     
   },
   "resources": [
     {
@@ -427,7 +449,7 @@
       }
     },
     {
-      "apiVersion": "[variables('apiVersion')]",
+      "apiVersion": "2020-06-01",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
@@ -442,7 +464,8 @@
         "osProfile": {
           "computerName": "[variables('vmName')]",
           "adminUsername": "[parameters('vmAdminUsername')]",
-          "adminPassword": "[parameters('vmAdminPassword')]"
+          "adminPassword": "[parameters('vmAdminPasswordOrKey')]",
+          "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
         },
         "storageProfile": {
           "imageReference": {

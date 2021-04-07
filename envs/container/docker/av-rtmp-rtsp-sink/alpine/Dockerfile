@@ -125,9 +125,9 @@ RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g'  ./rtsp-simple-server.yml
 # Add NGINX path, config and static files.
 ENV PATH "${PATH}:/usr/local/nginx/sbin"
 
-COPY docker-entrypoint.sh /
+COPY ./docker-entrypoint.sh /
 RUN chmod 0755 /docker-entrypoint.sh 
 
 EXPOSE $PORT_RTMP/tcp $PORT_HLS/tcp $PORT_HTTP/tcp $PORT_SSL/tcp $PORT_RTSP/tcp
 
-CMD ./docker-entrypoint.sh
+CMD /docker-entrypoint.sh

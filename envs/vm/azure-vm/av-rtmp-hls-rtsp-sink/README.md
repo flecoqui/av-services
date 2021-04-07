@@ -1,9 +1,9 @@
 # Deployment of a RTMP Ingester hosted on Azure Virtual Machine using NGINX RTMP, RTSP-SIMPLE-SERVER and FFMPEG with HLS, RTMP and RTSP Playback
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2Fav-services%2Fmaster%2Farm%2F101-vm-light-hls-rtsp%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2Fav-services%2Fmaster%2Farm%2Fav-rtmp-hls-rtsp-sink%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
-<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2Fav-services%2Fmaster%2Farm%2F101-vm-light-hls-rtsp%2Fazuredeploy.json" target="_blank">
+<a href="http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fflecoqui%2Fav-services%2Fmaster%2Farm%2Fav-rtmp-hls-rtsp-sink%2Fazuredeploy.json" target="_blank">
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
@@ -143,7 +143,7 @@ As avtool.sh is a Linux bash file, you could run this tool from a machine or vir
     mkdir $HOME/git
     cd $HOME/git
     git clone https://github.com/flecoqui/av-services.git
-    cd av-services/envs/vm/azure-vm/101-vm-light-hls-rtsp
+    cd av-services/envs/vm/azure-vm/av-rtmp-hls-rtsp-sink
 ```
 3. Run avtool.sh -a install to install Azure CLI and ffmpeg
 
