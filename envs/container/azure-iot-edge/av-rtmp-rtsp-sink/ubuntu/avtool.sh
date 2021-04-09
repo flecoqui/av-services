@@ -378,7 +378,7 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying IoT Hub and Azure Container Registry..."
     az group create -n ${AV_RESOURCE_GROUP}  -l ${AV_RESOURCE_REGION} 
     checkError
-    az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.iothub.json --parameters namePrefix=${AV_PREFIXNAME} containerName=${AV_CONTAINERNAME} -o json
+    az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.iothub.json --parameters namePrefix=${AV_PREFIXNAME} containerName=${AV_CONTAINERNAME}  iotHubSku="F1" -o json
     checkError
     outputs=$(az deployment group show --name ${AV_RESOURCE_GROUP}dep  -g ${AV_RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)

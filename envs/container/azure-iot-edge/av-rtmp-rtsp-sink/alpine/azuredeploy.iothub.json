@@ -16,6 +16,22 @@
       "metadata": {
         "description": "Container Name where the audio/video chunks are stored"
       }
+    },
+    "iotHubSku": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "metadata": {
+        "description": "Iot Hub SKU F1 by default (Free)."
+      }
     }
   },
   "variables": {
@@ -47,7 +63,7 @@
       "name": "[variables('iotHubName')]",
       "location": "[resourceGroup().location]",
       "sku": {
-          "name": "S1",
+          "name": "[parameters('iotHubSku')]",
           "capacity": 1
       },
       "properties": {
