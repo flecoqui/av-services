@@ -1,0 +1,42 @@
+trigger:
+  branches:
+    include:
+    - "main"
+  paths:
+    include:
+    - envs/container/azure-iot-edge/*
+
+variables:
+  - name: configurationFile
+    value:  'avtool.azure-iot-edge.env'
+
+pool:
+  vmImage: 'ubuntu-20.04'
+
+stages:
+- stage: TestAzureIotEdgeServices
+  displayName: Test Azure Iot Edge Services Stage
+  jobs:
+  - job: TestAzureIotEdgeServicesJob
+    displayName: Test Azure Iot Edge Services Job
+    steps:     
+    - task: Bash@3
+      displayName: 'Install Pre-requisites'
+      inputs:
+        targetType: 'inline'
+        script: |
+          pipelines/utils/avtool.sh -a install -c $(configurationFile) -e true 
+
+    - task: Bash@3
+      displayName: 'Deploy Services'
+      inputs:
+        targetType: 'inline'
+        script: |
+          pipelines/utils/avtool.sh -a deploy -c $(configurationFile) -e true 
+
+    - task: Bash@3
+      displayName: 'Test Services'
+      inputs:
+        targetType: 'inline'
+        script: |
+          pipelines/utils/avtool.sh -a test -c $(configurationFile) -e true 

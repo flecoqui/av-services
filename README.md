@@ -1,3 +1,13 @@
+# Audio/Video services (av-services) 
+
+# Table of Contents
+- [Introduction](#introduction)
+- [Overview](#Overview)
+- [Samples of Audio/Video components](#samples-of-audio-video-components)
+- [Using dev container](#using-dev-container)
+- [How to install, deploy, test the Audio/Video components with astool.sh](#how-to-install--deploy--test-the-audio-video-components-with-astool-sh)
+- [Next Steps](#next-steps)
+ 
 # Introduction
 This repository (av-services) contains samples of software components which could be used to create Audio/Video workflows. Most of those components are based on Open Source libraries or tools running in different environments like virtual machines, containers.  
 With those Audio/Video components, it's possible to provide services like:
@@ -120,7 +130,7 @@ The following audio/video services are supported:
 - Audio/Video Receiver: RTMP ingress/MP4 files in Azure Storage  
 ![](./docs/img/RTMP-MP4-receiver-client.png) 
 
-# Using devcontainer
+# Using dev container
 This av-services repository contains a folder called ".devcontainer". 
 When you'll open the project with Visual Studio Code, it will ask you to open the project in container mode provided some pre-requisites are installed on your machine.
 ## installing pre-requisites
@@ -168,7 +178,7 @@ You need to install the following pre-requisite on your machine
         avuser@d0b2b4ea7293:/avworkspace$ ffmpeg 
     ```
 
-# How to install, deploy, test those Audio/Video components with astool.sh 
+# How to install, deploy, test the Audio/Video components with astool.sh 
 In order to easily test those Audio/Video components, each component is delivered with a bash file called avtool.sh which could be used to :
 - install the pre-requisites: it could deployed Azure CLI, Docker, ...
 - deploy/undeploy  the component: it could deploy a virtual machine, a container,...
@@ -269,14 +279,12 @@ Once the av-service is built, you can test the av-service .
 
 # Next Steps
 
-Below a list of possible improvements: 
+Below a list of possible improvements:  
 
-1. Add IOT Edge support - to be delivered in March 2021
-2. Automate Tests and deployment - to be delivered in March 2021
-3. Add a HLS source
-4. Add a RTSP source
-5. Add components supporting smooth streaming
-6. Update the astool.sh files to automate the tests.
-7. Provide Samples of Audio/Video renderer components
-8. Provide Samples of Audio/Video splitter components supporting multicast
+1. Automate Tests and deployment - to be delivered in March 2021
+2. Add a HLS source
+3. Add a RTSP source
+4. Add components supporting smooth streaming
+5. Provide Samples of Audio/Video renderer components
+6. Provide Samples of Audio/Video splitter components supporting multicast
  
