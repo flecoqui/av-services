@@ -3,9 +3,9 @@
 # Table of Contents
 - [Introduction](#introduction)
 - [Overview](#Overview)
-- [Samples of Audio/Video components](#samples-of-audio/video-components)
+- [Samples of Audio/Video components](#samples-of-audiovideo-components)
 - [Using dev container](#using-dev-container)
-- [How to install, deploy, test the Audio/Video components with astool.sh](#how-to-install--deploy--test-the-audio/video-components-with-astool-sh)
+- [How to install, deploy, test the Audio/Video components with astool.sh](#how-to-install--deploy--test-the-audiovideo-components-with-astool-sh)
 - [Next Steps](#next-steps)
  
 # Introduction
