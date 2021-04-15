@@ -17,6 +17,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
     env:
+      configurationFile: 'avtool.docker.env'
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -25,13 +26,13 @@ jobs:
 
       - name: Install Pre-requisites
         run: |
-          pipelines/utils/avtool.sh -a install -c avtool.docker.env -e true
+          pipelines/utils/avtool.sh -a install -c $(configurationFile) -e true
 
       - name: Deploy services 
         run: |
-          pipelines/utils/avtool.sh -a deploy -c avtool.docker.env -e true
+          pipelines/utils/avtool.sh -a deploy -c $(configurationFile) -e true
 
       - name: Deploy services 
         run: |
-          pipelines/utils/avtool.sh -a test -c avtool.docker.env -e true
+          pipelines/utils/avtool.sh -a test -c $(configurationFile) -e true
           
