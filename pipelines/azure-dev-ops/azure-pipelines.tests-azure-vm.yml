@@ -28,15 +28,8 @@ stages:
           pipelines/utils/avtool.sh -a install -c $(configurationFile) -e true 
 
     - task: Bash@3
-      displayName: 'Deploy Services'
+      displayName: 'Integration Test Services'
       inputs:
         targetType: 'inline'
         script: |
-          pipelines/utils/avtool.sh -a deploy -c $(configurationFile) -e true 
-
-    - task: Bash@3
-      displayName: 'Test Services'
-      inputs:
-        targetType: 'inline'
-        script: |
-          pipelines/utils/avtool.sh -a test -c $(configurationFile) -e true 
+          pipelines/utils/avtool.sh -a integration -c $(configurationFile) -e true 
