@@ -28,11 +28,7 @@ jobs:
         run: |
           pipelines/utils/avtool.sh -a install -c ${{ env.configurationFile }} -e true
 
-      - name: Deploy services 
+      - name: Integration Test services 
         run: |
-          pipelines/utils/avtool.sh -a deploy -c ${{ env.configurationFile }} -e true
+          pipelines/utils/avtool.sh -a integration -c ${{ env.configurationFile }} -e true
 
-      - name: Deploy services 
-        run: |
-          pipelines/utils/avtool.sh -a test -c ${{ env.configurationFile }} -e true
-          
