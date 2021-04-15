@@ -26,13 +26,13 @@ jobs:
 
       - name: Install Pre-requisites
         run: |
-          pipelines/utils/avtool.sh -a install -c $(configurationFile) -e true
+          pipelines/utils/avtool.sh -a install -c ${{ env.configurationFile }} -e true
 
       - name: Deploy services 
         run: |
-          pipelines/utils/avtool.sh -a deploy -c $(configurationFile) -e true
+          pipelines/utils/avtool.sh -a deploy -c ${{ env.configurationFile }} -e true
 
       - name: Deploy services 
         run: |
-          pipelines/utils/avtool.sh -a test -c $(configurationFile) -e true
+          pipelines/utils/avtool.sh -a test -c ${{ env.configurationFile }} -e true
           
