@@ -45,9 +45,12 @@ stages:
           echo "Tenant Id: $tenantId"
           echo "Subscription Id: $subscriptionId"
 
-    - task: Bash@3
+    - task: AzureCLI@2
       displayName: 'Integration Test Services'
       inputs:
-        targetType: 'inline'
-        script: |
+        azureSubscription: $(serviceConnection)
+        scriptType: "bash"
+        addSpnToEnvironment: "true"
+        scriptLocation: "inlineScript"
+        inlineScript: |
           pipelines/utils/avtool.sh -a integration -c $(configurationFile) -e true -s true
