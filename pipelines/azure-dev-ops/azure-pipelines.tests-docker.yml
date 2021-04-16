@@ -5,6 +5,7 @@ trigger:
   paths:
     include:
     - envs/container/docker/*
+    - pipelines/azure-dev-ops/azure-pipelines.tests-docker.yml
 
 variables:
   - name: configurationFile

@@ -5,6 +5,7 @@ trigger:
   paths:
     include:
     - envs/vm/azure-vm/*
+    - pipelines/azure-dev-ops/azure-pipelines.tests-azure-vm.yml
 
 variables:
   - name: configurationFile

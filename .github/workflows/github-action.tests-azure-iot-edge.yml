@@ -7,12 +7,16 @@ on:
     paths:
       - envs/container/azure-iot-edge/*
       - src/lvatool/*
+      - pipelines/github-action/github-action.tests-azure-iot-edge.yml
+      - .github/workflows/github-action.tests-azure-iot-edge.yml
 
   pull_request:
     branches: [ main ]
     paths:
       - envs/container/azure-iot-edge/*
       - src/lvatool/*
+      - pipelines/github-action/github-action.tests-azure-iot-edge.yml
+      - .github/workflows/github-action.tests-azure-iot-edge.yml
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:

@@ -5,6 +5,8 @@ trigger:
   paths:
     include:
     - envs/container/azure-iot-edge/*
+    - src/lvatool/*
+    - pipelines/azure-dev-ops/azure-pipelines.tests-azure-iot-edge.yml
 
 variables:
   - name: configurationFile
