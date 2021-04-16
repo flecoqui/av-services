@@ -74,6 +74,9 @@ checkError() {
         exit 1
     fi
 }
+getPublicIPAddress() {
+    getPublicIPAddressResult=$(dig +short myip.opendns.com @resolver1.opendns.com)
+}
 checkLoginAndSubscription() {
     az account show -o none
     if [ $? -ne 0 ]; then
@@ -211,7 +214,8 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying service..."
     checkLoginAndSubscription
     az group create -n ${AV_RESOURCE_GROUP}  -l ${AV_RESOURCE_REGION} 
-    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json"
+    getPublicIPAddress || true
+    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} clientIPAddress="$getPublicIPAddressResult" rtmpPath=${AV_RTMP_PATH} containerName=${AV_CONTAINERNAME} --verbose -o json"
     echo "${cmd}"
     eval "${cmd}"
     checkError
