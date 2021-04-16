@@ -18,14 +18,14 @@ cd "$repoRoot"
 function usage() {
     echo
     echo "Arguments:"
-    echo -e "/t-a/t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
-    echo -e "/t-c/t Sets the AV Tool configuration file"
-    echo -e "/t-e/t Sets the stop on error (false by defaut)"
-    echo -e "/t-e/t Sets Silent mode installation or deployment (false by defaut)"
+    echo -e " -a  Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
+    echo -e " -c  Sets the AV Tool configuration file"
+    echo -e " -e  Sets the stop on error (false by defaut)"
+    echo -e " -e  Sets Silent mode installation or deployment (false by defaut)"
     echo
     echo "Example:"
-    echo -e "/tbash ./avtool.sh -a install "
-    echo -e "/tbash ./avtool.sh -a start -c avtool.env -e true -s true"
+    echo -e " bash ./avtool.sh -a install "
+    echo -e " bash ./avtool.sh -a start -c avtool.env -e true -s true"
     
 }
 action=

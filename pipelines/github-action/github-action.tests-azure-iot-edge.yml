@@ -31,9 +31,9 @@ jobs:
       - name: Azure Login
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}          
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Integration Test services 
         run: |
-          pipelines/utils/avtool.sh -a integration -c ${{ env.configurationFile }} -e true
+          pipelines/utils/avtool.sh -a integration -c ${{ env.configurationFile }} -e true -s true
           
