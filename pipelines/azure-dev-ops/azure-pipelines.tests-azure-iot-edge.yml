@@ -11,6 +11,7 @@ trigger:
 variables:
   - name: configurationFile
     value:  'avtool.azure-iot-edge.env'
+  - group: av-services-vg
 
 pool:
   vmImage: 'ubuntu-20.04'
@@ -28,6 +29,21 @@ stages:
         targetType: 'inline'
         script: |
           pipelines/utils/avtool.sh -a install -c $(configurationFile) -e true 
+
+    - task: AzureCLI@2
+      displayName: Azure Authentication  
+      inputs:
+        azureSubscription: $(serviceConnection)
+        scriptType: "bash"
+        addSpnToEnvironment: "true"
+        scriptLocation: "inlineScript"
+        inlineScript: |
+          echo "Service Principal Id: $servicePrincipalId"
+          echo "Service Principal Key: $servicePrincipalKey"
+          subscriptionId=$(az account show --query 'id' --output tsv)
+          tenantId=$(az account show --query 'tenantId' --output tsv)
+          echo "Tenant Id: $tenantId"
+          echo "Subscription Id: $subscriptionId"
 
     - task: Bash@3
       displayName: 'Integration Test Services'
