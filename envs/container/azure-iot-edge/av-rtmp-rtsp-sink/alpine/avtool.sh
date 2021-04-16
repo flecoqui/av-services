@@ -153,8 +153,13 @@ setContainerState () {
 getContainerState () {
     getContainerStateResult="unknown"
     # az vm get-instance-view -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
+    echo "Dump State with json"
+    az iot hub query -n ${AV_IOTHUB} -q "select * from devices.modules where devices.deviceId = '${AV_EDGE_DEVICE}' and devices.moduleId = '\$edgeAgent' " 
     getContainerStateResult=$(az iot hub query -n ${AV_IOTHUB} -q "select * from devices.modules where devices.deviceId = '${AV_EDGE_DEVICE}' and devices.moduleId = '\$edgeAgent' " --query '[].properties.reported.modules.rtmpsource.status'  --output tsv)
     checkError
+    if [[ $getContainerStateResult == "" || -z $getContainerStateResult ]]; then
+        getContainerStateResult="unknown"
+    fi
     return
 }
 stopContainer() {
@@ -167,7 +172,7 @@ stopContainer() {
             exit 1
         fi 
         getContainerState 
-        if [[ $getContainerStateResult == "stopped" ]]; then echo "Container is stopped"; break; fi; 
+        if [[ $getContainerStateResult == "stopped" || $getContainerStateResult == "unknown" ]]; then echo "Container is stopped"; break; fi; 
         echo "Waiting for container in stopped state, currently it is $getContainerStateResult"; 
         sleep 10; 
         x=$(( $x + 1 ))
