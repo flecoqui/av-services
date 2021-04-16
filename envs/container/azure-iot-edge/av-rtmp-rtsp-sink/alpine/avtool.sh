@@ -528,7 +528,11 @@ if [[ "${action}" == "deploy" ]] ; then
     echo
     echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${AV_IOTHUB} " 
     echo
+    # Wait 1 minute before deploying containers 
+    sleep 60    
     setContainerState "running"
+    # Wait 1 minute to complete the deployment 
+    sleep 60
     fillConfigurationFile
 
     echo -e "
