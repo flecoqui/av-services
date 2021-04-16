@@ -4,6 +4,7 @@
 #- Parameters are:
 #- [-a] action - value: login, install, deploy, undeploy, start, stop, status, test
 #- [-e] Stop on Error - by default false
+#- [-s] Silent mode - by default false
 #- [-c] configuration file - which contains the list of path of each avtool.sh to call (avtool.env by default)
 #
 # executable
@@ -20,20 +21,23 @@ function usage() {
     echo -e "/t-a/t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
     echo -e "/t-c/t Sets the AV Tool configuration file"
     echo -e "/t-e/t Sets the stop on error (false by defaut)"
+    echo -e "/t-e/t Sets Silent mode installation or deployment (false by defaut)"
     echo
     echo "Example:"
     echo -e "/tbash ./avtool.sh -a install "
-    echo -e "/tbash ./avtool.sh -a start -c avtool.env -e true"
+    echo -e "/tbash ./avtool.sh -a start -c avtool.env -e true -s true"
     
 }
 action=
 configuration_file=./avtool.env
 stoperror=false
-while getopts "a:c:e:hq" opt; do
+silentmode=false
+while getopts "a:c:e:s:hq" opt; do
     case $opt in
     a) action=$OPTARG ;;
     c) configuration_file=$OPTARG ;;
     e) stoperror=$OPTARG ;;
+    s) silentmode=$OPTARG ;;
     :)
         echo "Error: -${OPTARG} requires a value"
         exit 1
@@ -72,7 +76,7 @@ if [[ "${action}" == "install" ]] ; then
         echo "***********************************************************"
         pushd $line 
         alias exit=return
-        ./avtool.sh -a install
+        ./avtool.sh -a install  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
@@ -98,7 +102,7 @@ if [[ "${action}" == "login" ]] ; then
         echo "***********************************************************"
         pushd $line 
         alias exit=return
-        ./avtool.sh -a login
+        ./avtool.sh -a login  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
@@ -126,8 +130,8 @@ if [[ "${action}" == "deploy" ]] ; then
         echo "***********************************************************"
         pushd $line 
         alias exit=return
-        ./avtool.sh -a deploy
-        ./avtool.sh -a stop
+        ./avtool.sh -a deploy  -e ${stoperror} -s ${silentmode}
+        ./avtool.sh -a stop  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
@@ -155,7 +159,7 @@ if [[ "${action}" == "undeploy" ]] ; then
         echo "***********************************************************"
         pushd $line 
         alias exit=return
-        ./avtool.sh -a undeploy
+        ./avtool.sh -a undeploy  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
@@ -182,7 +186,7 @@ if [[ "${action}" == "status" ]] ; then
         echo "***********************************************************"
         pushd $line 
         alias exit=return
-        ./avtool.sh -a start
+        ./avtool.sh -a start  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
@@ -210,7 +214,7 @@ if [[ "${action}" == "start" ]] ; then
         echo "***********************************************************"
         pushd $line 
         alias exit=return
-        ./avtool.sh -a start
+        ./avtool.sh -a start -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
@@ -238,7 +242,7 @@ if [[ "${action}" == "stop" ]] ; then
         echo "***********************************************************"
         pushd $line 
         alias exit=return
-        ./avtool.sh -a stop
+        ./avtool.sh -a stop  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
@@ -264,7 +268,7 @@ if [[ "${action}" == "test" ]] ; then
         echo "***********************************************************"
         pushd $line 
         alias exit=return
-        ./avtool.sh -a test
+        ./avtool.sh -a test  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         echo "***********************************************************"
         if [ $STATUS -eq 0 ]; then 
@@ -296,7 +300,7 @@ if [[ "${action}" == "integration" ]] ; then
         fi
         echo "***********************************************************"
         echo "Deploy for $line " 
-        ./avtool.sh -a deploy
+        ./avtool.sh -a deploy  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Deployment for $line ran successfully${NC}" 
@@ -309,55 +313,63 @@ if [[ "${action}" == "integration" ]] ; then
         cat ./.avtoolconfig
         echo "***********************************************************"
         echo "Stop for $line " 
-        ./avtool.sh -a stop
+        ./avtool.sh -a stop  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Stop for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Stop for $line failed${NC}" 
             if [[ ${stoperror} == true ]]; then
+                echo "Undeploy for $line " 
+                ./avtool.sh -a undeploy   -e ${stoperror} -s ${silentmode}          
                 exit 1
             fi
         fi
         echo "***********************************************************"
         echo "Start for $line " 
-        ./avtool.sh -a start
+        ./avtool.sh -a start  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Start for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Start for $line failed${NC}" 
             if [[ ${stoperror} == true ]]; then
+                echo "Undeploy for $line " 
+                ./avtool.sh -a undeploy  -e ${stoperror} -s ${silentmode}           
                 exit 1
             fi
         fi
         echo "***********************************************************"
         echo "Status for $line " 
-        ./avtool.sh -a status
+        ./avtool.sh -a status  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Status for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Status for $line failed${NC}" 
             if [[ ${stoperror} == true ]]; then
+                echo "Undeploy for $line " 
+                ./avtool.sh -a undeploy     -e ${stoperror} -s ${silentmode}         
                 exit 1
             fi
         fi
         echo "***********************************************************"
         echo "Tests for $line " 
-        ./avtool.sh -a test
+        ./avtool.sh -a test  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Test for $line ran successfully${NC}" 
         else 
             echo  -e "${RED}Test for $line failed${NC}" 
             if [[ ${stoperror} == true ]]; then
+                echo "Undeploy for $line " 
+                ./avtool.sh -a undeploy  -e ${stoperror} -s ${silentmode}          
                 exit 1
             fi
         fi
         echo "***********************************************************"
         echo "Undeploy for $line " 
-        ./avtool.sh -a undeploy
+        ./avtool.sh -a undeploy  -e ${stoperror} -s ${silentmode}
         STATUS=$?  
         if [ $STATUS -eq 0 ]; then 
             echo  -e "${GREEN}Undeployment for $line ran successfully${NC}" 

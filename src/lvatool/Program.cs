@@ -154,9 +154,12 @@ namespace lvaconsole
                         if(((DateTime.UtcNow - start).TotalMilliseconds > timeOut) || (timeOut == 0))
                             break;
 
-                        if( Console.KeyAvailable && ((Console.ReadKey(true).Key == ConsoleKey.Escape) || (Console.ReadKey(true).Key == ConsoleKey.Spacebar))) 
+                        if (!Console.IsInputRedirected)
                         {
-                            break;
+                            if( Console.KeyAvailable && ((Console.ReadKey(true).Key == ConsoleKey.Escape) || (Console.ReadKey(true).Key == ConsoleKey.Spacebar))) 
+                            {
+                                break;
+                            }
                         }
 
                     }                            
@@ -250,11 +253,14 @@ namespace lvaconsole
                                 lastOperationReached = true;
                             }
                         }
-                        if( Console.KeyAvailable ) 
+                        if (!Console.IsInputRedirected)                        
                         {
-                            char c = Console.ReadKey().KeyChar ;
-                            if(c == 0x20 || c == 0x1B )
-                                break;
+                            if( Console.KeyAvailable ) 
+                            {
+                                char c = Console.ReadKey().KeyChar ;
+                                if(c == 0x20 || c == 0x1B )
+                                    break;
+                            }
                         }
                     }
                 }

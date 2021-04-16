@@ -3,7 +3,9 @@
 #- Purpose: Script used to install pre-requisites, deploy/undeploy service, start/stop service, test service
 #- Parameters are:
 #- [-a] action - value: login, install, deploy, undeploy, start, stop, status, test
-#- [-c] configuration file - by default avtool.env
+#- [-e] Stop on Error - by default false
+#- [-s] Silent mode - by default false
+#- [-c] configuration file - which contains the list of path of each avtool.sh to call (avtool.env by default)
 #
 # executable
 ###########################################################################################################################################################################################
@@ -16,20 +18,26 @@ cd "$repoRoot"
 function usage() {
     echo
     echo "Arguments:"
-    echo -e "\t-a\t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
-    echo -e "\t-c \t Sets the AV Tool configuration file"
+    echo -e "/t-a/t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
+    echo -e "/t-c/t Sets the AV Tool configuration file"
+    echo -e "/t-e/t Sets the stop on error (false by defaut)"
+    echo -e "/t-e/t Sets Silent mode installation or deployment (false by defaut)"
     echo
     echo "Example:"
-    echo -e "\tbash avtool.sh -a install "
-    echo -e "\tbash avtool.sh -a start -c avtool.env"
+    echo -e "/tbash ./avtool.sh -a install "
+    echo -e "/tbash ./avtool.sh -a start -c avtool.env -e true -s true"
     
 }
 action=
-configuration_file=.avtoolconfig
-while getopts "a:c:hq" opt; do
+configuration_file=./avtool.env
+stoperror=false
+silentmode=false
+while getopts "a:c:e:s:hq" opt; do
     case $opt in
     a) action=$OPTARG ;;
     c) configuration_file=$OPTARG ;;
+    e) stoperror=$OPTARG ;;
+    s) silentmode=$OPTARG ;;
     :)
         echo "Error: -${OPTARG} requires a value"
         exit 1
@@ -47,8 +55,8 @@ if [[ $# -eq 0 || -z $action || -z $configuration_file ]]; then
     usage
     exit 1
 fi
-if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == status && ! $action == deploy && ! $action == undeploy && ! $action == test ]]; then
-    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, status, test"
+if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == status && ! $action == deploy && ! $action == undeploy && ! $action == test && ! $action == integration ]]; then
+    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, status, test, integration"
     usage
     exit 1
 fi

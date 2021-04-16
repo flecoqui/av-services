@@ -2,12 +2,14 @@
 ##########################################################################################################################################################################################
 #- Purpose: Script used to install pre-requisites, deploy/undeploy service, start/stop service, test service
 #- Parameters are:
-#- [-a] action - value: login, install, deploy, undeploy, start, stop, test
-#- [-c] configuration file - by default avtool.env
+#- [-a] action - value: login, install, deploy, undeploy, start, stop, status, test
+#- [-e] Stop on Error - by default false
+#- [-s] Silent mode - by default false
+#- [-c] configuration file - which contains the list of path of each avtool.sh to call (avtool.env by default)
 #
 # executable
 ###########################################################################################################################################################################################
-set -eu
+set -u
 repoRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$repoRoot"
 #######################################################
@@ -16,20 +18,55 @@ cd "$repoRoot"
 function usage() {
     echo
     echo "Arguments:"
-    echo -e "\t-a\t Sets AV Tool action"
-    echo -e "\t-c \t Sets the AV Tool configuration file"
+    echo -e "/t-a/t Sets AV Tool action {install, deploy, undeploy, start, stop, status, test}"
+    echo -e "/t-c/t Sets the AV Tool configuration file"
+    echo -e "/t-e/t Sets the stop on error (false by defaut)"
+    echo -e "/t-e/t Sets Silent mode installation or deployment (false by defaut)"
     echo
     echo "Example:"
-    echo -e "\tbash avtool.sh -a install "
-    echo -e "\tbash avtool.sh -a start -c avtool.env"
+    echo -e "/tbash ./avtool.sh -a install "
+    echo -e "/tbash ./avtool.sh -a start -c avtool.env -e true -s true"
     
 }
+action=
+configuration_file=./avtool.env
+stoperror=false
+silentmode=false
+while getopts "a:c:e:s:hq" opt; do
+    case $opt in
+    a) action=$OPTARG ;;
+    c) configuration_file=$OPTARG ;;
+    e) stoperror=$OPTARG ;;
+    s) silentmode=$OPTARG ;;
+    :)
+        echo "Error: -${OPTARG} requires a value"
+        exit 1
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+    esac
+done
+
+# Validation
+if [[ $# -eq 0 || -z $action || -z $configuration_file ]]; then
+    echo "Required parameters are missing"
+    usage
+    exit 1
+fi
+if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == status && ! $action == deploy && ! $action == undeploy && ! $action == test && ! $action == integration ]]; then
+    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, status, test, integration"
+    usage
+    exit 1
+fi
 # colors for formatting the ouput
 YELLOW='\033[1;33m'
 GREEN='\033[1;32m'
 RED='\033[0;31m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Color
+
 checkError() {
     if [ $? -ne 0 ]; then
         echo -e "${RED}\nAn error occured exiting from the current bash${NC}"
@@ -50,20 +87,23 @@ checkLoginAndSubscription() {
 
         echo -e "\nYour current subscription is:"
         az account show --query '[name,id]'
-        echo -e "
-        You will need to use a subscription with permissions for creating service principals (owner role provides this).
-        If you want to change to a different subscription, enter the name or id.
-        Or just press enter to continue with the current subscription."
-        read -p ">> " SUBSCRIPTION_ID
 
-        if ! test -z "$SUBSCRIPTION_ID"
-        then 
-            az account set -s "$SUBSCRIPTION_ID"
-            echo -e "\nNow using:"
-            az account show --query '[name,id]'
-            CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
+        if [[ ${silentmode} == false ||  test -z "$CURRENT_SUBSCRIPTION_ID" ]]; then
+            echo -e "
+            You will need to use a subscription with permissions for creating service principals (owner role provides this).
+            If you want to change to a different subscription, enter the name or id.
+            Or just press enter to continue with the current subscription."
+            read -p ">> " SUBSCRIPTION_ID
+
+            if ! test -z "$SUBSCRIPTION_ID"
+            then 
+                az account set -s "$SUBSCRIPTION_ID"
+                echo -e "\nNow using:"
+                az account show --query '[name,id]'
+                CURRENT_SUBSCRIPTION_ID=$(az account show --query 'id' --output tsv)
+            fi
         fi
-        AV_SUBSCRIPTION_ID=$CURRENT_SUBSCRIPTION_ID
+        AV_SUBSCRIPTION_ID="$CURRENT_SUBSCRIPTION_ID"
         sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
     fi
 }
