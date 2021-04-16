@@ -19,7 +19,7 @@ stages:
   jobs:
   - job: TestAzureIotEdgeServicesJob
     displayName: Test Azure Iot Edge Services Job
-    steps:     
+    steps:   
     - task: Bash@3
       displayName: 'Install Pre-requisites'
       inputs:
