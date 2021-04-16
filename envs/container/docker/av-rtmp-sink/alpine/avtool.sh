@@ -29,7 +29,7 @@ function usage() {
     
 }
 action=
-configuration_file=./avtool.env
+configuration_file=.avtoolconfig
 stoperror=false
 silentmode=false
 while getopts "a:c:e:s:hq" opt; do

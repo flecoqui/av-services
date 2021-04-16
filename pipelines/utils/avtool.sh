@@ -310,7 +310,7 @@ if [[ "${action}" == "integration" ]] ; then
                 exit 1
             fi
         fi
-        cat ./.avtoolconfig
+        
         echo "***********************************************************"
         echo "Stop for $line " 
         ./avtool.sh -a stop  -e ${stoperror} -s ${silentmode}
