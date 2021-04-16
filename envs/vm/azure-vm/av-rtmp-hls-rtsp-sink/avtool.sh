@@ -52,6 +52,7 @@ done
 # Validation
 if [[ $# -eq 0 || -z $action || -z $configuration_file ]]; then
     echo "Required parameters are missing"
+    echo "???: $# "
     usage
     exit 1
 fi
@@ -120,34 +121,7 @@ test_output_files () {
     done 
     return
 }
-action=
-configuration_file=.avtoolconfig
-while getopts "a:c:hq" opt; do
-    case $opt in
-    a) action=$OPTARG ;;
-    c) configuration_file=$OPTARG ;;
-    :)
-        echo "Error: -${OPTARG} requires a value"
-        exit 1
-        ;;
-    *)
-        usage
-        exit 1
-        ;;
-    esac
-done
 
-# Validation
-if [[ $# -eq 0 || -z $action || -z $configuration_file ]]; then
-    echo "Required parameters are missing"
-    usage
-    exit 1
-fi
-if [[ ! $action == login && ! $action == install && ! $action == start && ! $action == stop && ! $action == deploy && ! $action == undeploy && ! $action == test &&  ! $action == status ]]; then
-    echo "Required action is missing, values: login, install, deploy, undeploy, start, stop, test"
-    usage
-    exit 1
-fi
 AV_RESOURCE_GROUP=av-rtmp-rtsp-hls-vm-rg
 AV_RESOURCE_REGION=eastus2
 AV_RTMP_PORT=1935
