@@ -87,7 +87,7 @@ checkLoginAndSubscription() {
 
         echo -e "\nYour current subscription is:"
         az account show --query '[name,id]'
-        if [[ ${silentmode} == false ||  test -z "$CURRENT_SUBSCRIPTION_ID" ]]; then        
+        if [[ ${silentmode} == false || -z "$CURRENT_SUBSCRIPTION_ID" ]]; then        
             echo -e "
             You will need to use a subscription with permissions for creating service principals (owner role provides this).
             If you want to change to a different subscription, enter the name or id.
