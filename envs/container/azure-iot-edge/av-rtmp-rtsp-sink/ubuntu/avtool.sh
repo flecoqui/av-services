@@ -518,7 +518,11 @@ if [[ "${action}" == "deploy" ]] ; then
     echo
     echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${AV_IOTHUB} " 
     echo
+    # Wait 1 minute before deploying containers 
+    sleep 60    
     setContainerState "running"
+    # Wait 1 minute to complete the deployment 
+    sleep 60
     fillConfigurationFile
 
     echo -e "
@@ -681,6 +685,7 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     # write operations.json for sample code
     sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json > ./operations.json 
+    cat ./operations.json 
     echo "Activating the LVA Graph"
     cmd="sudo dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --lastoperation GraphInstanceActivate"
     echo "$cmd"
