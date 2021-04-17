@@ -122,6 +122,8 @@ echo "PERMISSION_MG_Application_ReadWrite_OwnedBy: $PERMISSION_MG_Application_Re
 PERMISSION_AAD_Application_ReadWrite_OwnedBy=$(az ad sp show --id $API_Windows_Azure_Active_Directory --query "appRoles[?value=='Application.ReadWrite.OwnedBy']" | jq -r ".[].id")
 echo "PERMISSION_AAD_Application_ReadWrite_OwnedBy: $PERMISSION_AAD_Application_ReadWrite_OwnedBy"
 
+echo "Wait 60 seconds to be sure Service Principal is present on https://graph.microsoft.com/"
+sleep 60
 cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}' "
 echo "$cmd"
 eval "$cmd" || true
