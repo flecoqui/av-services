@@ -70,8 +70,8 @@ spjson=$(az ad sp create-for-rbac --skip-assignment --sdk-auth  --name http://$a
 echo "Value for Gitlhub Action secret AZURE_CREDENTIALS:"
 echo "$spjson"
 
-appId=$(echo "$spjson" | jq .clientId)
-appSecret=$(echo "$spjson" | jq .clientSecret)
+appId=$(echo "$spjson" | jq -r .clientId)
+appSecret=$(echo "$spjson" | jq -r .clientSecret)
 #read sp_password <<< $(az ad sp create-for-rbac --skip-assignment --name http://$appName --query [password] -o tsv)
 #read appId <<< $(az ad sp show  --id http://$appName --query [appId] -o tsv)
 #appId=$aks_sp_id
