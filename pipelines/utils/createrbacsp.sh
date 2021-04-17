@@ -66,10 +66,15 @@ echo
 echo
 echo Create Service Principal
 echo
+spjson=$(az ad sp create-for-rbac --skip-assignment --sdk-auth  --name http://$appName  -o json)
+echo "Value for Gitlhub Action secret AZURE_CREDENTIALS:"
+echo "$spjson"
 
-read aks_sp_password <<< $(az ad sp create-for-rbac --skip-assignment --name http://$appName --query [password] -o tsv)
-read aks_sp_id <<< $(az ad sp show  --id http://$appName --query [appId] -o tsv)
-appId=$aks_sp_id
+appId=$(echo "$spjson" | jq .clientId)
+appSecret=$(echo "$spjson" | jq .clientSecret)
+#read sp_password <<< $(az ad sp create-for-rbac --skip-assignment --name http://$appName --query [password] -o tsv)
+#read appId <<< $(az ad sp show  --id http://$appName --query [appId] -o tsv)
+#appId=$aks_sp_id
 
 # Microsoft Graph API 
 API_Microsoft_Graph="00000003-0000-0000-c000-000000000000"
@@ -149,8 +154,8 @@ echo
 echo "Service Principal Name: $appName"
 echo "Subscription: $subscription"
 echo "Subscription Name: $subscriptionName"
-echo "AppId: $aks_sp_id"
-echo "Password: $aks_sp_password"
+echo "AppId: $appId"
+echo "Password: $appSecret"
 echo "TenantID: $tenantId"
 echo
 
