@@ -74,12 +74,12 @@ appId=$aks_sp_id
 # Microsoft Graph API 
 API_Microsoft_Graph="00000003-0000-0000-c000-000000000000"
 # Application.ReadWrite.OwnedBy
-#PERMISSION_MG_Application_ReadWrite_OwnedBy="18a4783c-866b-4cc7-a460-3d5e5662c884"
+PERMISSION_MG_Application_ReadWrite_OwnedBy="18a4783c-866b-4cc7-a460-3d5e5662c884"
 
 # Azure Active Directory Graph API
 API_Windows_Azure_Active_Directory="00000002-0000-0000-c000-000000000000"
 # Application.ReadWrite.OwnedBy
-#PERMISSION_AAD_Application_ReadWrite_OwnedBy="824c81eb-e3f8-4ee6-8f6d-de7f50d565b7"
+PERMISSION_AAD_Application_ReadWrite_OwnedBy="824c81eb-e3f8-4ee6-8f6d-de7f50d565b7"
 
 echo
 echo "Service Principal AppId = $appId"
@@ -89,15 +89,15 @@ echo
 echo Request Microsoft Graph API Application.ReadWrite.OwnedBy Permissions
 echo
 # Request Microsoft Graph API Application.ReadWrite.OwnedBy Permissions
-#az ad app permission add --id $appId --api $API_Microsoft_Graph --api-permissions $PERMISSION_MG_Application_ReadWrite_OwnedBy=Role
-#az ad app permission grant --id $appId --api $API_Microsoft_Graph --scope $PERMISSION_MG_Application_ReadWrite_OwnedBy
+az ad app permission add --id $appId --api $API_Microsoft_Graph --api-permissions $PERMISSION_MG_Application_ReadWrite_OwnedBy=Role
+az ad app permission grant --id $appId --api $API_Microsoft_Graph --scope $PERMISSION_MG_Application_ReadWrite_OwnedBy
 
 echo
 echo Request Azure Active Directory Graph API Application.ReadWrite.OwnedBy Permissions
 echo
 # Request Azure Active Directory Graph API Application.ReadWrite.OwnedBy Permissions
-#az ad app permission add --id $appId --api $API_Windows_Azure_Active_Directory --api-permissions $PERMISSION_AAD_Application_ReadWrite_OwnedBy=Role
-#az ad app permission grant --id $appId --api $API_Windows_Azure_Active_Directory --scope $PERMISSION_AAD_Application_ReadWrite_OwnedBy
+az ad app permission add --id $appId --api $API_Windows_Azure_Active_Directory --api-permissions $PERMISSION_AAD_Application_ReadWrite_OwnedBy=Role
+az ad app permission grant --id $appId --api $API_Windows_Azure_Active_Directory --scope $PERMISSION_AAD_Application_ReadWrite_OwnedBy
 
 echo
 echo "Grant Application and Delegated permissions through admin-consent"
@@ -127,15 +127,15 @@ sleep 60
 cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}' "
 echo "$cmd"
 eval "$cmd" || true
-cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$API_Microsoft_GraphId/appRoleAssignedTo --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}'"
-echo "$cmd"
-eval "$cmd" || true
+#cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$API_Microsoft_GraphId/appRoleAssignedTo --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}'"
+#echo "$cmd"
+#eval "$cmd" || true
 cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}' "
 echo "$cmd"
 eval "$cmd" || true
-cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$API_Windows_Azure_Active_DirectoryId/appRoleAssignedTo --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}'"
-echo "$cmd"
-eval "$cmd" || true
+#cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$API_Windows_Azure_Active_DirectoryId/appRoleAssignedTo --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}'"
+#echo "$cmd"
+#eval "$cmd" || true
 
 
 echo
