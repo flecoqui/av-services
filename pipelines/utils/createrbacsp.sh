@@ -131,13 +131,13 @@ echo "Wait 60 seconds to be sure Service Principal is present on https://graph.m
 sleep 60
 cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}' "
 echo "$cmd"
-eval "$cmd" || true
+eval "$cmd" 1> /dev/null 2> /dev/null  || true
 #cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$API_Microsoft_GraphId/appRoleAssignedTo --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}'"
 #echo "$cmd"
 #eval "$cmd" || true
 cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}' "
 echo "$cmd"
-eval "$cmd" || true
+eval "$cmd" 1> /dev/null 2> /dev/null || true
 #cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$API_Windows_Azure_Active_DirectoryId/appRoleAssignedTo --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}'"
 #echo "$cmd"
 #eval "$cmd" || true
@@ -146,11 +146,10 @@ eval "$cmd" || true
 echo
 echo Assign role "Owner" to service principal 
 echo
-az role assignment create --assignee $appId  --role "Owner"
+az role assignment create --assignee $appId  --role "Owner" 1> /dev/null 2> /dev/null 
 
 subscriptionName=$(az account list --output tsv --query "[?id=='$subscription'].name")
-
-echo
+echo "Information for the creation of an Azure DevOps Service Connection:"
 echo "Service Principal Name: $appName"
 echo "Subscription: $subscription"
 echo "Subscription Name: $subscriptionName"
