@@ -52,27 +52,24 @@ fi
 echo Creating Service Principal for:
 echo Service Principal Name: $appName
 echo Subscription: $subscription
-echo
-echo Setting Azure Subscription 
-echo 
 az account set --subscription $subscription
-
 # Retrieve the tenant it
 tenantId=$(az account show --query tenantId -o tsv)
+echo "TenantId : $tenantId"
 echo
-echo TenantId : $tenantId
-echo 
-
-echo
-echo Create Service Principal
+echo "Create Service Principal:"
 echo
 spjson=$(az ad sp create-for-rbac --skip-assignment --sdk-auth  --name http://$appName  -o json)
 echo 
-echo "Value for Gitlhub Action secret AZURE_CREDENTIALS:"
+echo "Information for the creation of Github Action Secret AZURE_CREDENTIALS:"
 echo 
 echo "$spjson"
 appId=$(echo "$spjson" | jq -r .clientId)
 appSecret=$(echo "$spjson" | jq -r .clientSecret)
+echo "Service Principal created: $appId"
+echo "Service Principal secret: $appSecret"
+principalId=$(az ad sp show --id $appId --query "objectId" --output tsv)
+echo "Service Principal objectId: $principalId"
 
 # Microsoft Graph API 
 API_Microsoft_Graph="00000003-0000-0000-c000-000000000000"
@@ -88,13 +85,13 @@ PERMISSION_AAD_Application_ReadWrite_OwnedBy=$(az ad sp show --id $API_Windows_A
 echo "PERMISSION_AAD_Application_ReadWrite_OwnedBy: $PERMISSION_AAD_Application_ReadWrite_OwnedBy"
 
 echo
-echo Request Microsoft Graph API Application.ReadWrite.OwnedBy Permissions
+echo "Request Microsoft Graph API Application.ReadWrite.OwnedBy Permissions"
 echo
 az ad app permission add --id $appId --api $API_Microsoft_Graph --api-permissions $PERMISSION_MG_Application_ReadWrite_OwnedBy=Role  1> /dev/null 2> /dev/null 
 az ad app permission grant --id $appId --api $API_Microsoft_Graph --scope $PERMISSION_MG_Application_ReadWrite_OwnedBy  1> /dev/null 2> /dev/null 
 
 echo
-echo Request Azure Active Directory Graph API Application.ReadWrite.OwnedBy Permissions
+echo "Request Azure Active Directory Graph API Application.ReadWrite.OwnedBy Permissions"
 echo
 az ad app permission add --id $appId --api $API_Windows_Azure_Active_Directory --api-permissions $PERMISSION_AAD_Application_ReadWrite_OwnedBy=Role  1> /dev/null 2> /dev/null 
 az ad app permission grant --id $appId --api $API_Windows_Azure_Active_Directory --scope $PERMISSION_AAD_Application_ReadWrite_OwnedBy  1> /dev/null 2> /dev/null 
@@ -102,8 +99,6 @@ az ad app permission grant --id $appId --api $API_Windows_Azure_Active_Directory
 echo
 echo "Grant Application and Delegated permissions through admin-consent"
 echo
-principalId=$(az ad sp show --id $appId --query "objectId" --output tsv)
-echo "principalId: $principalId"
 echo "Wait 60 seconds to be sure Service Principal is present on https://graph.microsoft.com/"
 sleep 60
 cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}' "
@@ -115,7 +110,7 @@ eval "$cmd" 1> /dev/null 2> /dev/null || true
 
 
 echo
-echo Assign role "Owner" to service principal 
+echo "Assign role \"Owner\" to service principal" 
 echo
 az role assignment create --assignee $appId  --role "Owner" 1> /dev/null 2> /dev/null 
 
