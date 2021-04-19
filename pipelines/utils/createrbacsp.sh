@@ -48,6 +48,12 @@ if [[ $# -eq 0 || -z $subscription || -z $appName ]]; then
     usage
     exit 1
 fi
+# colors for formatting the ouput
+YELLOW='\033[1;33m'
+GREEN='\033[1;32m'
+RED='\033[0;31m'
+BLUE='\033[1;34m'
+NC='\033[0m' # No Color
 checkError() {
     if [ $? -ne 0 ]; then
         echo -e "${RED}\nAn error occured exiting from createrbacsp.sh bash${NC}"
