@@ -425,24 +425,294 @@ If you face the error below, when you run the bash file file pipelines/utils/cre
 Once the service principal is created, you can now create the Github Action pipeline and the Azure DevOps pipeline.
 
 ## Github Action pipeline
+You can use Github Action to automate the integration tests of the following av-services:
+- Docker av-services
+- Azure virtual machine av-services
+- Azure Iot Edge Live Video Analytics av-services
 
+First, you need to create the Github Action Secret AZURE_CREDENTIALS for the authentication with Azure.
 ### Create Github Action Secret AZURE_CREDENTIALS
 
+1. On the github portal where you store your project, navigate on the the page 'Settings' and select the options 'Secrets'.
+
+![](./docs/img/github-action-secrets.png)
+
+2. Click on 'New repository secret' button, enter 'AZURE_CREDENTIALS' in the Name field and copy/paste the JSON value associated with the service principal created with createrbacsp.sh.
+
+![](./docs/img/github-action-add-secret.png)
+
+3. Click on 'Add secret' button. The new secret will be accessible on the Secret page. 
+
+![](./docs/img/github-action-added-secret.png)
+
 ### Create Github Action pipeline for docker av-services
+By default, all the Github Action pipelines are stored under 'pipelines/github-action'.
+The docker av-services Github Action pipeline is [github-action.tests-docker.yml](pipelines/github-action/github-action.tests-docker.yml)
+
+In order to activate this pipeline, follow the steps below:
+
+1. Create a folder '.github/workflows' in your repository
+2. Copy the file github-action.tests-docker.yml in the folder '.github/workflows'
+3. Commit and push this modification in your main branch
+
+```bash
+   git add  .github/workflows/github-action.tests-docker.yml
+   git commit -m "Create Docker av-services Github Action"
+   git push
+```
+
+4. Once the new pipeline is pushed into the main branch, the Github Action is launched. On the github portal, on the 'Action' page, you can see the pipeline running.    
+
+![](./docs/img/github-action-workflow-docker.png)
 
 ### Create Github Action pipeline for Azure Virtual Machine av-services
+By default, all the Github Action pipelines are stored under 'pipelines/github-action'.
+The docker av-services Github Action pipeline is [github-action.tests-azure-vm.yml](pipelines/github-action/github-action.tests-azure-vm.yml)
 
+In order to activate this pipeline, follow the steps below:
+
+1. Create a folder '.github/workflows' in your repository
+2. Copy the file github-action.tests-azure-vm.yml in the folder '.github/workflows'
+3. Commit and push this modification in your main branch
+
+```bash
+   git add  .github/workflows/github-action.tests-azure-vm.yml
+   git commit -m "Create Azure VM av-services Github Action"
+   git push
+```
+
+4. Once the new pipeline is pushed into the main branch, the Github Action is launched. On the github portal, on the 'Action' page, you can see the pipeline running.    
+
+![](./docs/img/github-action-workflow-azure-vm.png)
 ### Create Github Action pipeline for Azure Iot Edge Live Video Analytics av-services
+By default, all the Github Action pipelines are stored under 'pipelines/github-action'.
+The docker av-services Github Action pipeline is [github-action.tests-azure-iot-edge.yml](pipelines/github-action/github-action.tests-azure-iot-edge.yml)
+
+In order to activate this pipeline, follow the steps below:
+
+1. Create a folder '.github/workflows' in your repository
+2. Copy the file github-action.tests-azure-iot-edge.yml in the folder '.github/workflows'
+3. Commit and push this modification in your main branch
+
+```bash
+   git add  .github/workflows/github-action.tests-azure-iot-edge.yml
+   git commit -m "Create Azure Iot Edge av-services Github Action"
+   git push
+```
+
+4. Once the new pipeline is pushed into the main branch, the Github Action is launched. On the github portal, on the 'Action' page, you can see the pipeline running.    
+
+![](./docs/img/github-action-workflow-azure-iot-edge.png)
+
+
+### Create Github Action pipeline results
+
+After few minutes, the results will be displayed on the github portal, on the 'Action' page.
+
+![](./docs/img/github-action-workflow-done.png)
 
 ## Azure DevOps pipeline
+You can use Azure DevOps to automate the integration tests of the following av-services:
+- Docker av-services
+- Azure virtual machine av-services
+- Azure Iot Edge Live Video Analytics av-services
 
+### Link your Azure DevOps project with the github repository
+
+1. Navigate on your Azure DevOps organization https://dev.azure.com/YOUR_ORG
+   
+![](./docs/img/azure-devops-org.png)
+
+2. Click on the button '+ New project'
+
+3. On the 'Create new project' page enter the name of your project and click on the button 'Create'
+
+![](./docs/img/azure-devops-newproject.png)
+
+4. On the main page of your project on Azure DevOps portal, select 'Repos' -> 'Files' page.
+
+![](./docs/img/azure-devops-project-repo.png)
+
+5. On this page, click on the 'import' button in the'Import a repository' section.
+
+6. On the Import a Git repository page, enter the url of the git repository where you stored the source code of av-services.
+
+![](./docs/img/azure-devops-project-git.png)
+
+7. Click on the button 'Import', after few seconds the repository is imported. 
+
+![](./docs/img/azure-devops-project-git-imported.png)
+
+You can now create the service connection for the authentication with your Azure Account.
 ### Create Azure DevOps Service Connection
 
+1. Navigate on your project home page on the Azure DevOps portal, select 'Project Settings' page.
+
+![](./docs/img/azure-devops-project-settings.png)
+
+2. Select 'Service Connection' on the project settings page.
+
+![](./docs/img/azure-devops-service-connection.png)
+
+3. Click on the 'Create service connection' button.
+4. On the 'New service connection' page, select 'Azure Resource manager' option: 
+
+![](./docs/img/azure-devops-service-connection-01.png)
+
+5. On the 'New service connection' page, select 'Service principal (manual)' option: 
+
+![](./docs/img/azure-devops-service-connection-02.png)
+
+6. On the 'New service connection' page, enter the value of the following fields:
+Subscription Id, Subscription Name, Service Principal Id, Service principal key, Tenant Id and service connection name.
+When all the fields are set, click on 'Verify and save' button: 
+
+![](./docs/img/azure-devops-service-connection-03.png)
+
+7. The new service connection is finally created and accessible for the new pipeline: 
+
+![](./docs/img/azure-devops-service-connection-04.png)
+
+### Create Azure DevOps Variable Group 'av-services-vg'
+The service connection is now created, by default the Azure Pipelines have been configured to get their service connection for the connection to Azure from a variable called 'serviceConnection' stored in the variable group 'av-services-vg'.
+
+For instance, below the yaml file which defines the Azure Iot Edge pipeline:
+
+```yaml
+trigger:
+  branches:
+    include:
+    - "main"
+  paths:
+    include:
+    - envs/container/azure-iot-edge/*
+    - src/lvatool/*
+    - pipelines/azure-dev-ops/azure-pipelines.tests-azure-iot-edge.yml
+
+variables:
+  - name: configurationFile
+    value:  'avtool.azure-iot-edge.env'
+  - group: av-services-vg
+
+pool:
+  vmImage: 'ubuntu-20.04'
+
+stages:
+- stage: TestAzureIotEdgeServices
+  displayName: Test Azure Iot Edge Services Stage
+  jobs:
+  - job: TestAzureIotEdgeServicesJob
+    displayName: Test Azure Iot Edge Services Job
+    steps:   
+    - task: Bash@3
+      displayName: 'Install Pre-requisites'
+      inputs:
+        targetType: 'inline'
+        script: |
+          pipelines/utils/avtool.sh -a install -c $(configurationFile) -e true 
+
+    - task: AzureCLI@2
+      displayName: Azure Authentication  
+      inputs:
+        azureSubscription: $(serviceConnection)
+        scriptType: "bash"
+        addSpnToEnvironment: "true"
+        scriptLocation: "inlineScript"
+        inlineScript: |
+          echo "Service Principal Id: $servicePrincipalId"
+          echo "Service Principal Key: $servicePrincipalKey"
+          subscriptionId=$(az account show --query 'id' --output tsv)
+          tenantId=$(az account show --query 'tenantId' --output tsv)
+          echo "Tenant Id: $tenantId"
+          echo "Subscription Id: $subscriptionId"
+
+    - task: AzureCLI@2
+      displayName: 'Integration Test Services'
+      inputs:
+        azureSubscription: $(serviceConnection)
+        scriptType: "bash"
+        addSpnToEnvironment: "true"
+        scriptLocation: "inlineScript"
+        inlineScript: |
+          pipelines/utils/avtool.sh -a integration -c $(configurationFile) -e true -s true
+
+```
+
+1. Navigate on your project home page on the Azure DevOps portal, select 'Pipelines' -> 'Library' page.
+
+![](./docs/img/azure-devops-variable-group.png)
+
+2. Click on the button '+ Variable group'. Enter the name of variable group 'av-services-vg'. Add the variable 'serviceConnection' with as value the name of the service connection which has been created during the step above. 
+
+![](./docs/img/azure-devops-variable-group-01.png)
+
+3. Don't forget to click on the button 'save' to create the new variable group which will be used by the new Azure DevOps pipeline.
+
+![](./docs/img/azure-devops-variable-group-02.png)
+
 ### Create Azure DevOps pipeline for docker av-services
+By default, all the Azure DevOps pipelines are stored under 'pipelines/azure-devops'.
+The docker av-services Azure DevOps pipeline is [azure-devops.tests-docker.yml](pipelines/azure-dev-ops/azure-pipelines.tests-docker.yml)
+
+In order to create this pipeline, follow the steps below:
+
+1. Navigate on your project home page on the Azure DevOps portal, select 'Pipelines' -> 'Pipelines' page.
+
+![](./docs/img/azure-devops-pipeline.png)
+
+2. Click on the button 'Create pipeline'. On the 'Connect' property page, select the 'Azure Repos Git'.
+
+![](./docs/img/azure-devops-pipeline-01.png)
+
+3. On the 'Select' property page, select the repository 'av-services'.
+
+![](./docs/img/azure-devops-pipeline-02.png)
+
+4. On the 'Configure' property page, select  'Existing Azure pipelines Yaml file'.
+
+![](./docs/img/azure-devops-pipeline-03.png)
+
+5. On the 'Select an existing YAML file' page, select the branch 'main' and the path of the docker av-services pipeline file: '/pipelines/azure-dev-ops/azure-pipelines.tests-docker.yml'. Click on the button 'Continue'
+
+![](./docs/img/azure-devops-pipeline-04.png)
+
+6. On the 'Review your pipeline YAML' page, select the item 'Save' in the 'Run' combo box.
+
+![](./docs/img/azure-devops-pipeline-05.png)
+
+6. On the 'Review your pipeline YAML' page, select the item 'Save' in the 'Run' combo box.
+
+![](./docs/img/azure-devops-pipeline-05.png)
+
+7. Click on the 3 dots menu, and select menu item 'Rename/move'.
+
+![](./docs/img/azure-devops-pipeline-06.png)
+
+8. Enter the name of the new pipeline, and click on the button 'Save'
+
+![](./docs/img/azure-devops-pipeline-07.png)
+
+9. On the next page, click on the button 'Run pipeline'
+
+![](./docs/img/azure-devops-pipeline-08.png)
+
+10. On the dialog box 'Run pipeline', select the 'main' branch and click on the button 'Run'
+
+![](./docs/img/azure-devops-pipeline-09.png)
+
+11. The pipeline is launched. 
+
+![](./docs/img/azure-devops-pipeline-10.png)
+
+12. After several minutes, the test is completed and the results are displayed on the page 'Pipelines' -> 'Pipelines'.
+
+
 
 ### Create Azure DevOps pipeline for Azure Virtual Machine av-services
+To create the Test Azure Virtual Machine av-services pipeline, follow the same steps as for the creation of Docker av-services pipeline and use the following YAML pipeline file:  '/pipelines/azure-dev-ops/azure-pipelines.tests-azure-vm.yml'
 
 ### Create Azure DevOps pipeline for Azure Iot Edge Live Video Analytics av-services
+To create the Test Azure Iot Edge av-services pipeline, follow the same steps as for the creation of Docker av-services pipeline and use the following YAML pipeline file:  '/pipelines/azure-dev-ops/azure-pipelines.tests-azure-iot-edge.yml'
 
 
 # Next Steps
