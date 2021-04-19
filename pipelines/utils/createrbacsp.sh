@@ -126,11 +126,6 @@ if [ $1 == 1 ]; then
     echo "$cmd"
     eval "$cmd" 1> /dev/null 
     checkError
-else
-    cmd="az rest --method PATCH --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}' "
-    echo "$cmd"
-    eval "$cmd" 1> /dev/null 
-    checkError
 fi
 
 cmd="az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments"
@@ -138,11 +133,6 @@ echo "$cmd"
 eval "$cmd" 1> /dev/null
 if [ $1 == 1 ]; then
     cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}' "
-    echo "$cmd"
-    eval "$cmd" 1> /dev/null 
-    checkError
-else
-    cmd="az rest --method PATCH --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}' "
     echo "$cmd"
     eval "$cmd" 1> /dev/null 
     checkError
