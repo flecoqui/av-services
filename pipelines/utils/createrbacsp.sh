@@ -118,7 +118,7 @@ echo "Grant Application and Delegated permissions through admin-consent"
 echo
 echo "Wait 60 seconds to be sure Service Principal is present on https://graph.microsoft.com/"
 sleep 60
-cmd="az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments | jq -r '.value[] | select(.principalId == \"$principalId\" && .resourceId == \"$API_Microsoft_GraphId\"  &&  .appRoleId == \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\")'"
+cmd="az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments | jq -r '.value[] | select(.principalId == \"$principalId\" and .resourceId == \"$API_Microsoft_GraphId\" and .appRoleId == \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\")'"
 echo "$cmd"
 result=$(eval "$cmd") 
 if [ $? == 1 || -z $result ]; then
@@ -131,7 +131,7 @@ else
     echo "$result"
 fi
 
-cmd="az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments | jq -r '.value[] | select(.principalId == \"$principalId\" && .resourceId == \"$API_Windows_Azure_Active_DirectoryId\"  &&  .appRoleId == \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\")'"
+cmd="az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments | jq -r '.value[] | select(.principalId == \"$principalId\" and .resourceId == \"$API_Windows_Azure_Active_DirectoryId\" and .appRoleId == \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\")'"
 echo "$cmd"
 result=$(eval "$cmd") 
 if [ $? == 1 || -z $result ]; then
