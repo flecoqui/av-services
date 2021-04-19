@@ -73,10 +73,7 @@ echo
 echo "Create Service Principal:"
 echo
 spjson=$(az ad sp create-for-rbac --skip-assignment --sdk-auth  --name http://$appName  -o json)
-echo 
-echo "Information for the creation of Github Action Secret AZURE_CREDENTIALS:"
-echo 
-echo "$spjson"
+
 appId=$(echo "$spjson" | jq -r .clientId)
 appSecret=$(echo "$spjson" | jq -r .clientSecret)
 echo "Service Principal created: $appId"
@@ -160,4 +157,8 @@ echo "AppId: $appId"
 echo "Password: $appSecret"
 echo "TenantID: $tenantId"
 echo
+echo 
+echo "Information for the creation of Github Action Secret AZURE_CREDENTIALS:"
+echo 
+echo "$spjson"
 
