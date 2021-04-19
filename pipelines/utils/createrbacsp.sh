@@ -121,7 +121,7 @@ sleep 60
 cmd="az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments | jq -r '.value[] | select(.principalId == \"$principalId\" and .resourceId == \"$API_Microsoft_GraphId\" and .appRoleId == \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\")'"
 echo "$cmd"
 result=$(eval "$cmd") 
-if [ $? == 1 ] || [ -z $result ]; then
+if [[ $? == 1 || -z $result ]]; then
     cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}' "
     echo "$cmd"
     eval "$cmd" 1> /dev/null 
@@ -134,7 +134,7 @@ fi
 cmd="az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments | jq -r '.value[] | select(.principalId == \"$principalId\" and .resourceId == \"$API_Windows_Azure_Active_DirectoryId\" and .appRoleId == \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\")'"
 echo "$cmd"
 result=$(eval "$cmd") 
-if [ $? == 1 ] || [ -z $result ]; then
+if [[ $? == 1 || -z $result ]]; then
     cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}' "
     echo "$cmd"
     eval "$cmd" 1> /dev/null 
