@@ -650,7 +650,7 @@ stages:
 
 ![](./docs/img/azure-devops-variable-group-02.png)
 
-### Create Azure DevOps pipeline for docker av-services
+### Create and Run Azure DevOps pipeline for docker av-services
 By default, all the Azure DevOps pipelines are stored under 'pipelines/azure-devops'.
 The docker av-services Azure DevOps pipeline is [azure-devops.tests-docker.yml](pipelines/azure-dev-ops/azure-pipelines.tests-docker.yml)
 
@@ -706,12 +706,14 @@ In order to create this pipeline, follow the steps below:
 
 12. After several minutes, the test is completed and the results are displayed on the page 'Pipelines' -> 'Pipelines'.
 
+![](./docs/img/azure-devops-pipeline-11.png)
 
-
-### Create Azure DevOps pipeline for Azure Virtual Machine av-services
+### Create Azure and Run DevOps pipeline for Azure Virtual Machine av-services
 To create the Test Azure Virtual Machine av-services pipeline, follow the same steps as for the creation of Docker av-services pipeline and use the following YAML pipeline file:  '/pipelines/azure-dev-ops/azure-pipelines.tests-azure-vm.yml'
 
-### Create Azure DevOps pipeline for Azure Iot Edge Live Video Analytics av-services
+![](./docs/img/azure-devops-pipeline-12.png)
+
+### Create Azure and Run DevOps pipeline for Azure Iot Edge Live Video Analytics av-services
 To create the Test Azure Iot Edge av-services pipeline, follow the same steps as for the creation of Docker av-services pipeline and use the following YAML pipeline file:  '/pipelines/azure-dev-ops/azure-pipelines.tests-azure-iot-edge.yml'
 
 

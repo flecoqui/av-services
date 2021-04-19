@@ -155,7 +155,6 @@ setContainerState () {
 }
 getContainerState () {
     getContainerStateResult="unknown"
-    # az vm get-instance-view -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
     getContainerStateResult=$(az iot hub query -n ${AV_IOTHUB} -q "select * from devices.modules where devices.deviceId = '${AV_EDGE_DEVICE}' and devices.moduleId = '\$edgeAgent' " --query '[].properties.reported.modules.rtmpsource.status'  --output tsv)
     checkError
     if [[ $getContainerStateResult == "" || -z $getContainerStateResult ]]; then
@@ -531,6 +530,8 @@ if [[ "${action}" == "deploy" ]] ; then
     setContainerState "running"
     # Wait 1 minute to complete the deployment 
     sleep 60
+    getContainerState 
+    echo "Container state: $getContainerStateResult"    
     fillConfigurationFile
 
     echo -e "
