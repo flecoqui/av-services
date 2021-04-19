@@ -54,6 +54,7 @@ GREEN='\033[1;32m'
 RED='\033[0;31m'
 BLUE='\033[1;34m'
 NC='\033[0m' # No Color
+
 checkError() {
     if [ $? -ne 0 ]; then
         echo -e "${RED}\nAn error occured exiting from createrbacsp.sh bash${NC}"
