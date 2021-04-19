@@ -324,33 +324,17 @@ For instance:
 
 The bash file will display the following information:
 ```bash
-
     Creating Service Principal for:
     Service Principal Name: sp-av-service
-    Subscription: d3814ade-afe8-4260-9b5f-************
-    TenantId : 6a13df32-a807-43c4-8277-************
+    Subscription: ********-****-****-****-************
+    TenantId : ********-****-****-****-************
 
     Create Service Principal:
 
     WARNING: The output includes credentials that you must protect. Be sure that you do not include these credentials in your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli
-
-    Information for the creation of Github Action Secret AZURE_CREDENTIALS:
-
-    {
-    "clientId": "************",
-    "clientSecret": "************",
-    "subscriptionId": "************",
-    "tenantId": "************",
-    "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
-    "resourceManagerEndpointUrl": "https://management.azure.com/",
-    "activeDirectoryGraphResourceId": "https://graph.windows.net/",
-    "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
-    "galleryEndpointUrl": "https://gallery.azure.com/",
-    "managementEndpointUrl": "https://management.core.windows.net/"
-    }
-    Service Principal created: ************
+    Service Principal created: ********-****-****-****-************
     Service Principal secret: ************
-    Service Principal objectId: ************
+    Service Principal objectId: ********-****-****-****-************
     API_Microsoft_GraphId: 6a912336-0d0c-4caa-826c-9056b262adf6
     API_Windows_Azure_Active_DirectoryId: 02a23de7-025e-4637-a30a-f56d585b9224
     PERMISSION_MG_Application_ReadWrite_OwnedBy: 18a4783c-866b-4cc7-a460-3d5e5662c884
@@ -358,6 +342,7 @@ The bash file will display the following information:
 
     Request Microsoft Graph API Application.ReadWrite.OwnedBy Permissions
 
+    WARNING: Invoking "az ad app permission grant --id ********-****-****-****-************ --api 00000003-0000-0000-c000-000000000000" is needed to make the change effective
 
     Request Azure Active Directory Graph API Application.ReadWrite.OwnedBy Permissions
 
@@ -365,8 +350,10 @@ The bash file will display the following information:
     Grant Application and Delegated permissions through admin-consent
 
     Wait 60 seconds to be sure Service Principal is present on https://graph.microsoft.com/
-    az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/************/appRoleAssignments --body '{"principalId": "************","resourceId": "6a912336-0d0c-4caa-826c-9056b262adf6","appRoleId": "18a4783c-866b-4cc7-a460-3d5e5662c884"}'
-    az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/************/appRoleAssignments --body '{"principalId": "************","resourceId": "02a23de7-025e-4637-a30a-f56d585b9224","appRoleId": "824c81eb-e3f8-4ee6-8f6d-de7f50d565b7"}'
+    az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/********-****-****-****-************/appRoleAssignments | jq -r '.value[] | select(.principalId == "********-****-****-****-************" and .resourceId == "6a912336-0d0c-4caa-826c-9056b262adf6" and .appRoleId == "18a4783c-866b-4cc7-a460-3d5e5662c884")'
+    az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/********-****-****-****-************/appRoleAssignments --body '{"principalId": "********-****-****-****-************","resourceId": "6a912336-0d0c-4caa-826c-9056b262adf6","appRoleId": "18a4783c-866b-4cc7-a460-3d5e5662c884"}'
+    az rest --method GET --uri https://graph.microsoft.com/v1.0/servicePrincipals/********-****-****-****-************/appRoleAssignments | jq -r '.value[] | select(.principalId == "********-****-****-****-************" and .resourceId == "02a23de7-025e-4637-a30a-f56d585b9224" and .appRoleId == "824c81eb-e3f8-4ee6-8f6d-de7f50d565b7")'
+    az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/********-****-****-****-************/appRoleAssignments --body '{"principalId": "********-****-****-****-************","resourceId": "02a23de7-025e-4637-a30a-f56d585b9224","appRoleId": "824c81eb-e3f8-4ee6-8f6d-de7f50d565b7"}'
 
     Assign role "Owner" to service principal
 
@@ -374,11 +361,27 @@ The bash file will display the following information:
     Information for the creation of an Azure DevOps Service Connection:
 
     Service Principal Name: sp-av-service
-    Subscription: ************
+    Subscription: ********-****-****-****-************
     Subscription Name: ************
-    AppId: ************
+    AppId: ********-****-****-****-************
     Password: ************
-    TenantID: ************
+    TenantID: ********-****-****-****-************
+
+
+    Information for the creation of Github Action Secret AZURE_CREDENTIALS:
+
+    {
+    "clientId": "********-****-****-****-************",
+    "clientSecret": "************",
+    "subscriptionId": "********-****-****-****-************",
+    "tenantId": "********-****-****-****-************",
+    "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+    "resourceManagerEndpointUrl": "https://management.azure.com/",
+    "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+    "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+    "galleryEndpointUrl": "https://gallery.azure.com/",
+    "managementEndpointUrl": "https://management.core.windows.net/"
+    }
 ```
 The section below will be used for the Azure authentication from a Github Action pipeline:
 ```bash
@@ -386,10 +389,10 @@ The section below will be used for the Azure authentication from a Github Action
     Information for the creation of Github Action Secret AZURE_CREDENTIALS:
 
     {
-    "clientId": "************",
+    "clientId": "********-****-****-****-************",
     "clientSecret": "************",
-    "subscriptionId": "************",
-    "tenantId": "************",
+    "subscriptionId": "********-****-****-****-************",
+    "tenantId": "********-****-****-****-************",
     "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
     "resourceManagerEndpointUrl": "https://management.azure.com/",
     "activeDirectoryGraphResourceId": "https://graph.windows.net/",
@@ -404,16 +407,43 @@ The section below will be used for the Azure authentication from an Azure DevOps
     Information for the creation of an Azure DevOps Service Connection:
 
     Service Principal Name: sp-av-service
-    Subscription: ************
+    Subscription: ********-****-****-****-************
     Subscription Name: ************
-    AppId: ************
+    AppId: ********-****-****-****-************
     Password: ************
-    TenantID: ************
+    TenantID: ********-****-****-****-************
 ```
-We can now create the Github Action pipeline and the Azure DevOps pipeline.
+
+If you face the error below, when you run the bash file file pipelines/utils/createrbacsp.sh, you need to contact your Azure AD Administrator to create the Service Principal for you using the same bash file.
+
+```bash
+    ERROR: Operation failed with status: 'Bad Request'. Details: 400 Client Error: Bad Request for url: https://graph.windows.net/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2PermissionGrants?api-version=1.6
+
+    An error occured exiting from createrbacsp.sh bash
+```
+
+Once the service principal is created, you can now create the Github Action pipeline and the Azure DevOps pipeline.
 
 ## Github Action pipeline
+
+### Create Github Action Secret AZURE_CREDENTIALS
+
+### Create Github Action pipeline for docker av-services
+
+### Create Github Action pipeline for Azure Virtual Machine av-services
+
+### Create Github Action pipeline for Azure Iot Edge Live Video Analytics av-services
+
 ## Azure DevOps pipeline
+
+### Create Azure DevOps Service Connection
+
+### Create Azure DevOps pipeline for docker av-services
+
+### Create Azure DevOps pipeline for Azure Virtual Machine av-services
+
+### Create Azure DevOps pipeline for Azure Iot Edge Live Video Analytics av-services
+
 
 # Next Steps
 
