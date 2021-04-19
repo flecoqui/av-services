@@ -19,7 +19,7 @@ function usage() {
     echo
     echo "Arguments:"
     echo -e "\t-s\t Sets the subscription"
-    echo -e "\t-a \t Sets the service principal name (required)"
+    echo -e "\t-a\t Sets the service principal name (required)"
     echo
     echo "Example:"
     echo -e "\tbash createrbacsp.sh -u e5c9fc83-fbd0-4368-9cb6-1b5823479b6a -a testazdosp "
@@ -48,6 +48,12 @@ if [[ $# -eq 0 || -z $subscription || -z $appName ]]; then
     usage
     exit 1
 fi
+checkError() {
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}\nAn error occured exiting from createrbacsp.sh bash${NC}"
+        exit 1
+    fi
+}
 
 echo Creating Service Principal for:
 echo Service Principal Name: $appName
@@ -87,14 +93,18 @@ echo "PERMISSION_AAD_Application_ReadWrite_OwnedBy: $PERMISSION_AAD_Application_
 echo
 echo "Request Microsoft Graph API Application.ReadWrite.OwnedBy Permissions"
 echo
-az ad app permission add --id $appId --api $API_Microsoft_Graph --api-permissions $PERMISSION_MG_Application_ReadWrite_OwnedBy=Role  1> /dev/null 2> /dev/null 
-az ad app permission grant --id $appId --api $API_Microsoft_Graph --scope $PERMISSION_MG_Application_ReadWrite_OwnedBy  1> /dev/null 2> /dev/null 
+az ad app permission add --id $appId --api $API_Microsoft_Graph --api-permissions $PERMISSION_MG_Application_ReadWrite_OwnedBy=Role  1> /dev/null  
+checkError
+az ad app permission grant --id $appId --api $API_Microsoft_Graph --scope $PERMISSION_MG_Application_ReadWrite_OwnedBy  1> /dev/null 
+checkError
 
 echo
 echo "Request Azure Active Directory Graph API Application.ReadWrite.OwnedBy Permissions"
 echo
 az ad app permission add --id $appId --api $API_Windows_Azure_Active_Directory --api-permissions $PERMISSION_AAD_Application_ReadWrite_OwnedBy=Role  1> /dev/null 2> /dev/null 
+checkError
 az ad app permission grant --id $appId --api $API_Windows_Azure_Active_Directory --scope $PERMISSION_AAD_Application_ReadWrite_OwnedBy  1> /dev/null 2> /dev/null 
+checkError
 
 echo
 echo "Grant Application and Delegated permissions through admin-consent"
@@ -103,16 +113,18 @@ echo "Wait 60 seconds to be sure Service Principal is present on https://graph.m
 sleep 60
 cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Microsoft_GraphId\",\"appRoleId\": \"$PERMISSION_MG_Application_ReadWrite_OwnedBy\"}' "
 echo "$cmd"
-eval "$cmd" 1> /dev/null 2> /dev/null  || true
+eval "$cmd" 1> /dev/null 
+checkError
 cmd="az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/$principalId/appRoleAssignments --body '{\"principalId\": \"$principalId\",\"resourceId\": \"$API_Windows_Azure_Active_DirectoryId\",\"appRoleId\": \"$PERMISSION_AAD_Application_ReadWrite_OwnedBy\"}' "
 echo "$cmd"
-eval "$cmd" 1> /dev/null 2> /dev/null || true
-
+eval "$cmd" 1> /dev/null 
+checkError
 
 echo
 echo "Assign role \"Owner\" to service principal" 
 echo
-az role assignment create --assignee $appId  --role "Owner" 1> /dev/null 2> /dev/null 
+az role assignment create --assignee $appId  --role "Owner" 1> /dev/null 
+checkError
 
 subscriptionName=$(az account list --output tsv --query "[?id=='$subscription'].name")
 echo

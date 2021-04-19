@@ -6,6 +6,7 @@
 - [Samples of Audio/Video components](#samples-of-audiovideo-components)
 - [Using dev container](#using-dev-container)
 - [How to install, deploy, test the Audio/Video components with astool.sh](#how-to-install-deploy-test-the-audiovideo-components-with-astoolsh)
+- [Using Github Action and Azure DevOps pipelines to test the av-services](#using-github-action-and-azure-devOps-pipelines-to-test-the-av-services)
 - [Next Steps](#next-steps)
  
 # Introduction
@@ -276,6 +277,143 @@ Once the av-service is built, you can test the av-service .
     ./avtool.sh -a test
 ```
 
+# Using Github Action and Azure DevOps pipelines to test the av-services
+This chapter describes how to automate the tests of the av-services using Azure DevOps pipeline and Github Action pipelines.
+Currently the repository contains the following pipelines:
+
+- Github Action pipeline for docker av-services
+- Github Action pipeline for Azure virtual machine av-services
+- Github Action pipeline for Azure Iot Edge Live Video Analytics av-services
+- Azure DevOps pipeline for docker av-services
+- Azure DevOps pipeline for Azure virtual machine av-services
+- Azure DevOps pipeline for Azure Iot Edge Live Video Analytics av-services
+
+## Creating the Service Principal for the pipelines Azure Authentication  
+For the following pipelines, an authentication with Azure is required:
+- Github Action pipeline for Azure virtual machine av-services
+- Github Action pipeline for AZure Iot Edge Live Video Analytics av-services
+- Azure DevOps pipeline for Azure virtual machine av-services
+- Azure DevOps pipeline for AZure Iot Edge Live Video Analytics av-services
+
+As the deployment of Live Video Analytics requires the creation of a service principal, the service principal which will be used for the Azure authentication will have the following permissions:
+- Microsoft Graph API Application.ReadWrite.OwnedBy permission  
+- Azure Active Directory Graph API Application.ReadWrite.OwnedBy permission
+
+The creation of this service principal with your Azure Account may fail, in that case, you'll need to contact your Azure Active Directory Administrator to create the Service Principal for you.
+
+In order to create this service principal you can use the following bash file: [pipelines/utils/createrbacsp.sh](pipelines/utils/createrbacsp.sh)
+
+Before running this bash file you need to be connected with your Azure Account using Azure CLI. Run 'az login' in your linux environment.
+
+```bash
+    az login
+```
+
+Once you are connected with Azure, you can run the following bash to create the Service Principal:
+
+```bash
+    pipelines/utils/createrbacsp.sh -s <Azure-Subscription-Id> -a <Service-Principal-Name>
+```
+where \<Azure-Subscription-Id\> is the subscriptionId of your Azure Account and \<Service-Principal-Name\> the name of the service principal which will be created. 
+This bash file will display all the information required for the Azure authentication with github Action pipeline and Azure DevOps pipeline.
+
+For instance:
+```bash
+    pipelines/utils/createrbacsp.sh -s d3814ade-afe8-4260-9b5f-************ -a sp-av-service
+```
+
+The bash file will display the following information:
+```bash
+
+    Creating Service Principal for:
+    Service Principal Name: sp-av-service
+    Subscription: d3814ade-afe8-4260-9b5f-************
+    TenantId : 6a13df32-a807-43c4-8277-************
+
+    Create Service Principal:
+
+    WARNING: The output includes credentials that you must protect. Be sure that you do not include these credentials in your code or check the credentials into your source control. For more information, see https://aka.ms/azadsp-cli
+
+    Information for the creation of Github Action Secret AZURE_CREDENTIALS:
+
+    {
+    "clientId": "************",
+    "clientSecret": "************",
+    "subscriptionId": "************",
+    "tenantId": "************",
+    "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+    "resourceManagerEndpointUrl": "https://management.azure.com/",
+    "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+    "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+    "galleryEndpointUrl": "https://gallery.azure.com/",
+    "managementEndpointUrl": "https://management.core.windows.net/"
+    }
+    Service Principal created: ************
+    Service Principal secret: ************
+    Service Principal objectId: ************
+    API_Microsoft_GraphId: 6a912336-0d0c-4caa-826c-9056b262adf6
+    API_Windows_Azure_Active_DirectoryId: 02a23de7-025e-4637-a30a-f56d585b9224
+    PERMISSION_MG_Application_ReadWrite_OwnedBy: 18a4783c-866b-4cc7-a460-3d5e5662c884
+    PERMISSION_AAD_Application_ReadWrite_OwnedBy: 824c81eb-e3f8-4ee6-8f6d-de7f50d565b7
+
+    Request Microsoft Graph API Application.ReadWrite.OwnedBy Permissions
+
+
+    Request Azure Active Directory Graph API Application.ReadWrite.OwnedBy Permissions
+
+
+    Grant Application and Delegated permissions through admin-consent
+
+    Wait 60 seconds to be sure Service Principal is present on https://graph.microsoft.com/
+    az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/************/appRoleAssignments --body '{"principalId": "************","resourceId": "6a912336-0d0c-4caa-826c-9056b262adf6","appRoleId": "18a4783c-866b-4cc7-a460-3d5e5662c884"}'
+    az rest --method POST --uri https://graph.microsoft.com/v1.0/servicePrincipals/************/appRoleAssignments --body '{"principalId": "************","resourceId": "02a23de7-025e-4637-a30a-f56d585b9224","appRoleId": "824c81eb-e3f8-4ee6-8f6d-de7f50d565b7"}'
+
+    Assign role "Owner" to service principal
+
+
+    Information for the creation of an Azure DevOps Service Connection:
+
+    Service Principal Name: sp-av-service
+    Subscription: ************
+    Subscription Name: ************
+    AppId: ************
+    Password: ************
+    TenantID: ************
+```
+The section below will be used for the Azure authentication from a Github Action pipeline:
+```bash
+
+    Information for the creation of Github Action Secret AZURE_CREDENTIALS:
+
+    {
+    "clientId": "************",
+    "clientSecret": "************",
+    "subscriptionId": "************",
+    "tenantId": "************",
+    "activeDirectoryEndpointUrl": "https://login.microsoftonline.com",
+    "resourceManagerEndpointUrl": "https://management.azure.com/",
+    "activeDirectoryGraphResourceId": "https://graph.windows.net/",
+    "sqlManagementEndpointUrl": "https://management.core.windows.net:8443/",
+    "galleryEndpointUrl": "https://gallery.azure.com/",
+    "managementEndpointUrl": "https://management.core.windows.net/"
+    }
+```
+The section below will be used for the Azure authentication from an Azure DevOps pipeline:
+```bash
+
+    Information for the creation of an Azure DevOps Service Connection:
+
+    Service Principal Name: sp-av-service
+    Subscription: ************
+    Subscription Name: ************
+    AppId: ************
+    Password: ************
+    TenantID: ************
+```
+We can now create the Github Action pipeline and the Azure DevOps pipeline.
+
+## Github Action pipeline
+## Azure DevOps pipeline
 
 # Next Steps
 
