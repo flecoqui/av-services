@@ -243,8 +243,6 @@ AV_HOSTNAME="$AV_VMNAME"."$AV_RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
 AV_LOGIN=avvmadmin
 AV_PASSWORD={YourPassword}
-AV_SSH_KEY_PUBLIC=
-AV_SSH_KEY_PRIVATE=
 AV_COMPANYNAME=contoso
 AV_PORT_HLS=8080
 AV_PORT_HTTP=80
@@ -531,6 +529,11 @@ if [[ "${action}" == "deploy" ]] ; then
     # Wait 1 minute to complete the deployment 
     sleep 60
     getContainerState 
+    if [[ $getContainerStateResult != "running" ]]; then
+        setContainerState "running"
+        sleep 30
+        getContainerState 
+    fi    
     echo "Container state: $getContainerStateResult"    
     fillConfigurationFile
 
@@ -581,7 +584,6 @@ Deployment parameters:
     echo "CONTAINER_REGISTRY_PASSWORD=${AV_CONTAINER_REGISTRY_PASSWORD}"
     echo "AV_HOSTNAME=${AV_HOSTNAME}"
     echo "SSH command: ssh ${AV_LOGIN}@${AV_HOSTNAME}"
-    echo "SSH password: ${AV_PASSWORD}"
     echo "RTMP URL: rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream"
     echo "RTSP URL: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream"
     echo "HLS  URL: http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"

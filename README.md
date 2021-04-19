@@ -716,6 +716,7 @@ To create the Test Azure Virtual Machine av-services pipeline, follow the same s
 ### Create Azure and Run DevOps pipeline for Azure Iot Edge Live Video Analytics av-services
 To create the Test Azure Iot Edge av-services pipeline, follow the same steps as for the creation of Docker av-services pipeline and use the following YAML pipeline file:  '/pipelines/azure-dev-ops/azure-pipelines.tests-azure-iot-edge.yml'
 
+![](./docs/img/azure-devops-pipeline-13.png)
 
 # Next Steps
 
