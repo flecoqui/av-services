@@ -22,11 +22,11 @@ RUN apt-get update \
     && chmod 0440 /etc/sudoers.d/$USERNAME \
     # install azure-cli
     && curl -sL https://aka.ms/InstallAzureCLIDeb  | bash 
+
 # install azcopy
-RUN wget https://aka.ms/downloadazcopy-v10-linux &&
-    tar -xvf downloadazcopy-v10-linux &&
-    rm /usr/bin/azcopy &&
-    cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
+RUN wget https://aka.ms/downloadazcopy-v10-linux \ 
+    && tar -xvf downloadazcopy-v10-linux  \
+    && cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
 
 # install python3 and pip3
 RUN apt-get update \
