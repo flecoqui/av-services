@@ -1,0 +1,12 @@
+version: '3.3'
+services:
+  av-ffmpeg:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}
+    container_name: ${AV_CONTAINER_NAME}
+    volumes:
+      - "${AV_TEMPDIR}:/${AV_VOLUME}"
+    command: ${AV_FFMPEG_COMMAND}
+

@@ -1,0 +1,14 @@
+[
+  {
+    "input": "https://docsstorageaccount.blob.core.windows.net/testffmpeg/input/camera-300s.mkv?sv=2020-04-08&st=2021-04-21T09%3A16%3A51Z&se=2022-06-22T09%3A16%3A00Z&sr=c&sp=rl&sig=vD%2BwdeMndQnBpAq7IelY171VHO0%2FRHoy7gvPfJ%2FBpZU%3D",
+    "command": "ffmpeg -y  -nostats -loglevel 0  -i ${inputFile} -codec copy ${outputFolder}/camera-300s.mp4",
+    "output": "https://docsstorageaccount.blob.core.windows.net/testffmpeg/output?sv=2020-04-08&st=2021-04-21T09%3A19%3A21Z&se=2022-04-22T09%3A19%3A00Z&sr=c&sp=racwl&sig=QMPy9Sv5CYEx5QhqFi3%2FVibWvMHhZkTYZ77oVt4Eu%2Bs%3D",
+    "log": "/tempvol/logs/log.txt"
+  },
+  {
+    "input": "/tempvol/input/camera-300s.mkv",
+    "command": "ffmpeg -y -nostats -loglevel 0  -i ${inputFile} -codec copy ${outputFolder}/camera-300s.mp4",
+    "output": "/tempvol/output",
+    "log": "/tempvol/logs/log.txt"
+  }
+]
