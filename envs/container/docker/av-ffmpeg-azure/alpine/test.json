@@ -1,0 +1,1 @@
+[{"inputFile": "/tempvol/input/camera-300s.mkv","command": "ffmpeg -y -nostats -loglevel 0  -i {inputFile} -codec copy {outputFolder}/camera-300s.mp4","outputFolder": "/tempvol/output","log": "/tempvol/logs/log.txt"}]
