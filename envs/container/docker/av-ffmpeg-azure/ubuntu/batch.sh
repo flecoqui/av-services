@@ -21,8 +21,8 @@ usage() {
     echo -e "bash batch.sh -i commands.json "
     echo -e "bash batch.sh -s '[{\"inputFile\": \"/tempvol/input/camera-300s.mkv\",\"command\": \"ffmpeg -y -nostats -loglevel 0  -i {inputFile} -codec copy {outputFolder}/camera-300s.mp4\",\"outputFolder\": \"/tempvol/output\",\"log\": \"/tempvol/logs/log.txt\"}]' "
 }
-inputfilepath=""
 inputstring=""
+inputfilepath=""
 while getopts "i:s:hq" opt; do
     case $opt in
     i) inputfilepath="$OPTARG" ;;
@@ -39,7 +39,7 @@ while getopts "i:s:hq" opt; do
 done
 
 # Validation
-if [ $# -eq 0 -o -z $inputfilepath -a -z $inputstring ]; then
+if [ $# -eq 0 -o ! ${inputfilepath:-} -a ! ${inputstring:-} ]; then
     echo "Required parameters are missing"
     usage
     exit 1
@@ -62,7 +62,7 @@ writeLog() {
     msg="$2"    
     
     localMsg="$(date -u +%Y/%m/%d-%H:%M:%S.%N) $msg"
-    if [ -z $logUrl ]; then
+    if [ ! ${logUrl:-} ]; then
         echo "$localMsg"
     else
         case $logUrl in
@@ -153,7 +153,7 @@ processCommand() {
         *) 
     esac    
 }
-if [ -z "$inputstring" ]; then
+if [ ! ${inputstring:-} ]; then
     case "$inputfilepath" in
     "https://"*) 
         getFileName $inputfilepath
@@ -167,9 +167,10 @@ if [ -z "$inputstring" ]; then
         ;;
     esac
     inputstring=$(cat "$inputfile")
-    echo "Batch processing file: $inputfile"
+    echo "Batch processing file: $inputfile and content: $inputstring"
+else
+    echo "Batch processing content: $inputstring"
 fi
-echo "Batch processing content: $inputstring"
 
 for row in $(echo "${inputstring}" | jq -r '.[] | @base64'); do
     _jq() {
