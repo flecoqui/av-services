@@ -39,7 +39,12 @@ while getopts "i:s:hq" opt; do
 done
 
 # Validation
-if [ $# -eq 0 -o ! ${inputfilepath:-} -a ! ${inputstring:-} ]; then
+if [ $# -eq 0 ]; then
+    echo "Required parameters are missing"
+    usage
+    exit 1
+fi
+if ! [ ${inputfilepath:-} -o ${inputstring:-} ]; then
     echo "Required parameters are missing"
     usage
     exit 1
