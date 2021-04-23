@@ -93,8 +93,8 @@ AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
 AV_VOLUME=tempvol
 AV_INPUT_FOLDER=input
 AV_OUTPUT_FOLDER=output
-AV_LOG_FOLDER=log
-AV_FFMPEG_COMMAND="sh /batch.sh -s '[{\\\"inputFile\\\": \\\"/${AV_VOLUME}/${AV_INPUT_FOLDER}/camera-300s.mkv\\\",\\\"command\\\": \\\"ffmpeg -y -nostats -loglevel 0  -i {inputFile} -codec copy {outputFolder}/camera-300s.mp4\\\",\\\"outputFolder\\\": \\\"/${AV_VOLUME}/${AV_OUTPUT_FOLDER}\\\",\\\"log\\\": \\\"/${AV_VOLUME}/logs/log.txt\\\"}]'"
+AV_LOG_FOLDER=logs
+AV_FFMPEG_COMMAND="sh /batch.sh -s '[{\\\"inputFile\\\": \\\"/${AV_VOLUME}/${AV_INPUT_FOLDER}/camera-300s.mkv\\\",\\\"command\\\": \\\"ffmpeg -y -nostats -loglevel 0  -i {inputFile} -codec copy {outputFolder}/camera-300s.mp4\\\",\\\"outputFolder\\\": \\\"/${AV_VOLUME}/${AV_OUTPUT_FOLDER}\\\",\\\"log\\\": \\\"/${AV_VOLUME}/${AV_LOG_FOLDER}/log.txt\\\"}]'"
 #AV_FFMPEG_COMMAND="/batch.sh -s '[{\\\"input\\\": \\\"/${AV_VOLUME}/${AV_INPUT_FOLDER}/camera-300s.mkv\\\",\\\"command\\\": \\\"ffmpeg -y -nostats -loglevel 0  -i \\\\\\\"\\\${inputFile}\\\\\\\" -codec copy \\\\\\\"\\\${outputFolder}\\\\\\\" /camera-300s.mp4\\\",\\\"output\\\": \\\"/${AV_VOLUME}/${AV_OUTPUT_FOLDER}\\\",\\\"log\\\": \\\"/${AV_VOLUME}/logs/log.txt\\\"}]'"
 #AV_FFMPEG_COMMAND="/batch.sh -s '[{\\\"input\\\": \\\"/${AV_VOLUME}/${AV_INPUT_FOLDER}/camera-300s.mkv\\\",\\\"command\\\": \\\"ffmpeg -y -nostats -loglevel 0  -i \\\"\\\${inputFile}\\\" -codec copy \\\"\\\${outputFolder}\\\" /camera-300s.mp4\\\",\\\"output\\\": \\\"/${AV_VOLUME}/${AV_OUTPUT_FOLDER}\\\",\\\"log\\\": \\\"\\\"}]'"
 

@@ -73,24 +73,28 @@ checkError() {
         exit 1
     fi
 }
-checkDevContainerMode () {
-    checkDevContainerModeResult="0"
+is_running_in_container() {
+  awk -F: '/cpuset/ && $3 ~ /^\/$/{ c=1 } END { return c }' /proc/self/cgroup
+}
+is_running_in_dev_container () {
+    is_running_in_dev_containerResult="0"
     VOLNAME=$(docker volume inspect av-services_devcontainer_tempvol --format {{.Name}} 2> /dev/null) || true    
     # if running in devcontainer connect container to dev container network av-services_devcontainer_default
     if [[ $VOLNAME == 'av-services_devcontainer_tempvol' ]] ; then
-        checkDevContainerModeResult="1"
+        is_running_in_dev_containerResult="1"
     fi
-    return
+    return is_running_in_dev_containerResult
 }
 AV_SERVICE=av-ffmpeg-azure
-AV_FLAVOR=alpine
+AV_FLAVOR=ubuntu
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
 AV_VOLUME=tempvol
 AV_INPUT_FOLDER=input
 AV_OUTPUT_FOLDER=output
-AV_FFMPEG_COMMAND="/batch.sh -s '[{\\\"inputFile\\\": \\\"/${AV_VOLUME}/${AV_INPUT_FOLDER}/camera-300s.mkv\\\",\\\"command\\\": \\\"ffmpeg -y -nostats -loglevel 0  -i {inputFile} -codec copy {outputFolder}/camera-300s.mp4\\\",\\\"outputFolder\\\": \\\"/${AV_VOLUME}/${AV_OUTPUT_FOLDER}\\\",\\\"log\\\": \\\"/${AV_VOLUME}/logs/log.txt\\\"}]'"
+AV_LOG_FOLDER=logs
+AV_FFMPEG_COMMAND="sh /batch.sh -s '[{\\\"inputFile\\\": \\\"/${AV_VOLUME}/${AV_INPUT_FOLDER}/camera-300s.mkv\\\",\\\"command\\\": \\\"ffmpeg -y -nostats -loglevel 0  -i {inputFile} -codec copy {outputFolder}/camera-300s.mp4\\\",\\\"outputFolder\\\": \\\"/${AV_VOLUME}/${AV_OUTPUT_FOLDER}\\\",\\\"log\\\": \\\"/${AV_VOLUME}/${AV_LOG_FOLDER}/log.txt\\\"}]'"
 #AV_FFMPEG_COMMAND="/batch.sh -s '[{\\\"input\\\": \\\"/${AV_VOLUME}/${AV_INPUT_FOLDER}/camera-300s.mkv\\\",\\\"command\\\": \\\"ffmpeg -y -nostats -loglevel 0  -i \\\\\\\"\\\${inputFile}\\\\\\\" -codec copy \\\\\\\"\\\${outputFolder}\\\\\\\" /camera-300s.mp4\\\",\\\"output\\\": \\\"/${AV_VOLUME}/${AV_OUTPUT_FOLDER}\\\",\\\"log\\\": \\\"/${AV_VOLUME}/logs/log.txt\\\"}]'"
 #AV_FFMPEG_COMMAND="/batch.sh -s '[{\\\"input\\\": \\\"/${AV_VOLUME}/${AV_INPUT_FOLDER}/camera-300s.mkv\\\",\\\"command\\\": \\\"ffmpeg -y -nostats -loglevel 0  -i \\\"\\\${inputFile}\\\" -codec copy \\\"\\\${outputFolder}\\\" /camera-300s.mp4\\\",\\\"output\\\": \\\"/${AV_VOLUME}/${AV_OUTPUT_FOLDER}\\\",\\\"log\\\": \\\"\\\"}]'"
 
@@ -103,6 +107,7 @@ AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
 AV_VOLUME=${AV_VOLUME}
 AV_INPUT_FOLDER=${AV_INPUT_FOLDER}
 AV_OUTPUT_FOLDER=${AV_OUTPUT_FOLDER}
+AV_LOG_FOLDER=${AV_LOG_FOLDER}
 AV_FFMPEG_COMMAND="${AV_FFMPEG_COMMAND}"
 AV_TEMPDIR=$(mktemp -d)
 EOF
@@ -114,6 +119,7 @@ export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_VOLUME "$repoRoot"/"$configuration_file")
 export $(grep AV_INPUT_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_OUTPUT_FOLDER "$repoRoot"/"$configuration_file")
+export $(grep AV_LOG_FOLDER "$repoRoot"/"$configuration_file")
 var=$(grep AV_FFMPEG_COMMAND "$repoRoot"/"$configuration_file")
 cmd="export $var"
 echo "$cmd"
@@ -127,8 +133,7 @@ fi
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if [[ is_running_in_dev_container == "1" ]] ; then
         echo "As running in devcontainer av-services_devcontainer installation not required"
         echo -e "${GREEN}Installing pre-requisites done${NC}"
         exit 0
@@ -138,9 +143,26 @@ if [[ "${action}" == "install" ]] ; then
         echo "Installing ffmpeg"
         sudo apt-get -y update
         sudo apt-get -y install ffmpeg
-        if [ ! -f "${AV_TEMPDIR}"/"${AV_INPUT_FOLDER}"/camera-300s.mkv ]; then
+        if [[ is_running_in_dev_container == "1" ]] ; then
+            TEMPVOL="/tempvol"
+        else
+            TEMPVOL=${AV_TEMPDIR}
+        fi
+        if [ ! -d "${TEMPVOL}"/"${AV_INPUT_FOLDER}" ]; then
+            mkdir "${TEMPVOL}"/"${AV_INPUT_FOLDER}"
+            chmod 0766 "${TEMPVOL}"/"${AV_INPUT_FOLDER}"
+        fi
+        if [ ! -d "${TEMPVOL}"/"${AV_OUTPUT_FOLDER}" ]; then
+            mkdir "${TEMPVOL}"/"${AV_OUTPUT_FOLDER}"
+            chmod 0766 "${TEMPVOL}"/"${AV_OUTPUT_FOLDER}"
+        fi
+        if [ ! -d "${TEMPVOL}"/"${AV_LOG_FOLDER}" ]; then
+            mkdir "${TEMPVOL}"/"${AV_LOG_FOLDER}"
+            chmod 0766 "${TEMPVOL}"/"${AV_LOG_FOLDER}"
+        fi
+        if [ ! -f "${TEMPVOL}"/"${AV_INPUT_FOLDER}"/camera-300s.mkv ]; then
             echo "Downloading content"
-            wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/"${AV_INPUT_FOLDER}"/camera-300s.mkv     
+            wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${TEMPVOL}"/"${AV_INPUT_FOLDER}"/camera-300s.mkv     
         fi
         echo "Installing docker"
         # removing old version
@@ -181,8 +203,7 @@ if [[ "${action}" == "deploy" ]] ; then
     docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     checkError
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if [[ is_running_in_dev_containerResult == "1" ]] ; then
         TEMPVOL=${VOLNAME}
     else
         TEMPVOL=${AV_TEMPDIR}
@@ -223,11 +244,27 @@ if [[ "${action}" == "stop" ]] ; then
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if [[ is_running_in_dev_containerResult == "1" ]] ; then
         TEMPVOL="/tempvol"
     else
         TEMPVOL=${AV_TEMPDIR}
+    fi
+
+    if [ ! -d "${TEMPVOL}"/"${AV_INPUT_FOLDER}" ]; then
+        mkdir "${TEMPVOL}"/"${AV_INPUT_FOLDER}"
+        chmod 0766 "${TEMPVOL}"/"${AV_INPUT_FOLDER}"
+    fi
+    if [ ! -d "${TEMPVOL}"/"${AV_OUTPUT_FOLDER}" ]; then
+        mkdir "${TEMPVOL}"/"${AV_OUTPUT_FOLDER}"
+        chmod 0766 "${TEMPVOL}"/"${AV_OUTPUT_FOLDER}"
+    fi
+    if [ ! -d "${TEMPVOL}"/"${AV_LOG_FOLDER}" ]; then
+        mkdir "${TEMPVOL}"/"${AV_LOG_FOLDER}"
+        chmod 0766 "${TEMPVOL}"/"${AV_LOG_FOLDER}"
+    fi
+    if [ ! -f "${TEMPVOL}"/"${AV_INPUT_FOLDER}"/camera-300s.mkv ]; then
+        echo "Downloading content"
+        wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${TEMPVOL}"/"${AV_INPUT_FOLDER}"/camera-300s.mkv     
     fi
     sudo rm -f "${TEMPVOL}"/${AV_OUTPUT_FOLDER}/*.mp4
     echo "Start av-ffmpeg container..."
@@ -241,7 +278,7 @@ if [[ "${action}" == "test" ]] ; then
     fi
     docker container stop ${AV_CONTAINER_NAME}
     docker container start -i ${AV_CONTAINER_NAME}
-    echo "Output directory : ${TEMPVOL}"
+    echo "Output directory : ${TEMPVOL}/${AV_OUTPUT_FOLDER}"
     if [[ ! -f "${TEMPVOL}/${AV_OUTPUT_FOLDER}/camera-300s.mp4" ]] ; then
         echo "ffmpeg Test failed - check file ${TEMPVOL}/${AV_OUTPUT_FOLDER}/camera-300s.mp4"
         docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
