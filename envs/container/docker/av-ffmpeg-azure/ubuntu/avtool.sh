@@ -87,11 +87,9 @@ is_running_in_dev_container () {
         VOLNAME=$(docker volume inspect av-services_devcontainer_tempvol --format {{.Name}} 2> /dev/null) || true    
         # if running in devcontainer connect container to dev container network av-services_devcontainer_default
         if [[ $VOLNAME == 'av-services_devcontainer_tempvol' ]] ; then
-            echo "running in dev container"
             return 0;
         fi
     fi
-    echo "not running in dev container"
     return 1;
 }
 AV_SERVICE=av-ffmpeg-azure
@@ -212,10 +210,8 @@ if [[ "${action}" == "deploy" ]] ; then
     docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     checkError
     if is_running_in_dev_container ; then
-        echo "Running in dev container..."
         TEMPVOL=${VOLNAME}
     else
-        echo "Not running in dev container..."
         TEMPVOL=${AV_TEMPDIR}
     fi
     cmd="docker run  -d -it -v ${TEMPVOL}:/${AV_VOLUME} --name ${AV_CONTAINER_NAME} ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} ${AV_FFMPEG_COMMAND}"
