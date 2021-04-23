@@ -73,14 +73,17 @@ checkError() {
         exit 1
     fi
 }
-checkDevContainerMode () {
-    checkDevContainerModeResult="0"
+is_running_in_container() {
+  awk -F: '/cpuset/ && $3 ~ /^\/$/{ c=1 } END { return c }' /proc/self/cgroup
+}
+is_running_in_dev_container () {
+    is_running_in_dev_containerResult="0"
     VOLNAME=$(docker volume inspect av-services_devcontainer_tempvol --format {{.Name}} 2> /dev/null) || true    
     # if running in devcontainer connect container to dev container network av-services_devcontainer_default
     if [[ $VOLNAME == 'av-services_devcontainer_tempvol' ]] ; then
-        checkDevContainerModeResult="1"
+        is_running_in_dev_containerResult="1"
     fi
-    return
+    return is_running_in_dev_containerResult
 }
 AV_SERVICE=av-ffmpeg-azure
 AV_FLAVOR=ubuntu
@@ -130,8 +133,7 @@ fi
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if [[ is_running_in_dev_container == "1" ]] ; then
         echo "As running in devcontainer av-services_devcontainer installation not required"
         echo -e "${GREEN}Installing pre-requisites done${NC}"
         exit 0
@@ -141,7 +143,7 @@ if [[ "${action}" == "install" ]] ; then
         echo "Installing ffmpeg"
         sudo apt-get -y update
         sudo apt-get -y install ffmpeg
-        if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+        if [[ is_running_in_dev_container == "1" ]] ; then
             TEMPVOL="/tempvol"
         else
             TEMPVOL=${AV_TEMPDIR}
@@ -201,8 +203,7 @@ if [[ "${action}" == "deploy" ]] ; then
     docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     checkError
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if [[ is_running_in_dev_containerResult == "1" ]] ; then
         TEMPVOL=${VOLNAME}
     else
         TEMPVOL=${AV_TEMPDIR}
@@ -243,8 +244,7 @@ if [[ "${action}" == "stop" ]] ; then
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if [[ is_running_in_dev_containerResult == "1" ]] ; then
         TEMPVOL="/tempvol"
     else
         TEMPVOL=${AV_TEMPDIR}
@@ -278,7 +278,7 @@ if [[ "${action}" == "test" ]] ; then
     fi
     docker container stop ${AV_CONTAINER_NAME}
     docker container start -i ${AV_CONTAINER_NAME}
-    echo "Output directory : ${TEMPVOL}"
+    echo "Output directory : ${TEMPVOL}/${AV_OUTPUT_FOLDER}"
     if [[ ! -f "${TEMPVOL}/${AV_OUTPUT_FOLDER}/camera-300s.mp4" ]] ; then
         echo "ffmpeg Test failed - check file ${TEMPVOL}/${AV_OUTPUT_FOLDER}/camera-300s.mp4"
         docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
