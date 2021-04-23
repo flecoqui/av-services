@@ -74,19 +74,26 @@ checkError() {
     fi
 }
 is_running_in_container() {
-  awk -F: '/cpuset/ && $3 ~ /^\/$/{ c=1 } END { return c }' /proc/self/cgroup
+  awk -F: '/cpuset/ && $3 ~ /^\/$/{ c=1 } END { exit c }' /proc/self/cgroup 
+  if [ "$?" != 0 ] ; then
+    return 1;
+  else
+    return 0;
+  fi
 }
+
 is_running_in_dev_container () {
-    is_running_in_dev_containerResult="0"
-    VOLNAME=$(docker volume inspect av-services_devcontainer_tempvol --format {{.Name}} 2> /dev/null) || true    
-    # if running in devcontainer connect container to dev container network av-services_devcontainer_default
-    if [[ $VOLNAME == 'av-services_devcontainer_tempvol' ]] ; then
-        is_running_in_dev_containerResult="1"
+    if is_running_in_container; then
+        VOLNAME=$(docker volume inspect av-services_devcontainer_tempvol --format {{.Name}} 2> /dev/null) || true    
+        # if running in devcontainer connect container to dev container network av-services_devcontainer_default
+        if [[ $VOLNAME == 'av-services_devcontainer_tempvol' ]] ; then
+            return 0;
+        fi
     fi
-    return is_running_in_dev_containerResult
+    return 1;
 }
 AV_SERVICE=av-ffmpeg-azure
-AV_FLAVOR=ubuntu
+AV_FLAVOR=alpine
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
@@ -122,7 +129,6 @@ export $(grep AV_OUTPUT_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_LOG_FOLDER "$repoRoot"/"$configuration_file")
 var=$(grep AV_FFMPEG_COMMAND "$repoRoot"/"$configuration_file")
 cmd="export $var"
-echo "$cmd"
 eval "$cmd"
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 
@@ -133,7 +139,7 @@ fi
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
-    if [[ is_running_in_dev_container == "1" ]] ; then
+    if is_running_in_dev_container ; then
         echo "As running in devcontainer av-services_devcontainer installation not required"
         echo -e "${GREEN}Installing pre-requisites done${NC}"
         exit 0
@@ -143,7 +149,7 @@ if [[ "${action}" == "install" ]] ; then
         echo "Installing ffmpeg"
         sudo apt-get -y update
         sudo apt-get -y install ffmpeg
-        if [[ is_running_in_dev_container == "1" ]] ; then
+        if is_running_in_dev_container ; then
             TEMPVOL="/tempvol"
         else
             TEMPVOL=${AV_TEMPDIR}
@@ -203,7 +209,7 @@ if [[ "${action}" == "deploy" ]] ; then
     docker image rm ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} > /dev/null 2> /dev/null  || true
     docker build -t ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME} .
     checkError
-    if [[ is_running_in_dev_containerResult == "1" ]] ; then
+    if is_running_in_dev_container ; then
         TEMPVOL=${VOLNAME}
     else
         TEMPVOL=${AV_TEMPDIR}
@@ -244,7 +250,7 @@ if [[ "${action}" == "stop" ]] ; then
     exit 0
 fi
 if [[ "${action}" == "test" ]] ; then
-    if [[ is_running_in_dev_containerResult == "1" ]] ; then
+    if is_running_in_dev_container ; then
         TEMPVOL="/tempvol"
     else
         TEMPVOL=${AV_TEMPDIR}

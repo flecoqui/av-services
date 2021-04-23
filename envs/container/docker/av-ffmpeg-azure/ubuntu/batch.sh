@@ -179,7 +179,7 @@ fi
 
 for row in $(echo "${inputstring}" | jq -r '.[] | @base64'); do
     _jq() {
-     echo ${row} | base64 --decode | jq -r ${1}
+     echo ${row} | base64 -d | jq -r ${1}
     }
 
    input=$(_jq '.inputFile')
