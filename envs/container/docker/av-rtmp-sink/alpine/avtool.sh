@@ -72,15 +72,27 @@ checkError() {
         exit 1
     fi
 }
-checkDevContainerMode () {
-    checkDevContainerModeResult="0"
-    VOLNAME=$(docker volume inspect av-services_devcontainer_tempvol --format {{.Name}} 2> /dev/null) || true    
-    # if running in devcontainer connect container to dev container network av-services_devcontainer_default
-    if [[ $VOLNAME == 'av-services_devcontainer_tempvol' ]] ; then
-        checkDevContainerModeResult="1"
-    fi
-    return
+
+is_running_in_container() {
+  awk -F: '/cpuset/ && $3 ~ /^\/$/{ c=1 } END { exit c }' /proc/self/cgroup 
+  if [ "$?" != 0 ] ; then
+    return 1;
+  else
+    return 0;
+  fi
 }
+
+is_running_in_dev_container () {
+    if is_running_in_container; then
+        VOLNAME=$(docker volume inspect av-services_devcontainer_tempvol --format {{.Name}} 2> /dev/null) || true    
+        # if running in devcontainer connect container to dev container network av-services_devcontainer_default
+        if [[ $VOLNAME == 'av-services_devcontainer_tempvol' ]] ; then
+            return 0;
+        fi
+    fi
+    return 1;
+}
+
 AV_SERVICE=av-rtmp-sink
 AV_FLAVOR=alpine
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
@@ -126,8 +138,7 @@ fi
 
 if [[ "${action}" == "install" ]] ; then
     echo "Installing pre-requisite"
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if is_running_in_dev_container ; then
         echo "As running in devcontainer av-services_devcontainer installation not required"
         echo -e "${GREEN}Installing pre-requisites done${NC}"
         exit 0
@@ -225,8 +236,7 @@ if [[ "${action}" == "test" ]] ; then
 
     # Wait 10 seconds before starting  the RTMP stream
     sleep 10    
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if is_running_in_dev_container ; then
         docker network connect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
         CONTAINER_IP=$(docker container inspect "${AV_CONTAINER_NAME}" | jq -r '.[].NetworkSettings.Networks."av-services_devcontainer_default".IPAddress')
     else
@@ -244,8 +254,7 @@ if [[ "${action}" == "test" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testrtmp0.mp4"
         kill %1
         # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
-        checkDevContainerMode  || true
-        if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+        if is_running_in_dev_container ; then
             docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
         fi        
         docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
@@ -259,8 +268,7 @@ if [[ "${action}" == "test" ]] ; then
         echo "RTMP Test failed - check file ${AV_TEMPDIR}/testhls0.mp4"
         kill %1
         # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
-        checkDevContainerMode  || true
-        if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+        if is_running_in_dev_container ; then
             docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
         fi
         docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
@@ -269,8 +277,7 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing ${AV_CONTAINER_NAME} successful"
     kill %1
     # if running in devcontainer disconnect container from dev container network av-services_devcontainer_default
-    checkDevContainerMode  || true
-    if [[ "$checkDevContainerModeResult" == "1" ]] ; then
+    if is_running_in_dev_container ; then
         docker network disconnect av-services_devcontainer_default ${AV_CONTAINER_NAME} 
     fi
     docker container stop ${AV_CONTAINER_NAME} > /dev/null 2> /dev/null  || true
