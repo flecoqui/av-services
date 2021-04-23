@@ -74,7 +74,7 @@ checkError() {
     fi
 }
 is_running_in_container() {
-  awk -F: '/cpuset/ && $3 ~ /^\/$/{ c=1 } END { exit c }' /proc/self/cgroup || true
+  awk -F: '/cpuset/ && $3 ~ /^\/$/{ c=1 } END { exit c }' /proc/self/cgroup 
   if [ "$?" != 0 ] ; then
     return 1;
   else
