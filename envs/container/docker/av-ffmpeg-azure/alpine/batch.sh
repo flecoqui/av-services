@@ -26,7 +26,7 @@ inputfilepath=""
 while getopts "i:s:hq" opt; do
     case $opt in
     i) inputfilepath="$OPTARG" ;;
-    s) inputstring=\"$OPTARG\" ;;
+    s) inputstring="$OPTARG" ;;
     :)
         echo "Error: -${OPTARG} requires a value"
         exit 1
@@ -44,7 +44,7 @@ if [ $# -eq 0 ]; then
     usage
     exit 1
 fi
-if ! [ ${inputfilepath:-} -o ${inputstring:-} ]; then
+if test -z "$inputfilepath" && test -z "$inputstring" ; then
     echo "Required parameters are missing"
     usage
     exit 1
@@ -158,7 +158,7 @@ processCommand() {
         *) 
     esac    
 }
-if [ ! ${inputstring:-} ]; then
+if test -z  "$inputstring" ; then
     case "$inputfilepath" in
     "https://"*) 
         getFileName $inputfilepath
@@ -188,7 +188,13 @@ for row in $(echo "${inputstring}" | jq -r '.[] | @base64'); do
    log=$(_jq '.log')
    writeLog "$log" "Processing command: \"$command\" with input file: \"$input\" and output folder: \"$output\""
    processCommand "$input" "$command" "$output" "$log" 
+   writeLog "$log" "Processing command sucessful: \"$command\""
 done
+if test -z  "$inputstring" ; then
+    echo "Batch processing file done"
+else
+    echo "Batch processing content done"
+fi
 
 exit 0
 
