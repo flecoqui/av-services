@@ -33,6 +33,12 @@
         "description": "SSH Key or password for the Virtual Machine. SSH key is recommended. Use \"ssh-keygen -t rsa -b 2048\" to generate your SSH key pairs."
       }
     },
+    "sshClientIPAddress": {
+      "type": "string",
+      "metadata": {
+        "description": "IP Address of the ssh client. It will be stored in NSG."
+      }
+    },    
     "customData": {
       "type": "string",
       "metadata": {
@@ -150,7 +156,7 @@
               "protocol": "Tcp",
               "sourcePortRange": "*",
               "destinationPortRange": "22",
-              "sourceAddressPrefix": "Internet",
+              "sourceAddressPrefix": "[parameters('sshClientIPAddress')]",
               "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 100,
