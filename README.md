@@ -5,7 +5,7 @@
 - [Overview](#Overview)
 - [Samples of Audio/Video components](#samples-of-audiovideo-components)
 - [Using dev container](#using-dev-container)
-- [How to install, deploy, test the Audio/Video components with astool.sh](#how-to-install-deploy-test-the-audiovideo-components-with-astoolsh)
+- [How to install, deploy, test the Audio/Video components with avtool.sh](#how-to-install-deploy-test-the-audiovideo-components-with-avtoolsh)
 - [Using Github Action and Azure DevOps pipelines to test the av-services](#using-github-action-and-azure-devOps-pipelines-to-test-the-av-services)
 - [Next Steps](#next-steps)
  
@@ -179,7 +179,7 @@ You need to install the following pre-requisite on your machine
         avuser@d0b2b4ea7293:/avworkspace$ ffmpeg 
     ```
 
-# How to install, deploy, test the Audio/Video components with astool.sh 
+# How to install, deploy, test the Audio/Video components with avtool.sh 
 In order to easily test those Audio/Video components, each component is delivered with a bash file called avtool.sh which could be used to :
 - install the pre-requisites: it could deployed Azure CLI, Docker, ...
 - deploy/undeploy  the component: it could deploy a virtual machine, a container,...
@@ -187,8 +187,8 @@ In order to easily test those Audio/Video components, each component is delivere
 - get the status of the component (running, exited, ...)
 - test the component
 
-In order to use this bash file astool.sh you need an Ubuntu 20.04 LTS machine, sub-system or virtual machine.
-The subsequent paragraphs will describe how to use astool.sh.
+In order to use this bash file avtool.sh you need an Ubuntu 20.04 LTS machine, sub-system or virtual machine.
+The subsequent paragraphs will describe how to use avtool.sh.
 
 ## Installing the pre-requisites on the host machine
 Follow the steps below to install the pre-requities.

@@ -38,7 +38,7 @@ As avtool.sh is a Linux bash file, you could run this tool from a machine or vir
     mkdir $HOME/git
     cd $HOME/git
     git clone https://github.com/flecoqui/av-services.git
-    cd av-services/envs/container/docker/av-rtmp-rtsp-sink/ubuntu 
+    cd av-services/envs/container/azure-iot-edge/av-rtmp-rtsp-sink/ubuntu 
 ```
 1. Run avtool.sh -a install to install the pre-requisite ffmpeg, Azure Client, ... 
 
