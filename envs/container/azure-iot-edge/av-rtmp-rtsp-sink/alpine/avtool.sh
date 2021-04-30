@@ -523,13 +523,16 @@ if [[ "${action}" == "deploy" ]] ; then
     echo
     echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${AV_IOTHUB} " 
     echo
-    # Wait 1 minute before deploying containers 
-    sleep 60    
+    # Wait 90 seconds before deploying containers 
+    sleep 90    
     setContainerState "running"
     # Wait 1 minute to complete the deployment 
     sleep 60
     getContainerState 
     if [[ $getContainerStateResult != "running" ]]; then
+        echo "Container state is not running: $getContainerStateResult"    
+        echo "Content of the template file used to start the container: "
+        cat ./deployment.template.json        
         setContainerState "running"
         sleep 30
         getContainerState 
