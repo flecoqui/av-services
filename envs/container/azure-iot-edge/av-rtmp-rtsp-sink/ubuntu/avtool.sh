@@ -167,7 +167,7 @@ stopContainer() {
     echo "Stop command sent"
     x=1
     while : ; do 
-        if [ $x -gt 10 ] ; then
+        if [ $x -gt 12 ] ; then
             echo -e "${RED}\nAn error occured exiting from the current bash: Timeout while stopping the container${NC}"
             exit 1
         fi 
@@ -183,7 +183,7 @@ startContainer() {
     echo "Start command sent"
     x=1
     while : ; do
-        if [ $x -gt 10 ] ; then
+        if [ $x -gt 12 ] ; then
             echo -e "${RED}\nAn error occured exiting from the current bash: Timeout while starting the container${NC}"
             exit 1
         fi 
@@ -523,8 +523,8 @@ if [[ "${action}" == "deploy" ]] ; then
     echo
     echo "Deploying modules on device ${AV_EDGE_DEVICE} in IoT Edge ${AV_IOTHUB} " 
     echo
-    # Wait 90 seconds before deploying containers 
-    sleep 90    
+    # Wait 120 seconds before deploying containers 
+    sleep 120    
     setContainerState "running"
     # Wait 1 minute to complete the deployment 
     sleep 60

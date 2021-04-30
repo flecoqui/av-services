@@ -382,6 +382,8 @@ EOF
 #############################################################################
 install_rtsp_service(){
 cat <<EOF > /testrtmp/rtsploop.sh
+export RTSP_PROTOCOLS=tcp 
+export RTSP_RTSPPORT=8554
 while [ : ]
 do
 folder=\$(date  +"%F-%X.%S")
