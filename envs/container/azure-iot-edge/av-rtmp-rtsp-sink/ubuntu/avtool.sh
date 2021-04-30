@@ -106,6 +106,9 @@ checkLoginAndSubscription() {
         sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
     fi
 }
+getPublicIPAddress() {
+    getPublicIPAddressResult=$(dig +short myip.opendns.com @resolver1.opendns.com)
+}
 checkOutputFiles () {
     checkOutputFilesResult="1"
     prefix="$1"
@@ -152,9 +155,11 @@ setContainerState () {
 }
 getContainerState () {
     getContainerStateResult="unknown"
-    # az vm get-instance-view -n ${AV_VMNAME} -g ${AV_RESOURCE_GROUP} --query instanceView.statuses[1].displayStatus --output json
     getContainerStateResult=$(az iot hub query -n ${AV_IOTHUB} -q "select * from devices.modules where devices.deviceId = '${AV_EDGE_DEVICE}' and devices.moduleId = '\$edgeAgent' " --query '[].properties.reported.modules.rtmpsource.status'  --output tsv)
     checkError
+    if [[ $getContainerStateResult == "" || -z $getContainerStateResult ]]; then
+        getContainerStateResult="unknown"
+    fi
     return
 }
 stopContainer() {
@@ -167,7 +172,7 @@ stopContainer() {
             exit 1
         fi 
         getContainerState 
-        if [[ $getContainerStateResult == "stopped" ]]; then echo "Container is stopped"; break; fi; 
+        if [[ $getContainerStateResult == "stopped" || $getContainerStateResult == "unknown" ]]; then echo "Container is stopped"; break; fi; 
         echo "Waiting for container in stopped state, currently it is $getContainerStateResult"; 
         sleep 10; 
         x=$(( $x + 1 ))
@@ -219,6 +224,7 @@ initializeConfigurationFile() {
     sed -i "/AV_AAD_SERVICE_PRINCIPAL_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_ID=" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_AAD_SERVICE_PRINCIPAL_SECRET=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_SECRET=" >> "$repoRoot"/"$configuration_file" 
 }
+
 
 
 
@@ -386,7 +392,7 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Deploying IoT Hub and Azure Container Registry..."
     az group create -n ${AV_RESOURCE_GROUP}  -l ${AV_RESOURCE_REGION} 
     checkError
-    az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.iothub.json --parameters namePrefix=${AV_PREFIXNAME} containerName=${AV_CONTAINERNAME}  iotHubSku="F1" -o json
+    az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.iothub.json --parameters namePrefix=${AV_PREFIXNAME} containerName=${AV_CONTAINERNAME} iotHubSku="F1" -o json
     checkError
     outputs=$(az deployment group show --name ${AV_RESOURCE_GROUP}dep  -g ${AV_RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
@@ -469,7 +475,8 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "$CUSTOM_STRING_BASE64"
 
     echo "Deploying Virtual Machine..."
-    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY}  storageAccountName=${AV_STORAGENAME} customData=\"${CUSTOM_STRING_BASE64}\" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json"
+    getPublicIPAddress || true
+    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} sshClientIPAddress="$getPublicIPAddressResult" storageAccountName=${AV_STORAGENAME} customData=\"${CUSTOM_STRING_BASE64}\" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json"
     echo "${cmd}"
     eval "${cmd}"
     #az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY}  storageAccountName=${AV_STORAGENAME} customData="${CUSTOM_STRING_BASE64}" portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS} portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json
@@ -527,7 +534,7 @@ if [[ "${action}" == "deploy" ]] ; then
         sleep 30
         getContainerState 
     fi    
-    echo "Container state: $getContainerStateResult"        
+    echo "Container state: $getContainerStateResult"    
     fillConfigurationFile
 
     echo -e "
