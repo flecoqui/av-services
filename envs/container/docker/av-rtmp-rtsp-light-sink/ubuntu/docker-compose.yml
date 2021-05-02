@@ -1,0 +1,10 @@
+version: '3.3'
+services:
+  ffmpeg-rtmp-rtsp:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "1935:1935"
+      - "8554:8554"
+      
