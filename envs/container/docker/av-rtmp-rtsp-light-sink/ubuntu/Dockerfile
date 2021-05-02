@@ -3,8 +3,8 @@ ARG AV_PORT_RTMP=1935
 ARG AV_PORT_RTSP=8554
 
 ##############################
-# Build the NGINX-build image.
-FROM ubuntu:20.04 as build-nginx
+# Build the RTSP-build image.
+FROM ubuntu:20.04 as build-rtsp
 
 # Build dependencies.
 RUN apt-get -y update  \
@@ -43,13 +43,13 @@ RUN  mkdir /testav \
 && mkdir /testav/config 
 
 # Copy binairies
-COPY --from=build-nginx /usr/local/bin/rtsp-simple-server /usr/local/bin/rtsp-simple-server 
-COPY --from=build-nginx /usr/local/bin/rtsp-simple-server.yml /usr/local/bin/rtsp-simple-server.yml 
+COPY --from=build-rtsp /usr/local/bin/rtsp-simple-server /usr/local/bin/rtsp-simple-server 
+COPY --from=build-rtsp /usr/local/bin/rtsp-simple-server.yml /usr/local/bin/rtsp-simple-server.yml 
 RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g'  /usr/local/bin/rtsp-simple-server.yml 
 
 COPY docker-entrypoint.sh /
 RUN chmod 0755 /docker-entrypoint.sh 
 
-EXPOSE $PORT_RTMP/tcp $PORT_HLS/tcp $PORT_HTTP/tcp $PORT_SSL/tcp $PORT_RTSP/tcp
+EXPOSE $PORT_RTMP/tcp  $PORT_RTSP/tcp
 
 CMD /docker-entrypoint.sh

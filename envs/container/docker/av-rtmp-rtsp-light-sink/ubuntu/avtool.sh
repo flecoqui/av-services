@@ -240,7 +240,7 @@ if [[ "${action}" == "test" ]] ; then
     # Wait 20 seconds before reading the RTSP stream
     sleep 20
     echo "Capture 20s of RTSP stream on the host machine..."
-    cmd="ffmpeg   -hide_banner -loglevel error  -rtsp_transport tcp -i rtsp://${CONTAINER_IP}:${AV_PORT_RTSP}/rtsp/stream  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 &"
+    cmd="ffmpeg   -hide_banner -loglevel error  -rtsp_transport tcp -i rtsp://${CONTAINER_IP}:${AV_PORT_RTSP}/live/stream  -t 00:00:20  -c copy -flags +global_header -f segment -segment_time 10 -segment_format_options movflags=+faststart -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 &"
     echo "$cmd"
     eval "$cmd"
     sleep 40

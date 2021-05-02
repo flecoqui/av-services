@@ -4,7 +4,7 @@
 cat <<EOF > /ffmpegrtmprtsploop.sh
 while [ : ]
 do
-ffmpeg -f flv -listen 1  -i rtmp://127.0.0.1:$PORT_RTMP/live/stream   -c copy  -f rtsp rtsp://127.0.0.1:$PORT_RTSP/live/stream
+ffmpeg -f flv -listen 1  -i rtmp://0.0.0.0:$PORT_RTMP/live/stream   -c copy  -f rtsp rtsp://127.0.0.1:$PORT_RTSP/live/stream
 sleep 1
 done
 EOF
