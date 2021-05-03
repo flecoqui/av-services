@@ -43,9 +43,9 @@ RUN  mkdir /testav \
 && mkdir /testav/config 
 
 # Copy binairies
-COPY --from=build-rtsp /usr/local/bin/rtsp-simple-server /usr/local/bin/rtsp-simple-server 
-COPY --from=build-rtsp /usr/local/bin/rtsp-simple-server.yml /usr/local/bin/rtsp-simple-server.yml 
-RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g'  /usr/local/bin/rtsp-simple-server.yml 
+COPY --from=build-rtsp /usr/local/bin/rtsp-simple-server / 
+COPY --from=build-rtsp /usr/local/bin/rtsp-simple-server.yml /
+RUN sed -i 's/rtmpDisable: no/rtmpDisable: yes/g'  /rtsp-simple-server.yml 
 
 COPY docker-entrypoint.sh /
 RUN chmod 0755 /docker-entrypoint.sh 
