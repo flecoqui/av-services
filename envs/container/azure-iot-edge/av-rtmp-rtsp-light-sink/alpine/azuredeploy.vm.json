@@ -315,7 +315,7 @@
     },
     "rtspUrl": {
       "type": "string",
-      "value": "[concat('rtsp://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com:8554/rtsp/stream')]"
+      "value": "[concat('rtsp://',variables('vmName'),'.', resourceGroup().location, '.cloudapp.azure.com:8554/live/stream')]"
     },
     "ffmpegCmd": {
       "type": "string",

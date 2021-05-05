@@ -37,7 +37,7 @@
                     "parameters": [
                         {
                             "name": "rtspUrl",
-                            "value": "rtsp://rtmpsource:{PORT_RTSP}/rtsp/stream"
+                            "value": "rtsp://rtmpsource:{PORT_RTSP}/live/stream"
                         }
                     ]
                 }
