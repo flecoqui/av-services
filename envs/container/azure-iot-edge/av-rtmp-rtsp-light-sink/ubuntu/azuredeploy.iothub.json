@@ -1,0 +1,156 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Service name prefix must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and is limited between 2 and 50 characters in length."
+      }
+    },
+    "containerName": {
+      "type": "string",
+      "defaultValue": "rtmpcontainer",
+      "metadata": {
+        "description": "Container Name where the audio/video chunks are stored"
+      }
+    },
+    "iotHubSku": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "metadata": {
+        "description": "Iot Hub SKU F1 by default (Free)."
+      }
+    }
+  },
+  "variables": {
+    "registryNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
+    "registryName": "[concat(variables('registryNamePrefix'), uniqueString(concat(resourceGroup().id, variables('registryNamePrefix'))),'acr')]",
+    "iotHubName": "[toLower(concat(parameters('namePrefix'),'iothub' ))]",
+    "mediaServiceName": "[toLower(concat(parameters('namePrefix'),'ams' ))]",
+    "storageAccountNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
+    "storageAccountName": "[concat(variables('storageAccountNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]",
+    "storageAccountType": "Standard_LRS",
+    "apiStorageVersion": "2019-04-01",
+    "serviceSasFunctionValues": {
+      "signedServices": "b",
+      "signedResourceTypes": "sco",
+      "signedPermission": "rwdlac",
+      "signedStart": "2020-01-01T00:00:01Z",
+      "signedExpiry": "2030-01-01T00:00:01Z",
+      "signedProtocol": "https",
+      "keyToSign": "key1"
+    }
+
+
+  },
+  "resources": [   
+    {
+      "type": "Microsoft.Devices/IotHubs",
+      "comments": "LVA is hosted on an IoT Edge device. The host device is managed through an IoT Hub. The keys for accessing the hub are in the template's output.",
+      "apiVersion": "2019-11-04",
+      "name": "[variables('iotHubName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+          "name": "[parameters('iotHubSku')]",
+          "capacity": 1
+      },
+      "properties": {
+      }
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "comments": "The basic sample scenarios do not require a registry. However, this will be used for more advanced scenarios.",
+      "apiVersion": "2019-05-01",
+      "name": "[variables('registryName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+          "name": "Basic"
+      },
+      "properties": {
+          "adminUserEnabled": true
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('storageAccountName')]",
+      "apiVersion": "2019-04-01",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "[variables('storageAccountType')]"
+      },
+      "kind": "Storage",
+      "resources": [
+        {
+          "type": "blobServices/containers",
+          "apiVersion": "2019-04-01",
+          "name": "[concat('default/', parameters('containerName'))]",
+          "dependsOn": [
+            "[variables('storageAccountName')]"
+          ],
+          "properties": {
+            "publicAccess": "None"
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Media/mediaServices",
+      "apiVersion": "2018-07-01",
+      "name": "[variables('mediaServiceName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ],
+      "properties": {
+          "storageAccounts": [
+              {
+                  "id": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                  "type": "Primary"
+              }
+          ]
+      }
+    }        
+  ],
+  "outputs": {
+    "iotHubName": {
+      "type": "string",
+      "value": "[variables('iotHubName')]"
+    },
+    "registryName": {
+      "type": "string",
+      "value": "[variables('registryName')]"
+    },
+    "storageAccount": {
+      "type": "string",
+      "value": "[variables('storageAccountName')]"
+    },
+    "storageAccountUrl": {
+      "type": "string",
+      "value": "[concat('https://',variables('storageAccountName'),'.blob.core.windows.net/', parameters('containerName'))]"
+    },
+    "storageKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),variables('apiStorageVersion')).keys[0].value]"
+    },
+    "storageSasToken": {
+      "type": "string",
+      "value": "[listAccountSas(variables('storageAccountName'), variables('apiStorageVersion'), variables('serviceSasFunctionValues')).accountSasToken]"
+    },
+    "containerUrl": {
+      "type": "string",
+      "value": "[concat('https://',variables('storageAccountName'),'.blob.core.windows.net/', parameters('containerName'),'?', listAccountSas(variables('storageAccountName'), variables('apiStorageVersion'), variables('serviceSasFunctionValues')).accountSasToken, '&comp=list&restype=container')]"
+    }    
+ }
+}
