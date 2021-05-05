@@ -352,6 +352,7 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get -y update
     sudo apt-get -y install ffmpeg
     sudo apt-get -y install  jq
+    sudo apt-get -y install  dig
     # install the Azure IoT extension
     echo -e "Checking azure-iot extension."
     az extension show -n azure-iot -o none &> /dev/null
