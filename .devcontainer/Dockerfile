@@ -44,7 +44,8 @@ RUN apt-get update \
     ca-certificates \
     curl \
     gnupg \
-    lsb-release
+    lsb-release \
+    dnsutils
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
 
 RUN echo \
