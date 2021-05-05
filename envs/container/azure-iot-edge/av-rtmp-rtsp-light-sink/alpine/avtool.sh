@@ -224,7 +224,7 @@ initializeConfigurationFile() {
 
 
 
-AV_RESOURCE_GROUP=av-rtmp-rtsp-lva-rg
+AV_RESOURCE_GROUP=av-rtmp-rtsp-light-lva-rg
 AV_RESOURCE_REGION=eastus2
 AV_SERVICE=av-rtmp-rtsp-sink
 AV_FLAVOR=alpine
