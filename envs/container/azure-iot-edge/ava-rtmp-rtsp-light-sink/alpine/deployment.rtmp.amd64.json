@@ -1,0 +1,89 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+
+              "{AV_CONTAINER_REGISTRY}": {
+                "username": "{AV_CONTAINER_REGISTRY_USERNAME}",
+                "password": "{AV_CONTAINER_REGISTRY_PASSWORD}",
+                "address": "{AV_CONTAINER_REGISTRY_DNS_NAME}"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.2",
+              "createOptions": "{}"
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.2",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+              }
+            }
+        },
+        "modules": {
+          "avaedge": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/media/video-analyzer:1",
+              "createOptions":"{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"Binds\":[\"{AV_VIDEO_OUTPUT_FOLDER_ON_DEVICE}:/var/media/\",\"{AV_APPDATA_FOLDER_ON_DEVICE}:/var/lib/videoanalyzer\"], \"IpcMode\": \"host\",\"ShmSize\": 1536870912}}"
+            }
+          },
+          "rtmpsource": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "{AV_STATE}",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "{AV_CONTAINER_REGISTRY_DNS_NAME}/{AV_IMAGE_FOLDER}/{AV_IMAGE_NAME}:latest",
+              "createOptions": "{\"Env\":[\"PORT_RTSP={AV_PORT_RTSP}\",\"PORT_RTMP={AV_PORT_RTMP}\",\"HOSTNAME={AV_HOSTNAME}\"],\"HostConfig\":{\"PortBindings\":{\"{AV_PORT_RTSP}/tcp\":[{\"HostPort\":\"{AV_PORT_RTSP}\"}],\"{AV_PORT_RTMP}/tcp\":[{\"HostPort\":\"{AV_PORT_RTMP}\"}]}}}"
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "AVAToHub": "FROM /messages/modules/avaedge/outputs/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "avaedge": {
+      "properties.desired": {
+        "applicationDataDirectory": "/var/lib/videoanalyzer",
+        "ProvisioningToken": "{AV_AVA_PROVISIONING_TOKEN}",
+        "diagnosticsEventsOutputName": "diagnostics",
+        "operationalEventsOutputName": "operational",
+        "logLevel": "information",
+        "logCategories": "application, events",
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
+      }
+    }
+  }
+}
+
