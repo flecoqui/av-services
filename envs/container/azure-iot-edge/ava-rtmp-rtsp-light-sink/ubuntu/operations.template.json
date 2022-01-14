@@ -2,106 +2,160 @@
     "apiVersion": "2.0",
     "operations": [
         {
-            "opName": "GraphTopologyList",
-            "opParams": {}
-        },
-        {
-            "opName": "WaitForInput",
+            "opName": "pipelineTopologyList",
             "opParams": {
-                "message": "Press Enter to continue"
-            }
+                "@apiVersion": "1.1"
+              }
         },
         {
-            "opName": "GraphInstanceList",
-            "opParams": {}
-        },
-        {
-            "opName": "WaitForInput",
+            "opName": "pipelineTopologySet",
             "opParams": {
-                "message": "Press Enter to continue"
-            }
-        },
-        {
-            "opName": "GraphTopologySet",
-            "opParams": {
-                "topologyUrl": "https://raw.githubusercontent.com/Azure/live-video-analytics/master/MediaGraph/topologies/motion-detection/2.0/topology.json"
-            }
-        },
-        {
-            "opName": "GraphInstanceSet",
-            "opParams": {
-                "name": "Sample-Graph-1",
+                "@apiVersion": "1.1",
+                "name": "MotionDetection",
                 "properties": {
-                    "topologyName": "MotionDetection",
-                    "description": "Sample graph description",
-                    "parameters": [
+                  "description": "Analyzing live video to detect motion and emit events",
+                  "parameters": [
+                    {
+                      "name": "rtspUrl",
+                      "type": "string",
+                      "description": "rtspUrl"
+                    },
+                    {
+                      "name": "rtspUserName",
+                      "type": "string",
+                      "description": "rtspUserName",
+                      "default": "dummyUserName"
+                    },
+                    {
+                      "name": "rtspPassword",
+                      "type": "string",
+                      "description": "rtspPassword",
+                      "default": "dummypw"
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "@type": "#Microsoft.VideoAnalyzer.RtspSource",
+                      "name": "rtspSource",
+                      "transport": "tcp",
+                      "endpoint": {
+                        "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
+                        "credentials": {
+                          "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+                          "username": "${rtspUserName}",
+                          "password": "${rtspPassword}"
+                        },
+                        "url": "${rtspUrl}"
+                      }
+                    }
+                  ],
+                  "processors": [
+                    {
+                      "@type": "#Microsoft.VideoAnalyzer.MotionDetectionProcessor",
+                      "sensitivity": "medium",
+                      "name": "motionDetection",
+                      "inputs": [
                         {
-                            "name": "rtspUrl",
-                            "value": "rtsp://rtmpsource:{PORT_RTSP}/live/stream"
+                          "nodeName": "rtspSource",
+                          "outputSelectors": []
                         }
-                    ]
+                      ]
+                    }
+                  ],
+                  "sinks": [
+                    {
+                      "hubOutputName": "inferenceOutput",
+                      "@type": "#Microsoft.VideoAnalyzer.IotHubMessageSink",
+                      "name": "iotHubSink",
+                      "inputs": [
+                        {
+                          "nodeName": "motionDetection"
+                        }
+                      ]
+                    }
+                  ]
                 }
-            }
+              }
         },
         {
-            "opName": "GraphInstanceActivate",
+            "opName": "pipelineTopologyList",
             "opParams": {
-                "name": "Sample-Graph-1"
-            }
+                "@apiVersion": "1.1"
+              }
         },
         {
-            "opName": "GraphInstanceList",
-            "opParams": {}
-        },
-        {
-            "opName": "WaitForInput",
+            "opName": "pipelineTopologyGet",
             "opParams": {
-                "message": "The graph instance has been activated. Press Enter to continue and deactivate the graph instance."
-            }
-        },
-        {
-            "opName": "GraphInstanceDeactivate",
-            "opParams": {
-                "name": "Sample-Graph-1"
-            }
-        },
-        {
-            "opName": "GraphInstanceDelete",
-            "opParams": {
-                "name": "Sample-Graph-1"
-            }
-        },
-        {
-            "opName": "GraphInstanceList",
-            "opParams": {}
-        },
-        {
-            "opName": "WaitForInput",
-            "opParams": {
-                "message": "Press Enter to continue"
-            }
-        },
-        {
-            "opName": "GraphTopologyDelete",
-            "opParams": {
+                "@apiVersion": "1.1",
                 "name": "MotionDetection"
-            }
+              }
         },
         {
-            "opName": "WaitForInput",
+            "opName": "livePipelineSet",
             "opParams": {
-                "message": "Press Enter to continue"
-            }
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1",
+                "properties": {
+                  "topologyName": "MotionDetection",
+                  "description": "Sample pipeline description",
+                  "parameters": [
+                    {
+                      "name": "rtspUrl",
+                      "value": "rtsp://{AV_HOSTNAME}:{AV_PORT_RTSP}/live/stream"
+                    },
+                    {
+                      "name": "rtspUserName",
+                      "value": "testuser"
+                    },
+                    {
+                      "name": "rtspPassword",
+                      "value": "testpassword"
+                    }
+                  ]
+                }
+              }
         },
         {
-            "opName": "GraphTopologyList",
-            "opParams": {}
-        },
-        {
-            "opName": "WaitForInput",
+            "opName": "livePipelineActivate",
             "opParams": {
-                "message": "Press Enter to continue"
-            }
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1"
+              }
+        },
+        {
+            "opName": "livePipelineGet",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1"
+              }
+        },
+        {
+            "opName": "livePipelineDeactivate",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1"
+              }
+        },
+        {
+            "opName": "livePipelineDelete",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1"
+              }
+        },
+        {
+            "opName": "pipelineTopologyDelete",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "MotionDetection"
+              }
+        },
+        {
+            "opName": "pipelineTopologyList",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "MotionDetection"
+              }
         }
     ]
 }

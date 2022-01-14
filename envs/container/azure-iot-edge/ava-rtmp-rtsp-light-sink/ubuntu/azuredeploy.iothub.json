@@ -38,7 +38,8 @@
     "registryNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
     "registryName": "[concat(variables('registryNamePrefix'), uniqueString(concat(resourceGroup().id, variables('registryNamePrefix'))),'acr')]",
     "iotHubName": "[toLower(concat(parameters('namePrefix'),'iothub' ))]",
-    "mediaServiceName": "[toLower(concat(parameters('namePrefix'),'ams' ))]",
+    "videoAnalyzerName": "[toLower(concat(parameters('namePrefix'),'ava' ))]",
+    "managedIdentity": "[toLower(concat(parameters('namePrefix'),'mi' ))]",
     "storageAccountNamePrefix": "[toLower(substring(concat(parameters('namePrefix'), uniqueString(resourceGroup().id)), 0, 8))]",
     "storageAccountName": "[concat(variables('storageAccountNamePrefix'), uniqueString(concat(resourceGroup().id, variables('storageAccountNamePrefix'))),'sa')]",
     "storageAccountType": "Standard_LRS",
@@ -51,14 +52,18 @@
       "signedExpiry": "2030-01-01T00:00:01Z",
       "signedProtocol": "https",
       "keyToSign": "key1"
-    }
-
-
+    },
+    "Owner": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635')]",
+    "Contributor": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+    "Reader": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+    "storageBlobDataContributor": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+    "uniqueRoleStorageBlobDataContributor": "[guid(resourceId('Microsoft.Storage/storageAccounts',  variables('storageAccountName')), variables('storageBlobDataContributor'), resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')))]",           
+    "uniqueRoleReader": "[guid(resourceId('Microsoft.Storage/storageAccounts',  variables('storageAccountName')), variables('Reader'), resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')))]"           
   },
   "resources": [   
     {
       "type": "Microsoft.Devices/IotHubs",
-      "comments": "LVA is hosted on an IoT Edge device. The host device is managed through an IoT Hub. The keys for accessing the hub are in the template's output.",
+      "comments": "AVA is hosted on an IoT Edge device. The host device is managed through an IoT Hub. The keys for accessing the hub are in the template's output.",
       "apiVersion": "2019-11-04",
       "name": "[variables('iotHubName')]",
       "location": "[resourceGroup().location]",
@@ -106,22 +111,72 @@
       ]
     },
     {
-      "type": "Microsoft.Media/mediaServices",
-      "apiVersion": "2018-07-01",
-      "name": "[variables('mediaServiceName')]",
-      "location": "[resourceGroup().location]",
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "name": "[variables('managedIdentity')]",
+      "apiVersion": "2018-11-30",
+      "location": "[resourceGroup().location]"
+    },   
+    {
+      "type": "Microsoft.Storage/storageAccounts/providers/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[concat(variables('storageAccountName'), '/Microsoft.Authorization/', variables('uniqueRoleReader'))]",
       "dependsOn": [
-          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentity'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
       ],
       "properties": {
-          "storageAccounts": [
-              {
-                  "id": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-                  "type": "Primary"
-              }
-          ]
+        "roleDefinitionId": "[variables('Reader')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('managedIdentity')), '2018-11-30').principalId]",
+        "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "principalType": "ServicePrincipal"
       }
-    }        
+    },     
+    {
+      "type": "Microsoft.Storage/storageAccounts/providers/roleAssignments",
+      "apiVersion": "2020-04-01-preview",
+      "name": "[concat(variables('storageAccountName'), '/Microsoft.Authorization/', variables('uniqueRoleStorageBlobDataContributor'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentity'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[variables('storageBlobDataContributor')]",
+        "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('managedIdentity')), '2018-11-30').principalId]",
+        "scope": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "principalType": "ServicePrincipal"
+      }
+    },      
+    {
+      "type": "Microsoft.Media/videoAnalyzers",
+      "apiVersion": "2021-11-01-preview",
+      "name": "[variables('videoAnalyzerName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": {
+          "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',variables('managedIdentity'))]": {}
+        }
+      },
+      "dependsOn": [
+        "[concat('Microsoft.ManagedIdentity/userAssignedIdentities/', variables('managedIdentity'))]",
+        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), 'Microsoft.Authorization/roleAssignments/', variables('uniqueRoleStorageBlobDataContributor'))]",
+        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), 'Microsoft.Authorization/roleAssignments/', variables('uniqueRoleReader'))]"
+           
+      ],      
+      "properties": {
+        "encryption": {
+          "type": "SystemKey"
+        },
+        "storageAccounts": [
+          {
+              "id": "[resourceID('Microsoft.Storage/storageAccounts/',variables('storageAccountName'))]" ,
+              "identity": {
+                  "userAssignedIdentity": "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',variables('managedIdentity'))]"
+              }
+          }
+      ]
+      }
+    }
   ],
   "outputs": {
     "iotHubName": {
@@ -132,10 +187,14 @@
       "type": "string",
       "value": "[variables('registryName')]"
     },
+    "videoAnalyzerName": {
+      "type": "string",
+      "value": "[variables('videoAnalyzerName')]"
+    },    
     "storageAccount": {
       "type": "string",
       "value": "[variables('storageAccountName')]"
-    },
+    },    
     "storageAccountUrl": {
       "type": "string",
       "value": "[concat('https://',variables('storageAccountName'),'.blob.core.windows.net/', parameters('containerName'))]"

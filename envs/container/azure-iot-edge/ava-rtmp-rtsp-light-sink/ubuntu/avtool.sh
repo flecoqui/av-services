@@ -142,10 +142,7 @@ setContainerState () {
     sed -i "s/{AV_APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
     sed -i "s/{AV_SUBSCRIPTION_ID}/${AV_SUBSCRIPTION_ID//\//\\/}/g" ./deployment.template.json
     sed -i "s/{AV_RESOURCE_GROUP}/$AV_RESOURCE_GROUP/g" ./deployment.template.json
-    sed -i "s/{AV_AMS_ACCOUNT}/${AV_AMS_ACCOUNT//\//\\/}/g" ./deployment.template.json
-    sed -i "s/{AV_AAD_TENANT_ID}/${AV_AAD_TENANT_ID//\//\\/}/g" ./deployment.template.json
-    sed -i "s/{AV_AAD_SERVICE_PRINCIPAL_ID}/${AV_AAD_SERVICE_PRINCIPAL_ID//\//\\/}/g" ./deployment.template.json
-    sed -i "s/{AV_AAD_SERVICE_PRINCIPAL_SECRET}/${AV_AAD_SERVICE_PRINCIPAL_SECRET//\//\\/}/g" ./deployment.template.json
+    sed -i "s/{AV_AVA_PROVISIONING_TOKEN}/${AV_AVA_PROVISIONING_TOKEN//\//\\/}/g" ./deployment.template.json
     az iot edge set-modules --device-id ${AV_EDGE_DEVICE} --hub-name ${AV_IOTHUB} --content ./deployment.template.json > /dev/null
     checkError
 }
@@ -198,11 +195,9 @@ fillConfigurationFile() {
     sed -i "/AV_CONTAINER_REGISTRY_DNS_NAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_DNS_NAME=$AV_CONTAINER_REGISTRY_DNS_NAME" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_CONTAINER_REGISTRY_USERNAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_USERNAME=$AV_CONTAINER_REGISTRY_USERNAME" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_CONTAINER_REGISTRY_PASSWORD=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_PASSWORD=$AV_CONTAINER_REGISTRY_PASSWORD" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AMS_ACCOUNT=/d" "$repoRoot"/"$configuration_file"; echo "AV_AMS_ACCOUNT=$AV_AMS_ACCOUNT" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_TENANT_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_TENANT_ID=$AV_AAD_TENANT_ID" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_SERVICE_PRINCIPAL_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_ID=$AV_AAD_SERVICE_PRINCIPAL_ID" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_SERVICE_PRINCIPAL_SECRET=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_SECRET=$AV_AAD_SERVICE_PRINCIPAL_SECRET" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=$AV_SUBSCRIPTION_ID" >> "$repoRoot"/"$configuration_file"   
+    sed -i "/AV_AVA_PROVISIONING_TOKEN=/d" "$repoRoot"/"$configuration_file"; echo "AV_AVA_PROVISIONING_TOKEN=$AV_AVA_PROVISIONING_TOKEN" >> "$repoRoot"/"$configuration_file" 
+
 }
 initializeConfigurationFile() {
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=" >> "$repoRoot"/"$configuration_file" 
@@ -215,25 +210,55 @@ initializeConfigurationFile() {
     sed -i "/AV_CONTAINER_REGISTRY_USERNAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_USERNAME=" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_CONTAINER_REGISTRY_PASSWORD=/d" "$repoRoot"/"$configuration_file"; echo "AV_CONTAINER_REGISTRY_PASSWORD=" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SUBSCRIPTION_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_SUBSCRIPTION_ID=" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AMS_ACCOUNT=/d" "$repoRoot"/"$configuration_file"; echo "AV_AMS_ACCOUNT=" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_TENANT_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_TENANT_ID=" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_SERVICE_PRINCIPAL_ID=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_ID=" >> "$repoRoot"/"$configuration_file" 
-    sed -i "/AV_AAD_SERVICE_PRINCIPAL_SECRET=/d" "$repoRoot"/"$configuration_file"; echo "AV_AAD_SERVICE_PRINCIPAL_SECRET=" >> "$repoRoot"/"$configuration_file" 
+    sed -i "/AV_AVA_PROVISIONING_TOKEN=/d" "$repoRoot"/"$configuration_file"; echo "AV_AVA_PROVISIONING_TOKEN=" >> "$repoRoot"/"$configuration_file" 
+}
+
+createEdgeModule()
+{
+
+    access_token=$(az account get-access-token --query accessToken --output tsv)
+    if [[ -z ${access_token} ]] ; then
+        echo -e "${RED}\nFailed to get azure Token${NC}"
+        exit 1
+    fi
+    headers="Authorization=Bearer ${access_token}"
+    cmd="az rest --method put --uri \"https://management.azure.com/subscriptions/${AV_SUBSCRIPTION_ID}/resourceGroups/${AV_RESOURCE_GROUP}/providers/Microsoft.Media/videoAnalyzers/${AV_VIDEO_ANALYZER_ACCOUNT}/edgeModules/${AV_EDGE_MODULE}?api-version=2021-11-01-preview\" --body \"{}\" --headers \"Content-Type=application/json\" \"Authorization=Bearer ${access_token}\" --query name --output tsv"
+    result=$(eval "$cmd")
+    #echo "Result '${result}'"
+    #echo "AV_EDGE_MODULE '${AV_EDGE_MODULE}'"
+    
+    if [ "${AV_EDGE_MODULE}" != "${result}" ] ; then
+        echo -e "${RED}\nFailed to create edge module ${AV_EDGE_MODULE} ${NC}"
+        exit 1
+    fi
+}
+
+getProvisioningToken()
+{
+    access_token=$(az account get-access-token --query accessToken --output tsv)
+    if [[ -z ${access_token} ]] ; then
+        echo  -e "${RED}\nFailed to get azure Token${NC}"
+        exit 1
+    fi
+    headers="Authorization=Bearer ${access_token}"
+    expiration_date=$(date '+%Y-%m-%d' -d "+2 years")
+    cmd="az rest --method post --uri \"https://management.azure.com/subscriptions/${AV_SUBSCRIPTION_ID}/resourceGroups/${AV_RESOURCE_GROUP}/providers/Microsoft.Media/videoAnalyzers/${AV_VIDEO_ANALYZER_ACCOUNT}/edgeModules/${AV_EDGE_MODULE}/listProvisioningToken?api-version=2021-11-01-preview\" --body '{\"expirationDate\": \"${expiration_date}\"}' --headers \"Content-Type=application/json\" \"Authorization=Bearer ${access_token}\" --query token --output tsv"
+    result=$(eval "$cmd")
+    echo "${result}"
 }
 
 
-
-
-AV_RESOURCE_GROUP=av-rtmp-rtsp-light-lva-rg
+AV_RESOURCE_GROUP=av-rtmp-rtsp-light-ava-rg
 AV_RESOURCE_REGION=eastus2
 AV_SERVICE=av-rtmp-rtsp-sink
 AV_FLAVOR=alpine
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
-AV_EDGE_DEVICE=rtmp-rtsp-lva-device
+AV_EDGE_DEVICE=rtmp-rtsp-ava-device
+AV_EDGE_MODULE=rtmp-rtsp-ava-device
 AV_PATH_RTMP=live/stream
-AV_PREFIXNAME="rtmprtsplva$(shuf -i 1000-9999 -n 1)"
+AV_PREFIXNAME="rtmprtspava$(shuf -i 1000-9999 -n 1)"
 AV_VMNAME="$AV_PREFIXNAME"vm
 AV_HOSTNAME="$AV_VMNAME"."$AV_RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
@@ -256,6 +281,7 @@ AV_IMAGE_NAME=${AV_IMAGE_NAME}
 AV_IMAGE_FOLDER=${AV_IMAGE_FOLDER}
 AV_CONTAINER_NAME=${AV_CONTAINER_NAME}
 AV_EDGE_DEVICE=${AV_EDGE_DEVICE}
+AV_EDGE_MODULE=${AV_EDGE_MODULE}
 AV_PORT_RTMP=${AV_PORT_RTMP}
 AV_PREFIXNAME=${AV_PREFIXNAME}
 AV_VMNAME=${AV_VMNAME}
@@ -274,10 +300,6 @@ AV_CONTAINER_REGISTRY=
 AV_CONTAINER_REGISTRY_DNS_NAME=
 AV_CONTAINER_REGISTRY_USERNAME=
 AV_CONTAINER_REGISTRY_PASSWORD=
-AV_AMS_ACCOUNT=
-AV_AAD_TENANT_ID=
-AV_AAD_SERVICE_PRINCIPAL_ID=
-AV_AAD_SERVICE_PRINCIPAL_SECRET=
 AV_SUBSCRIPTION_ID=
 AV_TEMPDIR=${AV_TEMPDIR}
 AV_AUTHENTICATION_TYPE=${AV_AUTHENTICATION_TYPE}
@@ -292,6 +314,7 @@ export $(grep AV_IMAGE_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_IMAGE_FOLDER "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_EDGE_DEVICE "$repoRoot"/"$configuration_file")
+export $(grep AV_EDGE_MODULE "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_RTMP "$repoRoot"/"$configuration_file")
 export $(grep AV_PREFIXNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_VMNAME "$repoRoot"/"$configuration_file")
@@ -311,15 +334,14 @@ export $(grep AV_CONTAINER_REGISTRY "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_DNS_NAME "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_USERNAME "$repoRoot"/"$configuration_file")
 export $(grep AV_CONTAINER_REGISTRY_PASSWORD "$repoRoot"/"$configuration_file")
-export $(grep AV_AMS_ACCOUNT "$repoRoot"/"$configuration_file")
-export $(grep AV_AAD_TENANT_ID "$repoRoot"/"$configuration_file")
-export $(grep AV_AAD_SERVICE_PRINCIPAL_ID "$repoRoot"/"$configuration_file")
-export $(grep AV_AAD_SERVICE_PRINCIPAL_SECRET "$repoRoot"/"$configuration_file")
 export $(grep AV_SUBSCRIPTION_ID "$repoRoot"/"$configuration_file")
 export $(grep AV_TEMPDIR "$repoRoot"/"$configuration_file" |  { read test; if [[ -z $test ]] ; then AV_TEMPDIR=$(mktemp -d) ; echo "AV_TEMPDIR=$AV_TEMPDIR" ; echo "AV_TEMPDIR=$AV_TEMPDIR" >> .avtoolconfig ; else echo $test; fi } )
 export $(grep AV_AUTHENTICATION_TYPE "$repoRoot"/"$configuration_file")
 export "$(grep AV_SSH_PUBLIC_KEY $repoRoot/$configuration_file)"
 export "$(grep AV_SSH_PRIVATE_KEY $repoRoot/$configuration_file)"
+export "$(grep AV_AVA_PROVISIONING_TOKEN $repoRoot/$configuration_file)" 
+
+
 
 if [[ -z "${AV_TEMPDIR}" ]] ; then
     AV_TEMPDIR=$(mktemp -d)
@@ -381,8 +403,10 @@ if [[ "${action}" == "deploy" ]] ; then
     outputs=$(az deployment group show --name ${AV_RESOURCE_GROUP}dep  -g ${AV_RESOURCE_GROUP} --query properties.outputs)
     AV_STORAGENAME=$(jq -r .storageAccount.value <<< $outputs)
     AV_SASTOKEN=$(jq -r .storageSasToken.value <<< $outputs)
+    AV_VIDEO_ANALYZER_ACCOUNT=$(jq -r .videoAnalyzerName.value <<< $outputs)
     sed -i "/AV_STORAGENAME=/d" "$repoRoot"/"$configuration_file"; echo "AV_STORAGENAME=$AV_STORAGENAME" >> "$repoRoot"/"$configuration_file" 
     sed -i "/AV_SASTOKEN=/d" "$repoRoot"/"$configuration_file"  ; echo "AV_SASTOKEN=$AV_SASTOKEN" >> "$repoRoot"/"$configuration_file"
+    sed -i "/AV_VIDEO_ANALYZER_ACCOUNT=/d" "$repoRoot"/"$configuration_file"; echo "AV_VIDEO_ANALYZER_ACCOUNT=$AV_VIDEO_ANALYZER_ACCOUNT" >> "$repoRoot"/"$configuration_file" 
 
     # tempo waiting 
     sleep 60
@@ -391,17 +415,16 @@ if [[ "${action}" == "deploy" ]] ; then
     AV_IOTHUB=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Devices\/IotHubs$/ {print $1}')
     AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query='connectionString')
 
-    # SUB1="/"
-    # SUB2="+"
-    # while  [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB1"* ]] || [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB2"* ]]; do
-    #     echo "Renewing IoT Hub connection string."
-    #     az iot hub policy renew-key --hub-name ${AV_IOTHUB}  --name iothubowner --rk Primary > /dev/null
-    #     checkError
-    #     AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query "connectionString" )
-    #     checkError
-    # done
+    createEdgeModule
+    checkError
 
-    AV_AMS_ACCOUNT=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.Media\/mediaservices$/ {print $1}')
+
+    AV_AVA_PROVISIONING_TOKEN=$(getProvisioningToken)
+    checkError
+
+    echo "Azure Video Analyzer provisioning Token: $AV_AVA_PROVISIONING_TOKEN"
+    sed -i "/AV_AVA_PROVISIONING_TOKEN=/d" "$repoRoot"/"$configuration_file"; echo "AV_AVA_PROVISIONING_TOKEN=$AV_AVA_PROVISIONING_TOKEN" >> "$repoRoot"/"$configuration_file" 
+
     AV_CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
     AV_CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'username' | tr -d \")
     AV_CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
@@ -415,52 +438,9 @@ if [[ "${action}" == "deploy" ]] ; then
     AV_DEVICE_CONNECTION_STRING=$(az iot hub device-identity connection-string show --device-id $AV_EDGE_DEVICE --hub-name $AV_IOTHUB --query='connectionString')
     AV_DEVICE_CONNECTION_STRING=${AV_DEVICE_CONNECTION_STRING//\//\\/} 
 
-    # creating the AMS account creates a service principal, so we'll just reset it to get the credentials
-    echo "setting up service principal..."
-    SPN="$AV_AMS_ACCOUNT-access-sp" # this is the default naming convention used by `az ams account sp`
-
-    if test -z "$(az ad sp list --display-name $SPN --query="[].displayName" -o tsv)"; then
-        AMS_CONNECTION=$(az ams account sp create -o yaml --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT)
-    else
-        AMS_CONNECTION=$(az ams account sp reset-credentials -o yaml --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT)
-    fi
-
-    # capture config information
-    re="AadTenantId:\s([0-9a-z\-]*)"
-    AV_AAD_TENANT_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
-
-    re="AadClientId:\s([0-9a-z\-]*)"
-    AV_AAD_SERVICE_PRINCIPAL_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
-
-    re="AadSecret:\s([0-9a-z\-]*)"
-    AV_AAD_SERVICE_PRINCIPAL_SECRET=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
-
-    re="SubscriptionId:\s([0-9a-z\-]*)"
-    SUBSCRIPTION_ID=$([[ "$AMS_CONNECTION" =~ $re ]] && echo ${BASH_REMATCH[1]})
-
-    # capture object_id
-    OBJECT_ID=$(az ad sp show --id ${AV_AAD_SERVICE_PRINCIPAL_ID} --query 'objectId' | tr -d \")
-
-    sleep 60
-
-    echo -e "
-    Updating the Media Services account to use one Premium streaming endpoint."
-    az ams streaming-endpoint scale --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT -n default --scale-units 1
-
-    echo "Kicking off the async start of the Premium streaming endpoint."
-    echo "  This is needed to run samples or tutorials involving video playback."
-    az ams streaming-endpoint start --resource-group $AV_RESOURCE_GROUP --account-name $AV_AMS_ACCOUNT -n default --no-wait
-
-    echo "Generating cloud-init.yml:"
-    CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g"  )
-    echo "$CUSTOM_STRING"
-    echo "Generating cloud-init.yml base64:"
-    CUSTOM_STRING_BASE64=$(sed "s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | base64)
-    echo "$CUSTOM_STRING_BASE64"
-
     echo "Deploying Virtual Machine..."
     getPublicIPAddress || true
-    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} sshClientIPAddress="$getPublicIPAddressResult" storageAccountName=${AV_STORAGENAME} customData=\"${CUSTOM_STRING_BASE64}\" portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json"
+    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} sshClientIPAddress="$getPublicIPAddressResult" storageAccountName=${AV_STORAGENAME} deviceConnectionString=\"${AV_DEVICE_CONNECTION_STRING//\"/}\"  portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json"
     echo "${cmd}"
     eval "${cmd}"
     #az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY}  storageAccountName=${AV_STORAGENAME} customData="${CUSTOM_STRING_BASE64}"  portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json
@@ -530,11 +510,7 @@ Content of the .env file which can be used with the Azure IoT Tools in Visual St
     # write .env file for edge deployment
     echo "SUBSCRIPTION_ID=\"$AV_SUBSCRIPTION_ID\"" > ./.env
     echo "RESOURCE_GROUP=\"$AV_RESOURCE_GROUP\"" >> ./.env
-    echo "AMS_ACCOUNT=\"$AV_AMS_ACCOUNT\""  >> ./.env
     echo "IOTHUB_CONNECTION_STRING=$AV_IOTHUB_CONNECTION_STRING" >> ./.env
-    echo "AAD_TENANT_ID=$AV_AAD_TENANT_ID"  >> ./.env
-    echo "AAD_SERVICE_PRINCIPAL_ID=$AV_AAD_SERVICE_PRINCIPAL_ID"  >> ./.env
-    echo "AAD_SERVICE_PRINCIPAL_SECRET=$AV_AAD_SERVICE_PRINCIPAL_SECRET"  >> ./.env
     echo "VIDEO_INPUT_FOLDER_ON_DEVICE=\"/home/lvaedgeuser/samples/input\""  >> ./.env
     echo "VIDEO_OUTPUT_FOLDER_ON_DEVICE=\"/var/media\""  >> ./.env
     echo "APPDATA_FOLDER_ON_DEVICE=\"/var/lib/azuremediaservices\""  >> ./.env
@@ -549,7 +525,7 @@ Content of the appsettings.json file which can be used with the Azure IoT Tools 
     echo "{" > ./appsettings.json
     echo "    \"IoThubConnectionString\" : $AV_IOTHUB_CONNECTION_STRING," >>  ./appsettings.json
     echo "    \"deviceId\" : \"$AV_EDGE_DEVICE\"," >>  ./appsettings.json
-    echo "    \"moduleId\" : \"lvaEdge\"" >>  ./appsettings.json
+    echo "    \"moduleId\" : \"avaedge\"" >>  ./appsettings.json
     echo -n "}" >>  ./appsettings.json
     cat ./appsettings.json
 
@@ -562,6 +538,7 @@ Content of operations.json file which can be used with the Azure Cloud To Device
     echo -e "
 Deployment parameters:    
     "
+    echo "AVA_PROVISIONING_TOKEN=${AV_AVA_PROVISIONING_TOKEN}"
     echo "IOTHUB=${AV_IOTHUB}"
     echo "IOTHUB_CONNECTION_STRING=${AV_IOTHUB_CONNECTION_STRING}"
     echo "DEVICE_CONNECTION_STRING=${AV_DEVICE_CONNECTION_STRING}"
@@ -616,7 +593,7 @@ if [[ "${action}" == "test" ]] ; then
     rm -f "${AV_TEMPDIR}"/testrtsp*.mp4
     if [ ! -f "${AV_TEMPDIR}"/camera-300s.mkv ]; then
         echo "Downloading content"
-        wget --quiet https://github.com/flecoqui/av-services/raw/main/content/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
+        wget --quiet https://avamedia.blob.core.windows.net/public/camera-300s.mkv -O "${AV_TEMPDIR}"/camera-300s.mkv     
     fi
     echo "Testing service..."
     stopContainer
@@ -647,25 +624,26 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing output RTSP successful"
 
     echo ""
-    echo "Testing LVA..."
+    echo "Testing AVA..."
     echo ""
     # write operations.json for sample code
-    sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json > ./operations.json 
+    sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json > ./operations.json 
+    sed -i "s/{AV_HOSTNAME}/${AV_HOSTNAME}/" ./operations.json
     cat ./operations.json 
-    echo "Activating the LVA Graph"
-    cmd="sudo dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --lastoperation GraphInstanceActivate"
+    echo "Activating the AVA Graph"
+    cmd="sudo dotnet run --project ../../../../../src/avatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module avaedge --lastoperation livePipelineGet"
     echo "$cmd"
     eval "$cmd"
     checkError
 
-    echo "Receiving the LVA events during 60 seconds"
-    cmd="sudo dotnet run -p ../../../../../src/lvatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
+    echo "Receiving the AVA events during 60 seconds"
+    cmd="sudo dotnet run --project ../../../../../src/avatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
     echo "$cmd"
     eval "$cmd" 2>&1 | tee events.txt
     checkError
 
-    echo "Deactivating the LVA Graph"
-    cmd="sudo dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module lvaEdge --firstoperation GraphInstanceDeactivate"
+    echo "Deactivating the AVA Graph"
+    cmd="sudo dotnet run --project ../../../../../src/avatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module avaedge --firstoperation livePipelineGet"
     echo "$cmd"
     eval "$cmd"
     checkError

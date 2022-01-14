@@ -425,16 +425,6 @@ if [[ "${action}" == "deploy" ]] ; then
     echo "Azure Video Analyzer provisioning Token: $AV_AVA_PROVISIONING_TOKEN"
     sed -i "/AV_AVA_PROVISIONING_TOKEN=/d" "$repoRoot"/"$configuration_file"; echo "AV_AVA_PROVISIONING_TOKEN=$AV_AVA_PROVISIONING_TOKEN" >> "$repoRoot"/"$configuration_file" 
 
-    # SUB1="/"
-    # SUB2="+"
-    # while  [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB1"* ]] || [[ "$AV_IOTHUB_CONNECTION_STRING" == *"$SUB2"* ]]; do
-    #     echo "Renewing IoT Hub connection string."
-    #     az iot hub policy renew-key --hub-name ${AV_IOTHUB}  --name iothubowner --rk Primary > /dev/null
-    #     checkError
-    #     AV_IOTHUB_CONNECTION_STRING=$(az iot hub connection-string show --hub-name ${AV_IOTHUB} --query "connectionString" )
-    #     checkError
-    # done
-
     AV_CONTAINER_REGISTRY=$(echo "${RESOURCES}" | awk '$2 ~ /Microsoft.ContainerRegistry\/registries$/ {print $1}')
     AV_CONTAINER_REGISTRY_USERNAME=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'username' | tr -d \")
     AV_CONTAINER_REGISTRY_PASSWORD=$(az acr credential show -n $AV_CONTAINER_REGISTRY --query 'passwords[0].value' | tr -d \")
@@ -447,15 +437,6 @@ if [[ "${action}" == "deploy" ]] ; then
     fi
     AV_DEVICE_CONNECTION_STRING=$(az iot hub device-identity connection-string show --device-id $AV_EDGE_DEVICE --hub-name $AV_IOTHUB --query='connectionString')
     AV_DEVICE_CONNECTION_STRING=${AV_DEVICE_CONNECTION_STRING//\//\\/} 
-
-
-
-    #echo "Generating cloud-init.yml:"
-    #CUSTOM_STRING=$(sed "s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g"  )
-    #echo "$CUSTOM_STRING"
-    #echo "Generating cloud-init.yml base64:"
-    #CUSTOM_STRING_BASE64=$(sed "s/{DEVICE_CONNECTION_STRING}/${AV_DEVICE_CONNECTION_STRING//\"/}/g" < ./cloud-init.yml | sed "s/{AV_ADMIN}/${AV_LOGIN//\"/}/g" | sed "s/{AV_PORT_RTMP}/${AV_PORT_RTMP}/g" | sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" | base64)
-    #echo "$CUSTOM_STRING_BASE64"
 
     echo "Deploying Virtual Machine..."
     getPublicIPAddress || true

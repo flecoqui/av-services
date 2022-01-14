@@ -1,13 +1,13 @@
-# av-rtmp-rtsp-light-sink alpine container running in IoT Edge device 
+# av-rtmp-rtsp-light-sink ubuntu container running in IoT Edge device 
 
 ## Overview
 This av-service av-rtmp-rtsp-light-sink for alpine is a container running nginx RTMP server which convert an incoming RTMP stream into RTSP stream. 
-This av-service is used in IoT Edge device with Live Video Analytics to convert an incoming RTMP stream into a RTSP stream to feed Live Video Analytics AI components.
-When you will deploy this component with avtool.sh, it will deploy a complete LVA infrastructure with IoT Edge Hub, Azure Container Registry, Azure Media Services (so far mandatory to deploy Live Video Analytics), Azure Storage, Azure Virtual Machine acting as IoT Edge device and running docker.
+This av-service is used in IoT Edge device with Azure Video Analyzer to convert an incoming RTMP stream into a RTSP stream to feed Azure Video Analyzer AI components.
+When you will deploy this component with avtool.sh, it will deploy a complete AVA infrastructure with IoT Edge Hub, Azure Container Registry, Azure Media Services (so far mandatory to deploy Azure Video Analyzer), Azure Storage, Azure Virtual Machine acting as IoT Edge device and running docker.
 When you will start, stop this component with avtool.sh, it will start, stop the rtmpsource container in the IoT Edge device.
 When you will test this component with avtool.sh, it will test automatically the following scenarios:
 - RTMP to RTSP adaptor
-- LVA Motion Detection
+- AVA Motion Detection
 
 At least, when the rtmpsource will be fed with a Live RTMP stream, you could consume the following streams with VLC:  
 RTSP URL: rtsp://\<IoTEdgeVMName\>.\<REGION\>.cloudapp.azure.com:8554/rtsp/stream  
@@ -50,7 +50,7 @@ Once the pre-requisites are installed, you can deploy the Live Analytics infrast
     ./avtool.sh -a deploy
 ```
 
-When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the av-rtmp-rtsp-light-sink in LVA configuration. By default, the file contains these parameters:
+When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the av-rtmp-rtsp-light-sink in AVA configuration. By default, the file contains these parameters:
 
 ```bash
     AV_RESOURCE_GROUP=av-rtmp-rtsp-lva-rg
@@ -94,8 +94,8 @@ Below the list of input parameters:
 
 | Variables | Description |
 | ---------------------|:-------------|
-| AV_RESOURCE_GROUP | The name of the resource group where LVA infrastructure will be deployed (av-rtmp-rtsp-lva-rg by default) |
-| AV_RESOURCE_REGION | The Azure region where LVA infrastructure will be deployed (eastus2 by default)  |
+| AV_RESOURCE_GROUP | The name of the resource group where AVA infrastructure will be deployed (av-rtmp-rtsp-lva-rg by default) |
+| AV_RESOURCE_REGION | The Azure region where AVA infrastructure will be deployed (eastus2 by default)  |
 | AV_SERVICE | The name of the service  (by default av-rtmp-rtsp-light-sink)  |
 | AV_FLAVOR | The flavor of this service   (by default alpine)  |
 | AV_IMAGE_NAME | The suffix of the image name  (by default ${AV_SERVICE}-${AV_FLAVOR}) |
@@ -125,7 +125,7 @@ Below the output parameters:
 
 | Variables | Description |
 | ---------------------|:-------------|
-| AV_RESOURCE_GROUP | The name of the resource group where LVA infrastructure will be deployed (av-rtmp-rtsp-lva-rg by default) |
+| AV_RESOURCE_GROUP | The name of the resource group where AVA infrastructure will be deployed (av-rtmp-rtsp-lva-rg by default) |
 | AV_STORAGENAME |The name of the sotrage account created|
 | AV_SASTOKEN | The Shared Access Signature for the storage account|
 | AV_IOTHUB | The IoT Hub name |
@@ -136,7 +136,7 @@ Below the output parameters:
 | AV_CONTAINER_REGISTRY_USERNAME |The Azure Container Registry user name|
 | AV_CONTAINER_REGISTRY_PASSWORD |The Azure Container Registry password|
 | AV_SUBSCRIPTION_ID |The Azure Subscription ID |
-| AV_AMS_ACCOUNT |The Azure Media Service Account (not used but mandatory for LVA)|
+| AV_AMS_ACCOUNT |The Azure Media Service Account (not used but mandatory for AVA)|
 | AV_AAD_TENANT_ID |The Azure AD Tenant ID used for the authentication with Azure Media Services|
 | AV_AAD_SERVICE_PRINCIPAL_ID |The Azure AD Service Principal ID used for the authentication with Azure Media Services|
 | AV_AAD_SERVICE_PRINCIPAL_SECRET |The Azure AD Service Principal Secret used for the authentication with Azure Media Services|
@@ -176,7 +176,7 @@ For this container, the test feature will check if the output MP4 files have bee
 
 By default for the tests, it will test automatically the following scenarios:
 - RTMP to RTSP adaptor
-- LVA Motion Detection
+- AVA Motion Detection
 
 For this test, we use an incoming Live RTMP stream created from a MKV file using the following ffmpeg command:
 
