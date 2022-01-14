@@ -379,8 +379,8 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get update 
     sudo apt-get install -y apt-transport-https 
     sudo apt-get install -y dotnet-sdk-6.0
-    sudo dotnet restore ../../../../../src/lvatool
-    sudo dotnet build ../../../../../src/lvatool
+    sudo dotnet restore ../../../../../src/avatool
+    sudo dotnet build ../../../../../src/avatool
     echo -e "${GREEN}Installing pre-requisites done${NC}"
     exit 0
 fi
@@ -646,22 +646,23 @@ if [[ "${action}" == "test" ]] ; then
     echo "Testing AVA..."
     echo ""
     # write operations.json for sample code
-    sed "s/{PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json > ./operations.json 
+    sed "s/{AV_PORT_RTSP}/${AV_PORT_RTSP}/g" < ./operations.template.json > ./operations.json 
+    sed -i "s/{AV_HOSTNAME}/${AV_HOSTNAME}/" ./operations.json
     cat ./operations.json 
     echo "Activating the AVA Graph"
-    cmd="sudo dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module avaedge --lastoperation GraphInstanceActivate"
+    cmd="sudo dotnet run --project ../../../../../src/avatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module avaedge --lastoperation livePipelineGet"
     echo "$cmd"
     eval "$cmd"
     checkError
 
     echo "Receiving the AVA events during 60 seconds"
-    cmd="sudo dotnet run -p ../../../../../src/lvatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
+    cmd="sudo dotnet run --project ../../../../../src/avatool --readevents --connectionstring $AV_IOTHUB_CONNECTION_STRING --timeout 60000"
     echo "$cmd"
     eval "$cmd" 2>&1 | tee events.txt
     checkError
 
     echo "Deactivating the AVA Graph"
-    cmd="sudo dotnet run -p ../../../../../src/lvatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module avaedge --firstoperation GraphInstanceDeactivate"
+    cmd="sudo dotnet run --project ../../../../../src/avatool --runoperations --operationspath \"./operations.json\" --connectionstring $AV_IOTHUB_CONNECTION_STRING --device \"$AV_EDGE_DEVICE\"  --module avaedge --firstoperation livePipelineGet"
     echo "$cmd"
     eval "$cmd"
     checkError

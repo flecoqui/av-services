@@ -22,7 +22,7 @@ using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Azure.Amqp.Sasl;
 using Microsoft.Azure.Amqp.Transport;
 
-namespace lvatool
+namespace avatool
 {
         /// <summary>
     ///   A transient connection to the IoT Hub service, providing a set of utility-type operations that

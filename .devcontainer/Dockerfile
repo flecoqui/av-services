@@ -30,17 +30,16 @@ RUN apt-get update \
 # install iotedge-compose 
 RUN pip3 install iotedge-compose 
 
-# install .Net 5.0 SDK
+# install .Net 6.0 SDK
 RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 RUN dpkg -i packages-microsoft-prod.deb
 RUN apt-get update \
     && apt-get install -y apt-transport-https \
-    && apt-get install -y dotnet-sdk-5.0
+    && apt-get install -y dotnet-sdk-6.0
     
 # Install Docker CLI
 RUN apt-get update \
     && apt-get install -y \
-    apt-transport-https \
     ca-certificates \
     curl \
     gnupg \
@@ -55,7 +54,7 @@ RUN  apt-get update \
       && apt-get install -y docker-ce-cli
 
 # copy sample mkv video 
-RUN wget https://github.com/flecoqui/av-services/blob/main/content/camera-300s.mkv?raw=true -O  /camera-300s.mkv
+RUN wget https://avamedia.blob.core.windows.net/public/camera-300s.mkv?raw=true -O  /camera-300s.mkv
 
 # now everything from here uses the normal user
 USER $USERNAME

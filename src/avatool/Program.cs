@@ -52,18 +52,18 @@ namespace lvaconsole
         static Action action;
         private const string lvaVersion = "1.0";
         private static string ErrorMessagePrefix = "Error message: {0}";
-        private static string InformationMessagePrefix = "lvatool:\r\n" + "Version: {0} \r\n" + "Syntax:\r\n" +
-            "lvatool --runoperations --connectionstring <IoTHubConnectionString> --device <deviceId> \r\n" +
+        private static string InformationMessagePrefix = "avatool:\r\n" + "Version: {0} \r\n" + "Syntax:\r\n" +
+            "avatool --runoperations --connectionstring <IoTHubConnectionString> --device <deviceId> \r\n" +
             "                       [--module <moduleId> --operationspath <OperationsPath> --firstoperation <OperationName>]\r\n" +
             "                       [--lastoperation <OperationName> --waitforinput --verbose]\r\n" +
-            "lvatool --readevents    --connectionstring <IoTHubConnectionString>\r\n" +
+            "avatool --readevents    --connectionstring <IoTHubConnectionString>\r\n" +
             "                       [--timeout <TimeOut in milliseconds> --all]\r\n" +
-            "lvatool --help" +
+            "avatool --help" +
             "Note:\r\nmoduleId default value: lvaEdge\r\nOperationPath default value: operations.json\r\nFirst Operation Name default value: null\r\nLast Operation Name default value: null\r\nTimeOut default value: 0\r\n" +
             "\r\nRECEIVING EVENTS FROM IOT HUB:\r\n" +
-            "lvatool can be used to receive events from IoT Hub, you need to specify the IoT Hub connection string,\r\nthe timeout in milliseconds. By default, it will display the new events. If you want to display all the events,\r\n add the option --all\r\n" +
+            "avatool can be used to receive events from IoT Hub, you need to specify the IoT Hub connection string,\r\nthe timeout in milliseconds. By default, it will display the new events. If you want to display all the events,\r\n add the option --all\r\n" +
             "\r\nLAUNCHING OPERATIONS ON LVAEDGE MODULE:\r\n" +
-            "lvatool can also be used to manage LVA Graph and launch operations, you need to specify the IoT Hub connection string,\r\nthe device Id, by default the module id is lvaEdge, the path to the operation file which contains the graph. \r\nYou can also define the name of the first step and the last step in the operation file. \r\nif the name of the first step is not present, it will start with the first operation in the file.\r\nIf the name of the last operation is not present, it will run till the end of the operation file\r\n"; 
+            "avatool can also be used to manage LVA Graph and launch operations, you need to specify the IoT Hub connection string,\r\nthe device Id, by default the module id is lvaEdge, the path to the operation file which contains the graph. \r\nYou can also define the name of the first step and the last step in the operation file. \r\nif the name of the first step is not present, it will start with the first operation in the file.\r\nIf the name of the last operation is not present, it will run till the end of the operation file\r\n"; 
 
 
 
@@ -94,7 +94,7 @@ namespace lvaconsole
 
                 // Translate the connection string.
                 LogMessage(LogLevel.Information,"Requesting Event Hubs connection string...");
-                var eventHubsConnectionString = await lvatool.IotHubConnection.RequestEventHubsConnectionStringAsync(connectionString);
+                var eventHubsConnectionString = await avatool.IotHubConnection.RequestEventHubsConnectionStringAsync(connectionString);
 
                 LogMessage(LogLevel.Information,"Connecting to Event Hubs...");
                 await using var consumer = new EventHubConsumerClient(EventHubConsumerClient.DefaultConsumerGroupName, eventHubsConnectionString);
@@ -221,6 +221,15 @@ namespace lvaconsole
                                 await ExecuteGraphTopologySetOperationAsync(operationParams, apiVersionProperty,verbose);
                                 break;
 
+                            case "pipelineTopologySet":
+                            case "pipelineTopologyList":
+                            case "pipelineTopologyGet":
+                            case "pipelineTopologyDelete":
+                            case "livePipelineSet":
+                            case "livePipelineActivate":
+                            case "livePipelineDeactivate":
+                            case "livePipelineGet":
+                            case "livePipelineDelete":
                             case "GraphTopologyList" :
                             case "GraphInstanceList" :
                             case "GraphInstanceActivate" :
@@ -389,9 +398,9 @@ namespace lvaconsole
                         break;
                         default:
                             if ((args[i - 1].ToLower() == "dotnet") ||
-                                (args[i - 1].ToLower() == "lvatool") ||
-                                (args[i - 1].ToLower() == "lvatool.dll") ||
-                                (args[i - 1].ToLower() == "lvatool.exe"))
+                                (args[i - 1].ToLower() == "avatool") ||
+                                (args[i - 1].ToLower() == "avatool.dll") ||
+                                (args[i - 1].ToLower() == "avatool.exe"))
                                 break;
                             errorMessage = $"wrong parameter: {args[i-1]} ";
                             action = Action.Help;
@@ -494,7 +503,7 @@ namespace lvaconsole
                 else
                 {                
                     JObject lvaGraphObject = operationParams;
-                    lvaGraphObject.AddFirst(apiVersionProperty);                                
+                    //lvaGraphObject.AddFirst(apiVersionProperty);                                
                     await InvokeMethodWithPayloadAsync(operationName, lvaGraphObject.ToString(),verbose);
                 }
             }

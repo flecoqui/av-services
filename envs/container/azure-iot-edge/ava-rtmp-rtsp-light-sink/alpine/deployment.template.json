@@ -13,7 +13,7 @@
 
               "rtmprtspxkevtz2dnu4umacr": {
                 "username": "rtmprtspxkevtz2dnu4umacr",
-                "password": "eH+qqsHFVAmHejZL9Hc4mB0MzJJIgvgb",
+                "password": "u1GWZro1RnMpg08UObz6h=0vqhJeTvno",
                 "address": "rtmprtspxkevtz2dnu4umacr.azurecr.io"
               }
             }
@@ -45,7 +45,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "mcr.microsoft.com/media/video-analyzer:1",
-              "createOptions":"{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"Binds\":[\"/var/media:/var/media/\",\"/var/lib/azuremediaservices:/var/lib/videoanalyzer\"]}}"
+              "createOptions":"{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"Binds\":[\"/var/media:/var/media/\",\"/var/lib/azuremediaservices:/var/lib/videoanalyzer\"], \"IpcMode\": \"host\",\"ShmSize\": 1536870912}}"
             }
           },
           "rtmpsource": {
@@ -55,7 +55,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "rtmprtspxkevtz2dnu4umacr.azurecr.io/av-services/av-rtmp-rtsp-sink-alpine:latest",
-              "createOptions": "{\"Env\":[\"PORT_RTSP=8554\",\"PORT_RTMP=1935\",\"HOSTNAME=rtmprtspava9224vm.eastus2.cloudapp.azure.com\"],\"HostConfig\":{\"PortBindings\":{\"8554/tcp\":[{\"HostPort\":\"8554\"}],\"1935/tcp\":[{\"HostPort\":\"1935\"}]}}}"
+              "createOptions": "{\"Env\":[\"PORT_RTSP=8554\",\"PORT_RTMP=1935\",\"HOSTNAME=rtmprtspava9260vm.eastus2.cloudapp.azure.com\"],\"HostConfig\":{\"PortBindings\":{\"8554/tcp\":[{\"HostPort\":\"8554\"}],\"1935/tcp\":[{\"HostPort\":\"1935\"}]}}}"
             }
           }
         }
@@ -65,22 +65,21 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "LVAToHub": "FROM /messages/modules/avaedge/outputs/* INTO $upstream"
+          "AVAToHub": "FROM /messages/modules/avaedge/outputs/* INTO $upstream"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
         }
       }
     },
-    "avaEdge": {
+    "avaedge": {
       "properties.desired": {
         "applicationDataDirectory": "/var/lib/videoanalyzer",
-        "ProvisioningToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IllYTGFSZGJ5dFVOSWxiSzdhbUVIemVLRmpFYyIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJydG1wLXJ0c3AtYXZhLWRldmljZSIsImF1ZCI6WyJodHRwczovLzIzMTFiMTE3OTA5NjRjNGM4MzYzOWMwNjFkNjJjNjY5LmVkZ2VhcGkuZWFzdHVzMi52aWRlb2FuYWx5emVyLmF6dXJlLm5ldC9lZGdlTW9kdWxlcy9ydG1wLXJ0c3AtYXZhLWRldmljZSJdLCJleHAiOjE2NDI3ODMyNjEsInRva2VuVHlwZSI6IlByb3Zpc2lvbmluZ1Rva2VuIiwibW9kdWxlQXJtSWQiOiIvc3Vic2NyaXB0aW9ucy9lNWM5ZmM4My1mYmQwLTQzNjgtOWNiNi0xYjU4MjM0NzliNmQvcmVzb3VyY2VHcm91cHMvYXYtcnRtcC1ydHNwLWxpZ2h0LWF2YS1yZy9wcm92aWRlcnMvTWljcm9zb2Z0Lk1lZGlhL3ZpZGVvQW5hbHl6ZXJzL3J0bXBydHNwYXZhOTIyNGF2YS9lZGdlTW9kdWxlcy9ydG1wLXJ0c3AtYXZhLWRldmljZSIsIm1vZHVsZUlkIjoiOTljMDVjNjktMjk3NS00YzdmLTljOTAtYTJiMDFjODVjYzZkIiwiaXNzIjoiaHR0cHM6Ly9lYXN0dXMyLnZpZGVvYW5hbHl6ZXIuYXp1cmUubmV0LyJ9.bc8s9dla7YpdELHaKl2e-4A5elQgwkTddKuSxjQH-nT27VsdR2QOxLPIk_zD2GWaQOrFClxJ4Z7-cL-ihovkbiWpKptt-c7kb2CxW4iXN-bmLWDKy54XxpqfJoyV4QxtJrTjDwQGldBQdEV877GNAb46JD6IuU5VrNcjitq61-Jfv3zUqsEmcgmYTpTh-N5w30LL4tDbNmUvYk3KIIrSo2VEszLJQpUR7Sl3mkHaEoTD-obaJPXjDRTVHPUk6873Obnx89B3qKjmo5hkm8YG0BYD7EZ-3CUF9jFJQws-CN6Xcwz5IJGmcKZEFbZQBlfJ6FA3TAOhXBzkvg85ZiXDUA",
+        "ProvisioningToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IllYTGFSZGJ5dFVOSWxiSzdhbUVIemVLRmpFYyIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJydG1wLXJ0c3AtYXZhLWRldmljZSIsImF1ZCI6WyJodHRwczovL2I0ODc0ZmRhMGFkYjQ1MjFhYzI4YzA0NDhiYjZlYzkzLmVkZ2VhcGkuZWFzdHVzMi52aWRlb2FuYWx5emVyLmF6dXJlLm5ldC9lZGdlTW9kdWxlcy9ydG1wLXJ0c3AtYXZhLWRldmljZSJdLCJleHAiOjE2NDI3ODkyOTgsInRva2VuVHlwZSI6IlByb3Zpc2lvbmluZ1Rva2VuIiwibW9kdWxlQXJtSWQiOiIvc3Vic2NyaXB0aW9ucy9lNWM5ZmM4My1mYmQwLTQzNjgtOWNiNi0xYjU4MjM0NzliNmQvcmVzb3VyY2VHcm91cHMvYXYtcnRtcC1ydHNwLWxpZ2h0LWF2YS1yZy9wcm92aWRlcnMvTWljcm9zb2Z0Lk1lZGlhL3ZpZGVvQW5hbHl6ZXJzL3J0bXBydHNwYXZhOTI2MGF2YS9lZGdlTW9kdWxlcy9ydG1wLXJ0c3AtYXZhLWRldmljZSIsIm1vZHVsZUlkIjoiMGI2NGQzMjktZDkyMS00NGU1LTk3YWQtMTY1MGJlZTM3YmNkIiwiaXNzIjoiaHR0cHM6Ly9lYXN0dXMyLnZpZGVvYW5hbHl6ZXIuYXp1cmUubmV0LyJ9.aHFY9Rca5-e4YTaq2bJWCbJnv7sWgMzBOwtrLuFastGR02CPQZoTYa4QwkfnJS74p4Toa2mwCCU6CjOOhzju_F7qaurV57vFRPYA52ShMLJ80MjV1l6T82M3DBWDkgFpjLIuDIvXYBy6XPzWPUub2Liyy_157bjcyZweP9-cexbz3QeATp9A_nHk0-SY3Kv7rSzn26txyJRLeUtzFbYQAlJS3UkM8oPpdydkKn1cCpYw6gGXyRJwZqFsP43Ff5t4cCNu5zujhpbNThaEl_SPgQfZTBSfPY8AW3ZBhmoMP7QzDtgRXiej-H_MO3bnrS7Ks8fKYtG0zK-SKkCGu2iI8w",
         "diagnosticsEventsOutputName": "diagnostics",
         "operationalEventsOutputName": "operational",
         "logLevel": "information",
         "logCategories": "application, events",
-        "debugLogsDirectory": "/tmp/logs",
         "allowUnsecuredEndpoints": true,
         "telemetryOptOut": false
       }
