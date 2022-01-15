@@ -283,19 +283,19 @@ Currently the repository contains the following pipelines:
 
 - Github Action pipeline for docker av-services
 - Github Action pipeline for Azure virtual machine av-services
-- Github Action pipeline for Azure Iot Edge Live Video Analytics av-services
+- Github Action pipeline for Azure Iot Edge Azure Video Analyzer av-services
 - Azure DevOps pipeline for docker av-services
 - Azure DevOps pipeline for Azure virtual machine av-services
-- Azure DevOps pipeline for Azure Iot Edge Live Video Analytics av-services
+- Azure DevOps pipeline for Azure Iot Edge Azure Video Analyzer av-services
 
 ## Creating the Service Principal for the pipelines Azure Authentication  
 For the following pipelines, an authentication with Azure is required:
 - Github Action pipeline for Azure virtual machine av-services
-- Github Action pipeline for AZure Iot Edge Live Video Analytics av-services
+- Github Action pipeline for AZure Iot Edge Azure Video Analyzer av-services
 - Azure DevOps pipeline for Azure virtual machine av-services
-- Azure DevOps pipeline for AZure Iot Edge Live Video Analytics av-services
+- Azure DevOps pipeline for AZure Iot Edge Azure Video Analyzer av-services
 
-As the deployment of Live Video Analytics requires the creation of a service principal, the service principal which will be used for the Azure authentication will have the following permissions:
+As the deployment of Azure Video Analyzer requires the creation of a service principal, the service principal which will be used for the Azure authentication will have the following permissions:
 - Microsoft Graph API Application.ReadWrite.OwnedBy permission  
 - Azure Active Directory Graph API Application.ReadWrite.OwnedBy permission
 
@@ -428,7 +428,7 @@ Once the service principal is created, you can now create the Github Action pipe
 You can use Github Action to automate the integration tests of the following av-services:
 - Docker av-services
 - Azure virtual machine av-services
-- Azure Iot Edge Live Video Analytics av-services
+- Azure Iot Edge Azure Video Analyzer av-services
 
 First, you need to create the Github Action Secret AZURE_CREDENTIALS for the authentication with Azure.
 ### Create Github Action Secret AZURE_CREDENTIALS
@@ -484,7 +484,7 @@ In order to activate this pipeline, follow the steps below:
 4. Once the new pipeline is pushed into the main branch, the Github Action is launched. On the github portal, on the 'Action' page, you can see the pipeline running.    
 
 ![](./docs/img/github-action-workflow-azure-vm.png)
-### Create Github Action pipeline for Azure Iot Edge Live Video Analytics av-services
+### Create Github Action pipeline for Azure Iot Edge Azure Video Analyzer av-services
 By default, all the Github Action pipelines are stored under 'pipelines/github-action'.
 The docker av-services Github Action pipeline is [github-action.tests-azure-iot-edge.yml](pipelines/github-action/github-action.tests-azure-iot-edge.yml)
 
@@ -515,7 +515,7 @@ After few minutes, the results will be displayed on the github portal, on the 'A
 You can use Azure DevOps to automate the integration tests of the following av-services:
 - Docker av-services
 - Azure virtual machine av-services
-- Azure Iot Edge Live Video Analytics av-services
+- Azure Iot Edge Azure Video Analyzer av-services
 
 ### Link your Azure DevOps project with the github repository
 
@@ -713,7 +713,7 @@ To create the Test Azure Virtual Machine av-services pipeline, follow the same s
 
 ![](./docs/img/azure-devops-pipeline-12.png)
 
-### Create Azure and Run DevOps pipeline for Azure Iot Edge Live Video Analytics av-services
+### Create Azure and Run DevOps pipeline for Azure Iot Edge Azure Video Analyzer av-services
 To create the Test Azure Iot Edge av-services pipeline, follow the same steps as for the creation of Docker av-services pipeline and use the following YAML pipeline file:  '/pipelines/azure-dev-ops/azure-pipelines.tests-azure-iot-edge.yml'
 
 ![](./docs/img/azure-devops-pipeline-13.png)
