@@ -6,7 +6,7 @@ on:
     branches: [ main ]
     paths:
       - "envs/container/azure-iot-edge/**"
-      - "src/lvatool/**"
+      - "src/avatool/**"
       - "pipelines/github-action/github-action.tests-azure-iot-edge.yml"
       - ".github/workflows/github-action.tests-azure-iot-edge.yml"    
 
@@ -14,7 +14,7 @@ on:
     branches: [ main ]
     paths:
       - "envs/container/azure-iot-edge/**"
-      - "src/lvatool/**"
+      - "src/avatool/**"
       - "pipelines/github-action/github-action.tests-azure-iot-edge.yml"
       - ".github/workflows/github-action.tests-azure-iot-edge.yml" 
 

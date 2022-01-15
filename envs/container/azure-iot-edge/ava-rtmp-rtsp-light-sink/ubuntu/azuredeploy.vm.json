@@ -68,7 +68,7 @@
     },
     "storageAccountName": {
       "type": "string",
-      "defaultValue": "rtmprtsplvasto",
+      "defaultValue": "rtmprtspavasto",
       "metadata": {
         "description": "Storage Account Name to be used ith the virtual machine"
       }

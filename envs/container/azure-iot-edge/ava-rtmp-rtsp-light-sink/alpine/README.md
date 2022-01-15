@@ -53,19 +53,19 @@ Once the pre-requisites are installed, you can deploy the Live Analytics infrast
 When you run avtool.sh for the first time, it creates a file called .avtoolconfig to store the av-rtmp-rtsp-light-sink in AVA configuration. By default, the file contains these parameters:
 
 ```bash
-    AV_RESOURCE_GROUP=av-rtmp-rtsp-lva-rg
+    AV_RESOURCE_GROUP=av-rtmp-rtsp-ava-rg
     AV_RESOURCE_REGION=eastus2
     AV_IMAGE_NAME=av-rtmp-rtsp-light-sink-alpine
     AV_IMAGE_FOLDER=av-services
     AV_CONTAINER_NAME=av-rtmp-rtsp-light-sink-alpine-container
-    AV_EDGE_DEVICE=rtmp-rtsp-lva-device
+    AV_EDGE_DEVICE=rtmp-rtsp-ava-device
     AV_PORT_RTMP=1935
-    AV_PREFIXNAME=rtmprtsplva
-    AV_VMNAME=rtmprtsplvavm
+    AV_PREFIXNAME=rtmprtspava
+    AV_VMNAME=rtmprtspavavm
     AV_CONTAINERNAME=avchunks
     AV_LOGIN=avvmadmin
     AV_PASSWORD={YourPassword}
-    AV_HOSTNAME=rtmprtsplvavm.eastus2.cloudapp.azure.com
+    AV_HOSTNAME=rtmprtspavavm.eastus2.cloudapp.azure.com
     AV_PORT_RTMP=1935
     AV_PORT_RTSP=8554
     AV_TEMPDIR=
@@ -79,30 +79,26 @@ When you run avtool.sh for the first time, it creates a file called .avtoolconfi
     AV_CONTAINER_REGISTRY_USERNAME=
     AV_CONTAINER_REGISTRY_PASSWORD=
     AV_SUBSCRIPTION_ID=
-    AV_AMS_ACCOUNT=
-    AV_AAD_TENANT_ID=
-    AV_AAD_SERVICE_PRINCIPAL_ID=
-    AV_AAD_SERVICE_PRINCIPAL_SECRET=
 ```
 
 Below further information about the input parameters in the file .avtoolconfig:
 It's important before running ./avtool.sh -a deploy to define the following input parameters:
-- AV_PREFIXNAME: The name prefix used for all the Azure resources. As the Azure Container Registry name and the virtual machine name depends on this prefix, if a deployment as already used the same prefix, your deployment will fail because of a name conflict in Azure (by default rtmprtsplva)  
+- AV_PREFIXNAME: The name prefix used for all the Azure resources. As the Azure Container Registry name and the virtual machine name depends on this prefix, if a deployment as already used the same prefix, your deployment will fail because of a name conflict in Azure (by default rtmprtspava)  
 - AV_PASSWORD: The password for the Virtual Machine running IoT Edge. 
 
 Below the list of input parameters:
 
 | Variables | Description |
 | ---------------------|:-------------|
-| AV_RESOURCE_GROUP | The name of the resource group where AVA infrastructure will be deployed (av-rtmp-rtsp-lva-rg by default) |
+| AV_RESOURCE_GROUP | The name of the resource group where AVA infrastructure will be deployed (av-rtmp-rtsp-ava-rg by default) |
 | AV_RESOURCE_REGION | The Azure region where AVA infrastructure will be deployed (eastus2 by default)  |
 | AV_SERVICE | The name of the service  (by default av-rtmp-rtsp-light-sink)  |
 | AV_FLAVOR | The flavor of this service   (by default alpine)  |
 | AV_IMAGE_NAME | The suffix of the image name  (by default ${AV_SERVICE}-${AV_FLAVOR}) |
 | AV_IMAGE_FOLDER | The image folder, the image name will be ${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}  |
 | AV_CONTAINER_NAME | The name of the container (by default av-rtmp-rtsp-light-sink-alpine-container)  |
-| AV_EDGE_DEVICE | The name of the Edge device (by default rtmp-rtsp-lva-device)  |
-| AV_PREFIXNAME | The name prefix used for all the Azure resources (by default rtmprtsplva)  |
+| AV_EDGE_DEVICE | The name of the Edge device (by default rtmp-rtsp-ava-device)  |
+| AV_PREFIXNAME | The name prefix used for all the Azure resources (by default rtmprtspava)  |
 | AV_VMNAME | The name of the virtual machien running IoT Edge  (by default "$AV_PREFIXNAME"vm)  |
 | AV_HOSTNAME | The host name of the container. Default value: "$AV_VMNAME"."$AV_RESOURCE_REGION".cloudapp.azure.com  |
 | AV_CONTAINERNAME | The name of the container in Azure Storage Account where the video and audio chunks will be stored (by default avchunks)  |
@@ -125,7 +121,7 @@ Below the output parameters:
 
 | Variables | Description |
 | ---------------------|:-------------|
-| AV_RESOURCE_GROUP | The name of the resource group where AVA infrastructure will be deployed (av-rtmp-rtsp-lva-rg by default) |
+| AV_RESOURCE_GROUP | The name of the resource group where AVA infrastructure will be deployed (av-rtmp-rtsp-ava-rg by default) |
 | AV_STORAGENAME |The name of the sotrage account created|
 | AV_SASTOKEN | The Shared Access Signature for the storage account|
 | AV_IOTHUB | The IoT Hub name |
@@ -136,10 +132,6 @@ Below the output parameters:
 | AV_CONTAINER_REGISTRY_USERNAME |The Azure Container Registry user name|
 | AV_CONTAINER_REGISTRY_PASSWORD |The Azure Container Registry password|
 | AV_SUBSCRIPTION_ID |The Azure Subscription ID |
-| AV_AMS_ACCOUNT |The Azure Media Service Account (not used but mandatory for AVA)|
-| AV_AAD_TENANT_ID |The Azure AD Tenant ID used for the authentication with Azure Media Services|
-| AV_AAD_SERVICE_PRINCIPAL_ID |The Azure AD Service Principal ID used for the authentication with Azure Media Services|
-| AV_AAD_SERVICE_PRINCIPAL_SECRET |The Azure AD Service Principal Secret used for the authentication with Azure Media Services|
 
 ### Starting/Stopping av-rtmp-rtsp-light-sink alpine service
 Once the rtmpsource service is built and deployed you can start and stop the container .

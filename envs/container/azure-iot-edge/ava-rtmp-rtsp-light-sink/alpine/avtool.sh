@@ -511,7 +511,7 @@ Content of the .env file which can be used with the Azure IoT Tools in Visual St
     echo "SUBSCRIPTION_ID=\"$AV_SUBSCRIPTION_ID\"" > ./.env
     echo "RESOURCE_GROUP=\"$AV_RESOURCE_GROUP\"" >> ./.env
     echo "IOTHUB_CONNECTION_STRING=$AV_IOTHUB_CONNECTION_STRING" >> ./.env
-    echo "VIDEO_INPUT_FOLDER_ON_DEVICE=\"/home/lvaedgeuser/samples/input\""  >> ./.env
+    echo "VIDEO_INPUT_FOLDER_ON_DEVICE=\"/home/avaedgeuser/samples/input\""  >> ./.env
     echo "VIDEO_OUTPUT_FOLDER_ON_DEVICE=\"/var/media\""  >> ./.env
     echo "APPDATA_FOLDER_ON_DEVICE=\"/var/lib/azuremediaservices\""  >> ./.env
     echo "CONTAINER_REGISTRY_USERNAME_myacr=$AV_CONTAINER_REGISTRY_USERNAME" >> ./.env
@@ -651,7 +651,7 @@ if [[ "${action}" == "test" ]] ; then
     grep -i '"type": "motion"' events.txt &> /dev/null
     status=$?
     if [ $status -ne 0 ]; then
-        echo "LVA Test Failed to detect motion events in the results file"
+        echo "AVA Test Failed to detect motion events in the results file"
         kill %1
         exit $status
     fi

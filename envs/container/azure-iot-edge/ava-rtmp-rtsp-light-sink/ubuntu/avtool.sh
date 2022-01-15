@@ -251,7 +251,7 @@ getProvisioningToken()
 AV_RESOURCE_GROUP=av-rtmp-rtsp-light-ava-rg
 AV_RESOURCE_REGION=eastus2
 AV_SERVICE=av-rtmp-rtsp-sink
-AV_FLAVOR=alpine
+AV_FLAVOR=ubuntu
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
@@ -379,8 +379,8 @@ if [[ "${action}" == "install" ]] ; then
     sudo apt-get update 
     sudo apt-get install -y apt-transport-https 
     sudo apt-get install -y dotnet-sdk-6.0
-    sudo dotnet restore ../../../../../src/lvatool
-    sudo dotnet build ../../../../../src/lvatool
+    sudo dotnet restore ../../../../../src/avatool
+    sudo dotnet build ../../../../../src/avatool
     echo -e "${GREEN}Installing pre-requisites done${NC}"
     exit 0
 fi
@@ -422,6 +422,11 @@ if [[ "${action}" == "deploy" ]] ; then
     AV_AVA_PROVISIONING_TOKEN=$(getProvisioningToken)
     checkError
 
+    if [ -z ${AV_AVA_PROVISIONING_TOKEN} ]; then
+        echo -e "${RED}\nIOTHub provisioning Token not defined${NC}"
+        exit 1        
+    fi
+
     echo "Azure Video Analyzer provisioning Token: $AV_AVA_PROVISIONING_TOKEN"
     sed -i "/AV_AVA_PROVISIONING_TOKEN=/d" "$repoRoot"/"$configuration_file"; echo "AV_AVA_PROVISIONING_TOKEN=$AV_AVA_PROVISIONING_TOKEN" >> "$repoRoot"/"$configuration_file" 
 
@@ -460,7 +465,7 @@ if [[ "${action}" == "deploy" ]] ; then
     az acr task create  --image "$imageNameId"   -n "${AV_CONTAINER_NAME}" -r "${AV_CONTAINER_REGISTRY}" \
     --arg AV_PORT_RTSP=${AV_PORT_RTSP} --arg  AV_PORT_RTMP=${AV_PORT_RTMP}   \
       --arg  AV_HOSTNAME=${AV_HOSTNAME}  \
-         -c "https://github.com/flecoqui/av-services.git#main:envs/container/docker/av-rtmp-rtsp-light-sink/alpine" -f "Dockerfile" \
+         -c "https://github.com/flecoqui/av-services.git#main:envs/container/docker/av-rtmp-rtsp-light-sink/ubuntu" -f "Dockerfile" \
          --commit-trigger-enabled false --base-image-trigger-enabled false 
     echo
     echo "Launching the task to build service: ${AV_CONTAINER_NAME}" 
@@ -511,7 +516,7 @@ Content of the .env file which can be used with the Azure IoT Tools in Visual St
     echo "SUBSCRIPTION_ID=\"$AV_SUBSCRIPTION_ID\"" > ./.env
     echo "RESOURCE_GROUP=\"$AV_RESOURCE_GROUP\"" >> ./.env
     echo "IOTHUB_CONNECTION_STRING=$AV_IOTHUB_CONNECTION_STRING" >> ./.env
-    echo "VIDEO_INPUT_FOLDER_ON_DEVICE=\"/home/lvaedgeuser/samples/input\""  >> ./.env
+    echo "VIDEO_INPUT_FOLDER_ON_DEVICE=\"/home/avaedgeuser/samples/input\""  >> ./.env
     echo "VIDEO_OUTPUT_FOLDER_ON_DEVICE=\"/var/media\""  >> ./.env
     echo "APPDATA_FOLDER_ON_DEVICE=\"/var/lib/azuremediaservices\""  >> ./.env
     echo "CONTAINER_REGISTRY_USERNAME_myacr=$AV_CONTAINER_REGISTRY_USERNAME" >> ./.env
@@ -651,7 +656,7 @@ if [[ "${action}" == "test" ]] ; then
     grep -i '"type": "motion"' events.txt &> /dev/null
     status=$?
     if [ $status -ne 0 ]; then
-        echo "LVA Test Failed to detect motion events in the results file"
+        echo "AVA Test Failed to detect motion events in the results file"
         kill %1
         exit $status
     fi

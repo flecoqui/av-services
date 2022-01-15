@@ -19,7 +19,7 @@ using Newtonsoft.Json.Linq;
 using Azure.Messaging.EventHubs.Consumer;
 
 
-namespace lvaconsole
+namespace avaconsole
 {
     class Program
     {                
@@ -50,7 +50,7 @@ namespace lvaconsole
         static bool all;
         static bool verbose;
         static Action action;
-        private const string lvaVersion = "1.0";
+        private const string avaVersion = "1.0";
         private static string ErrorMessagePrefix = "Error message: {0}";
         private static string InformationMessagePrefix = "avatool:\r\n" + "Version: {0} \r\n" + "Syntax:\r\n" +
             "avatool --runoperations --connectionstring <IoTHubConnectionString> --device <deviceId> \r\n" +
@@ -59,11 +59,11 @@ namespace lvaconsole
             "avatool --readevents    --connectionstring <IoTHubConnectionString>\r\n" +
             "                       [--timeout <TimeOut in milliseconds> --all]\r\n" +
             "avatool --help" +
-            "Note:\r\nmoduleId default value: lvaEdge\r\nOperationPath default value: operations.json\r\nFirst Operation Name default value: null\r\nLast Operation Name default value: null\r\nTimeOut default value: 0\r\n" +
+            "Note:\r\nmoduleId default value: avaEdge\r\nOperationPath default value: operations.json\r\nFirst Operation Name default value: null\r\nLast Operation Name default value: null\r\nTimeOut default value: 0\r\n" +
             "\r\nRECEIVING EVENTS FROM IOT HUB:\r\n" +
             "avatool can be used to receive events from IoT Hub, you need to specify the IoT Hub connection string,\r\nthe timeout in milliseconds. By default, it will display the new events. If you want to display all the events,\r\n add the option --all\r\n" +
-            "\r\nLAUNCHING OPERATIONS ON LVAEDGE MODULE:\r\n" +
-            "avatool can also be used to manage LVA Graph and launch operations, you need to specify the IoT Hub connection string,\r\nthe device Id, by default the module id is lvaEdge, the path to the operation file which contains the graph. \r\nYou can also define the name of the first step and the last step in the operation file. \r\nif the name of the first step is not present, it will start with the first operation in the file.\r\nIf the name of the last operation is not present, it will run till the end of the operation file\r\n"; 
+            "\r\nLAUNCHING OPERATIONS ON AVAEDGE MODULE:\r\n" +
+            "avatool can also be used to manage AVA Graph and launch operations, you need to specify the IoT Hub connection string,\r\nthe device Id, by default the module id is avaEdge, the path to the operation file which contains the graph. \r\nYou can also define the name of the first step and the last step in the operation file. \r\nif the name of the first step is not present, it will start with the first operation in the file.\r\nIf the name of the last operation is not present, it will run till the end of the operation file\r\n"; 
 
 
 
@@ -293,7 +293,7 @@ namespace lvaconsole
                 timeOut = 0;
                 all = false;
                 verbose = false;
-                moduleId = "lvaEdge";
+                moduleId = "avaEdge";
                 deviceId = string.Empty;
                 connectionString = string.Empty;
                 firstOperation = string.Empty;
@@ -437,7 +437,7 @@ namespace lvaconsole
                 {
                     if(!string.IsNullOrEmpty(errorMessage))
                         Console.Write(string.Format(ErrorMessagePrefix,errorMessage));
-                    Console.Write(string.Format(InformationMessagePrefix,lvaVersion));
+                    Console.Write(string.Format(InformationMessagePrefix,avaVersion));
                     return 1;
                 }
 
@@ -502,9 +502,9 @@ namespace lvaconsole
                 }
                 else
                 {                
-                    JObject lvaGraphObject = operationParams;
-                    //lvaGraphObject.AddFirst(apiVersionProperty);                                
-                    await InvokeMethodWithPayloadAsync(operationName, lvaGraphObject.ToString(),verbose);
+                    JObject avaGraphObject = operationParams;
+                    //avaGraphObject.AddFirst(apiVersionProperty);                                
+                    await InvokeMethodWithPayloadAsync(operationName, avaGraphObject.ToString(),verbose);
                 }
             }
             catch(Exception ex)
