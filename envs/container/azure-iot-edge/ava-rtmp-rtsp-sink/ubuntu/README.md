@@ -3,7 +3,7 @@
 ## Overview
 This av-service av-rtmp-rtsp-sink for ubuntu is a container running nginx RTMP server which convert an incoming RTMP stream into RTMP stream, HLS stream and RTSP stream. Moreover, the server hosts a basic HTML page to play the HLS content.
 This av-service is used in IoT Edge device with Azure Video Analyzer to convert an incoming RTMP stream into a RTSP stream to feed Azure Video Analyzer AI components.
-When you will deploy this component with avtool.sh, it will deploy a complete AVA infrastructure with IoT Edge Hub, Azure Container Registry, Azure Media Services (so far mandatory to deploy Live Video Analytics), Azure Storage, Azure Virtual Machine acting as IoT Edge device and running docker.
+When you will deploy this component with avtool.sh, it will deploy a complete AVA infrastructure with IoT Edge Hub, Azure Container Registry, Azure Media Services (so far mandatory to deploy Azure Video Analyzer), Azure Storage, Azure Virtual Machine acting as IoT Edge device and running docker.
 When you will start, stop this component with avtool.sh, it will start, stop the rtmpsource container in the IoT Edge device.
 When you will test this component with avtool.sh, it will test automatically the following scenarios:
 - RTMP to RTMP adaptor
