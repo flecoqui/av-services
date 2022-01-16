@@ -1,0 +1,161 @@
+{
+    "apiVersion": "2.0",
+    "operations": [
+        {
+            "opName": "pipelineTopologyList",
+            "opParams": {
+                "@apiVersion": "1.1"
+              }
+        },
+        {
+            "opName": "pipelineTopologySet",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "MotionDetection",
+                "properties": {
+                  "description": "Analyzing live video to detect motion and emit events",
+                  "parameters": [
+                    {
+                      "name": "rtspUrl",
+                      "type": "string",
+                      "description": "rtspUrl"
+                    },
+                    {
+                      "name": "rtspUserName",
+                      "type": "string",
+                      "description": "rtspUserName",
+                      "default": "dummyUserName"
+                    },
+                    {
+                      "name": "rtspPassword",
+                      "type": "string",
+                      "description": "rtspPassword",
+                      "default": "dummypw"
+                    }
+                  ],
+                  "sources": [
+                    {
+                      "@type": "#Microsoft.VideoAnalyzer.RtspSource",
+                      "name": "rtspSource",
+                      "transport": "tcp",
+                      "endpoint": {
+                        "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
+                        "credentials": {
+                          "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+                          "username": "${rtspUserName}",
+                          "password": "${rtspPassword}"
+                        },
+                        "url": "${rtspUrl}"
+                      }
+                    }
+                  ],
+                  "processors": [
+                    {
+                      "@type": "#Microsoft.VideoAnalyzer.MotionDetectionProcessor",
+                      "sensitivity": "medium",
+                      "name": "motionDetection",
+                      "inputs": [
+                        {
+                          "nodeName": "rtspSource",
+                          "outputSelectors": []
+                        }
+                      ]
+                    }
+                  ],
+                  "sinks": [
+                    {
+                      "hubOutputName": "inferenceOutput",
+                      "@type": "#Microsoft.VideoAnalyzer.IotHubMessageSink",
+                      "name": "iotHubSink",
+                      "inputs": [
+                        {
+                          "nodeName": "motionDetection"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+        },
+        {
+            "opName": "pipelineTopologyList",
+            "opParams": {
+                "@apiVersion": "1.1"
+              }
+        },
+        {
+            "opName": "pipelineTopologyGet",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "MotionDetection"
+              }
+        },
+        {
+            "opName": "livePipelineSet",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1",
+                "properties": {
+                  "topologyName": "MotionDetection",
+                  "description": "Sample pipeline description",
+                  "parameters": [
+                    {
+                      "name": "rtspUrl",
+                      "value": "rtsp://{AV_HOSTNAME}:{AV_PORT_RTSP}/rtsp/stream"
+                    },
+                    {
+                      "name": "rtspUserName",
+                      "value": "testuser"
+                    },
+                    {
+                      "name": "rtspPassword",
+                      "value": "testpassword"
+                    }
+                  ]
+                }
+              }
+        },
+        {
+            "opName": "livePipelineActivate",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1"
+              }
+        },
+        {
+            "opName": "livePipelineGet",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1"
+              }
+        },
+        {
+            "opName": "livePipelineDeactivate",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1"
+              }
+        },
+        {
+            "opName": "livePipelineDelete",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "mdpipeline1"
+              }
+        },
+        {
+            "opName": "pipelineTopologyDelete",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "MotionDetection"
+              }
+        },
+        {
+            "opName": "pipelineTopologyList",
+            "opParams": {
+                "@apiVersion": "1.1",
+                "name": "MotionDetection"
+              }
+        }
+    ]
+}

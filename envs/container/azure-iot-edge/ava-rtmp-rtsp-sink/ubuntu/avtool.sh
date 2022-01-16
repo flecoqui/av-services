@@ -137,6 +137,10 @@ setContainerState () {
     sed -i "s/{AV_IMAGE_FOLDER}/${AV_IMAGE_FOLDER}/g" ./deployment.template.json
     sed -i "s/{AV_PORT_RTMP}/$AV_PORT_RTMP/g" ./deployment.template.json
     sed -i "s/{AV_PORT_RTSP}/$AV_PORT_RTSP/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_HTTP}/$AV_PORT_HTTP/g" ./deployment.template.json
+    sed -i "s/{AV_PORT_HLS}/$AV_PORT_HLS/g" ./deployment.template.json    
+    sed -i "s/{AV_PORT_SSL}/$AV_PORT_SSL/g" ./deployment.template.json
+    sed -i "s/{AV_COMPANYNAME}/$AV_COMPANYNAME/g" ./deployment.template.json    
     sed -i "s/{AV_HOSTNAME}/$AV_HOSTNAME/g" ./deployment.template.json
     sed -i "s/{AV_VIDEO_OUTPUT_FOLDER_ON_DEVICE}/\/var\/media/" ./deployment.template.json
     sed -i "s/{AV_APPDATA_FOLDER_ON_DEVICE}/\/var\/lib\/azuremediaservices/" ./deployment.template.json
@@ -248,10 +252,10 @@ getProvisioningToken()
 }
 
 
-AV_RESOURCE_GROUP=av-rtmp-rtsp-light-ava-rg
+AV_RESOURCE_GROUP=av-rtmp-rtsp-ava-rg
 AV_RESOURCE_REGION=eastus2
 AV_SERVICE=av-rtmp-rtsp-sink
-AV_FLAVOR=alpine
+AV_FLAVOR=ubuntu
 AV_IMAGE_NAME=${AV_SERVICE}-${AV_FLAVOR} 
 AV_IMAGE_FOLDER=av-services
 AV_CONTAINER_NAME=${AV_SERVICE}-${AV_FLAVOR}-container
@@ -264,6 +268,11 @@ AV_HOSTNAME="$AV_VMNAME"."$AV_RESOURCE_REGION".cloudapp.azure.com
 AV_CONTAINERNAME=avchunks
 AV_LOGIN=avvmadmin
 AV_PASSWORD={YourPassword}
+AV_COMPANYNAME=contoso
+AV_PORT_HLS=8080
+AV_PORT_HTTP=80
+# use 8443 for SSL port to avoid conflict on IoT Edge with EdgeHub port
+AV_PORT_SSL=8443
 AV_PORT_RTMP=1935
 AV_PORT_RTSP=8554
 AV_TEMPDIR=$(mktemp -d)
@@ -291,6 +300,10 @@ AV_STORAGENAME=
 AV_SASTOKEN=
 AV_LOGIN=${AV_LOGIN}
 AV_PASSWORD=${AV_PASSWORD}
+AV_COMPANYNAME=${AV_COMPANYNAME}
+AV_PORT_HLS=${AV_PORT_HLS}
+AV_PORT_HTTP=${AV_PORT_HTTP}
+AV_PORT_SSL=${AV_PORT_SSL}
 AV_PORT_RTMP=${AV_PORT_RTMP}
 AV_PORT_RTSP=${AV_PORT_RTSP}
 AV_IOTHUB=
@@ -325,6 +338,10 @@ export $(grep AV_SASTOKEN "$repoRoot"/"$configuration_file")
 export $(grep AV_LOGIN "$repoRoot"/"$configuration_file"  )
 export $(grep AV_PASSWORD "$repoRoot"/"$configuration_file" )
 export $(grep AV_HOSTNAME "$repoRoot"/"$configuration_file")
+export $(grep AV_COMPANYNAME "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_HLS "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_HTTP "$repoRoot"/"$configuration_file")
+export $(grep AV_PORT_SSL "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_RTMP "$repoRoot"/"$configuration_file")
 export $(grep AV_PORT_RTSP "$repoRoot"/"$configuration_file")
 export $(grep AV_IOTHUB "$repoRoot"/"$configuration_file")
@@ -445,7 +462,7 @@ if [[ "${action}" == "deploy" ]] ; then
 
     echo "Deploying Virtual Machine..."
     getPublicIPAddress || true
-    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} sshClientIPAddress="$getPublicIPAddressResult" storageAccountName=${AV_STORAGENAME} deviceConnectionString=\"${AV_DEVICE_CONNECTION_STRING//\"/}\"  portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json"
+    cmd="az deployment group create -g ${AV_RESOURCE_GROUP} -n \"${AV_RESOURCE_GROUP}dep\" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY} sshClientIPAddress="$getPublicIPAddressResult" storageAccountName=${AV_STORAGENAME} deviceConnectionString=\"${AV_DEVICE_CONNECTION_STRING//\"/}\"  portHTTP=${AV_PORT_HTTP} portSSL=${AV_PORT_SSL} portHLS=${AV_PORT_HLS}  portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json"
     echo "${cmd}"
     eval "${cmd}"
     #az deployment group create -g ${AV_RESOURCE_GROUP} -n "${AV_RESOURCE_GROUP}dep" --template-file azuredeploy.vm.json --parameters namePrefix=${AV_PREFIXNAME} vmAdminUsername=${AV_LOGIN} authenticationType=${AV_AUTHENTICATION_TYPE} vmAdminPasswordOrKey=${AV_SSH_PUBLIC_KEY}  storageAccountName=${AV_STORAGENAME} customData="${CUSTOM_STRING_BASE64}"  portRTMP=${AV_PORT_RTMP} portRTSP=${AV_PORT_RTSP}  -o json
@@ -463,9 +480,9 @@ if [[ "${action}" == "deploy" ]] ; then
     latestImageName=${AV_IMAGE_FOLDER}/${AV_IMAGE_NAME}':'$imageTag
 
     az acr task create  --image "$imageNameId"   -n "${AV_CONTAINER_NAME}" -r "${AV_CONTAINER_REGISTRY}" \
-    --arg AV_PORT_RTSP=${AV_PORT_RTSP} --arg  AV_PORT_RTMP=${AV_PORT_RTMP}   \
-      --arg  AV_HOSTNAME=${AV_HOSTNAME}  \
-         -c "https://github.com/flecoqui/av-services.git#main:envs/container/docker/av-rtmp-rtsp-light-sink/alpine" -f "Dockerfile" \
+    --arg AV_PORT_RTSP=${AV_PORT_RTSP} --arg  AV_PORT_RTMP=${AV_PORT_RTMP} --arg  AV_PORT_SSL=${AV_PORT_SSL}  \
+     --arg  AV_PORT_HTTP=${AV_PORT_HTTP} --arg  AV_PORT_HLS=${AV_PORT_HLS} --arg  AV_HOSTNAME=${AV_HOSTNAME} --arg  AV_COMPANYNAME=${AV_COMPANYNAME} \
+         -c "https://github.com/flecoqui/av-services.git#main:envs/container/docker/av-rtmp-rtsp-sink/ubuntu" -f "Dockerfile" \
          --commit-trigger-enabled false --base-image-trigger-enabled false 
     echo
     echo "Launching the task to build service: ${AV_CONTAINER_NAME}" 
@@ -555,6 +572,9 @@ Deployment parameters:
     echo "SSH command: ssh ${AV_LOGIN}@${AV_HOSTNAME}"
     echo "RTMP URL: rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/live/stream"
     echo "RTSP URL: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/live/stream"
+    echo "HLS  URL: http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"
+    echo "HTTP URL: http://${AV_HOSTNAME}:${AV_PORT_HTTP}/player.html"
+    echo "SSL  URL: https://${AV_HOSTNAME}:${AV_PORT_SSL}/player.html" 
     echo -e "${GREEN}Deployment done${NC}"
     exit 0
 fi
@@ -615,11 +635,39 @@ if [[ "${action}" == "test" ]] ; then
     echo ""
     sleep 30
     echo ""
+    echo "Testing output RTMP..."
+    echo ""
+    echo "Output RTMP: rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP}"
+    echo "RTMP Command: ffmpeg -nostats -loglevel 0 -re -rw_timeout 20000000 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  "
+    ffmpeg -nostats -loglevel 0 -re -rw_timeout 20000000 -i rtmp://${AV_HOSTNAME}:${AV_PORT_RTMP}/${AV_PATH_RTMP} -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testrtmp%d.mp4  || true
+    checkOutputFiles testrtmp || true
+    if [[ "$checkOutputFilesResult" == "0" ]] ; then
+        echo "RTMP Test failed - check files testrtmpx.mp4"
+        kill %1
+        exit 0
+    fi
+    echo "Testing output RTMP successful"
+    
+    echo ""
+    echo "Testing output HLS..."
+    echo ""
+    echo "Output HLS:  http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8"
+    echo "HLS Command: ffmpeg -nostats -loglevel 0  -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4 "
+    ffmpeg -nostats -loglevel 0  -i http://${AV_HOSTNAME}:${AV_PORT_HLS}/live/stream.m3u8 -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20  -reset_timestamps 1 "${AV_TEMPDIR}"/testhls%d.mp4  || true
+    checkOutputFiles testhls || true
+    if [[ "$checkOutputFilesResult" == "0" ]] ; then
+        echo "HLS Test failed - check files testhlsx.mp4"
+        kill %1
+        exit 0
+    fi
+    echo "Testing output HLS successful"
+
+    echo ""
     echo "Testing output RTSP..."
     echo ""
-    echo "Output RTSP: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/live/stream"
-    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/live/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
-    ffmpeg -nostats -loglevel 0  -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/live/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
+    echo "Output RTSP: rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream"
+    echo "RTSP Command: ffmpeg -nostats -loglevel 0 -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4"
+    ffmpeg -nostats -loglevel 0  -rtsp_transport tcp  -i rtsp://${AV_HOSTNAME}:${AV_PORT_RTSP}/rtsp/stream -c copy -flags +global_header -f segment -segment_time 5 -segment_format_options movflags=+faststart -t 00:00:20 -reset_timestamps 1 "${AV_TEMPDIR}"/testrtsp%d.mp4 || true
     checkOutputFiles testrtsp || true
     if [[ "$checkOutputFilesResult" == "0" ]] ; then
         echo "RTSP Test failed - check files testrtsp.mp4"
